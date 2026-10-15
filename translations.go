@@ -58,8 +58,8 @@ func (s *TranslationsOverridesService) List(ctx context.Context, orgID string, q
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *TranslationsOverridesService) ListAutoPaging(ctx context.Context, orgID string, query *TranslationsOverridesListQuery, opts ...RequestOption) *Iter[TranslationOverrideView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]TranslationOverrideView, string, error) {
+func (s *TranslationsOverridesService) ListAutoPaging(ctx context.Context, orgID string, query *TranslationsOverridesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -68,7 +68,7 @@ func (s *TranslationsOverridesService) ListAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[TranslationOverrideView](raw, "overrides")
+		return decodePage[any](raw, "")
 	})
 }
 

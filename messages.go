@@ -52,8 +52,8 @@ func (s *MessagesService) List(ctx context.Context, orgID string, query *Message
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *MessagesService) ListAutoPaging(ctx context.Context, orgID string, query *MessagesListQuery, opts ...RequestOption) *Iter[ConversationSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ConversationSummary, string, error) {
+func (s *MessagesService) ListAutoPaging(ctx context.Context, orgID string, query *MessagesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +62,7 @@ func (s *MessagesService) ListAutoPaging(ctx context.Context, orgID string, quer
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ConversationSummary](raw, "conversations")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -112,8 +112,8 @@ func (s *MessagesService) Recipients(ctx context.Context, orgID string, query *M
 }
 
 // RecipientsAutoPaging walks every item of Recipients across all pages.
-func (s *MessagesService) RecipientsAutoPaging(ctx context.Context, orgID string, query *MessagesRecipientsQuery, opts ...RequestOption) *Iter[Candidate] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]Candidate, string, error) {
+func (s *MessagesService) RecipientsAutoPaging(ctx context.Context, orgID string, query *MessagesRecipientsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -122,7 +122,7 @@ func (s *MessagesService) RecipientsAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[Candidate](raw, "members")
+		return decodePage[any](raw, "")
 	})
 }
 

@@ -76,8 +76,8 @@ func (s *RolesCustomService) List(ctx context.Context, orgID string, query *Role
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *RolesCustomService) ListAutoPaging(ctx context.Context, orgID string, query *RolesCustomListQuery, opts ...RequestOption) *Iter[CustomRoleView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CustomRoleView, string, error) {
+func (s *RolesCustomService) ListAutoPaging(ctx context.Context, orgID string, query *RolesCustomListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -86,7 +86,7 @@ func (s *RolesCustomService) ListAutoPaging(ctx context.Context, orgID string, q
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CustomRoleView](raw, "roles")
+		return decodePage[any](raw, "")
 	})
 }
 

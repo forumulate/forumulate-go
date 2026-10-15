@@ -37,71 +37,127 @@ type Client struct {
 	UserAgent  string
 	headers    map[string]string
 
-	AI              *AIService
-	Analytics       *AnalyticsService
-	APIActivity     *APIActivityService
-	Audit           *AuditService
-	Auth            *AuthService
-	Billing         *BillingService
-	Blog            *BlogService
-	Careers         *CareersService
-	Changelog       *ChangelogService
-	Chat            *ChatService
-	Community       *CommunityService
-	Connectors      *ConnectorsService
-	Consent         *ConsentService
-	Contact         *ContactService
-	Courses         *CoursesService
-	CustomEmoji     *CustomEmojiService
-	CustomFields    *CustomFieldsService
-	DeviceKeys      *DeviceKeysService
-	Docs            *DocsService
-	Drafts          *DraftsService
-	EmbeddableHosts *EmbeddableHostsService
-	EmbedFeeds      *EmbedFeedsService
-	Events          *EventsService
-	Extensions      *ExtensionsService
-	Forms           *FormsService
-	Forum           *ForumService
-	Groups          *GroupsService
-	Integrations    *IntegrationsService
-	Invites         *InvitesService
-	Items           *ItemsService
-	Library         *LibraryService
-	Mail            *MailService
-	MCP             *MCPService
-	Members         *MembersService
-	Messages        *MessagesService
-	Moderation      *ModerationService
-	Newsletter      *NewsletterService
-	Notifications   *NotificationsService
-	Onboarding      *OnboardingService
-	Orgs            *OrgsService
-	Public          *PublicService
-	Questions       *QuestionsService
-	ReaderAuth      *ReaderAuthService
-	ReaderDomain    *ReaderDomainService
-	ReaderPolicy    *ReaderPolicyService
-	ReaderSignups   *ReaderSignupsService
-	Roadmap         *RoadmapService
-	Roles           *RolesService
-	SCIM            *SCIMService
-	Sdks            *SdksService
-	Search          *SearchService
-	ServiceAccounts *ServiceAccountsService
-	Sessions        *SessionsService
-	Sites           *SitesService
-	Spaces          *SpacesService
-	SpaceTemplates  *SpaceTemplatesService
-	SpaceTypes      *SpaceTypesService
-	SSO             *SSOService
-	Status          *StatusService
-	Templates       *TemplatesService
-	Themes          *ThemesService
-	Tokens          *TokensService
-	Translations    *TranslationsService
-	Users           *UsersService
-	Webhooks        *WebhooksService
+	AI                    *AIService
+	Analytics             *AnalyticsService
+	APIActivity           *APIActivityService
+	Audit                 *AuditService
+	Auth                  *AuthService
+	Billing               *BillingService
+	Blog                  *BlogService
+	BlogComments          *BlogCommentsService
+	BlogPostTranslation   *BlogPostTranslationService
+	BlogTaxonomy          *BlogTaxonomyService
+	Careers               *CareersService
+	CareersAts            *CareersAtsService
+	CareersIndexing       *CareersIndexingService
+	Changelog             *ChangelogService
+	ChangelogImport       *ChangelogImportService
+	Chat                  *ChatService
+	Community             *CommunityService
+	Connectors            *ConnectorsService
+	Consent               *ConsentService
+	Contact               *ContactService
+	ContactBlock          *ContactBlockService
+	ContactPrivacy        *ContactPrivacyService
+	CourseAccess          *CourseAccessService
+	CourseCommerce        *CourseCommerceService
+	CourseLearnerExtras   *CourseLearnerExtrasService
+	CourseLearners        *CourseLearnersService
+	CoursePaths           *CoursePathsService
+	Courses               *CoursesService
+	CustomEmoji           *CustomEmojiService
+	CustomFields          *CustomFieldsService
+	DeviceKeys            *DeviceKeysService
+	Docs                  *DocsService
+	Drafts                *DraftsService
+	EmbeddableHosts       *EmbeddableHostsService
+	EmbedFeeds            *EmbedFeedsService
+	EventAgendaPublic     *EventAgendaPublicService
+	EventAttendees        *EventAttendeesService
+	EventAttendeesPublic  *EventAttendeesPublicService
+	EventMyAgenda         *EventMyAgendaService
+	EventNotices          *EventNoticesService
+	EventPromoCodes       *EventPromoCodesService
+	EventRsvpPrivacy      *EventRsvpPrivacyService
+	Events                *EventsService
+	EventSeriesPublic     *EventSeriesPublicService
+	EventSessions         *EventSessionsService
+	EventSpeakers         *EventSpeakersService
+	EventTickets          *EventTicketsService
+	EventTicketsPublic    *EventTicketsPublicService
+	EventTicketWebhook    *EventTicketWebhookService
+	Extensions            *ExtensionsService
+	Forms                 *FormsService
+	Forum                 *ForumService
+	ForumTopicTranslation *ForumTopicTranslationService
+	GoogleIndexing        *GoogleIndexingService
+	Groups                *GroupsService
+	Growth                *GrowthService
+	Icons                 *IconsService
+	Integrations          *IntegrationsService
+	Invites               *InvitesService
+	Items                 *ItemsService
+	LegalUpdates          *LegalUpdatesService
+	Library               *LibraryService
+	Mail                  *MailService
+	MarkdownDialect       *MarkdownDialectService
+	MCP                   *MCPService
+	Members               *MembersService
+	Messages              *MessagesService
+	Moderation            *ModerationService
+	MyActivity            *MyActivityService
+	MyCoursePaths         *MyCoursePathsService
+	MyLearning            *MyLearningService
+	Newsletter            *NewsletterService
+	Notifications         *NotificationsService
+	Onboarding            *OnboardingService
+	OrgImportJob          *OrgImportJobService
+	OrgPayments           *OrgPaymentsService
+	Orgs                  *OrgsService
+	OrgSms                *OrgSmsService
+	Public                *PublicService
+	Questions             *QuestionsService
+	ReaderAuth            *ReaderAuthService
+	ReaderDomain          *ReaderDomainService
+	ReaderImageSign       *ReaderImageSignService
+	ReaderPolicy          *ReaderPolicyService
+	ReaderSignOut         *ReaderSignOutService
+	ReaderSignups         *ReaderSignupsService
+	ReleaseReview         *ReleaseReviewService
+	ReleaseTranslation    *ReleaseTranslationService
+	Roadmap               *RoadmapService
+	Roles                 *RolesService
+	SCIM                  *SCIMService
+	Sdks                  *SdksService
+	Search                *SearchService
+	SectionLibrary        *SectionLibraryService
+	ServiceAccounts       *ServiceAccountsService
+	Sessions              *SessionsService
+	SiteFrontPage         *SiteFrontPageService
+	SiteLabels            *SiteLabelsService
+	SitePreview           *SitePreviewService
+	Sites                 *SitesService
+	SpaceAuthors          *SpaceAuthorsService
+	SpaceFrontPage        *SpaceFrontPageService
+	SpaceLabels           *SpaceLabelsService
+	SpacePiecePage        *SpacePiecePageService
+	Spaces                *SpacesService
+	SpaceTemplates        *SpaceTemplatesService
+	SpaceTypes            *SpaceTypesService
+	SSO                   *SSOService
+	Status                *StatusService
+	StatusAccess          *StatusAccessService
+	StatusIntegrations    *StatusIntegrationsService
+	StatusMetrics         *StatusMetricsService
+	StatusTemplates       *StatusTemplatesService
+	StatusTranslations    *StatusTranslationsService
+	Templates             *TemplatesService
+	Themes                *ThemesService
+	Tokens                *TokensService
+	Translations          *TranslationsService
+	Users                 *UsersService
+	Versioning            *VersioningService
+	Webhooks              *WebhooksService
 }
 
 // Option configures a Client.
@@ -176,8 +232,14 @@ func NewClient(opts ...Option) *Client {
 	c.Blog.Articles = &BlogArticlesService{c: c}
 	c.Blog.Moderation = &BlogModerationService{c: c}
 	c.Blog.Newsletter = &BlogNewsletterService{c: c}
+	c.BlogComments = &BlogCommentsService{c: c}
+	c.BlogPostTranslation = &BlogPostTranslationService{c: c}
+	c.BlogTaxonomy = &BlogTaxonomyService{c: c}
 	c.Careers = &CareersService{c: c}
+	c.CareersAts = &CareersAtsService{c: c}
+	c.CareersIndexing = &CareersIndexingService{c: c}
 	c.Changelog = &ChangelogService{c: c}
+	c.ChangelogImport = &ChangelogImportService{c: c}
 	c.Chat = &ChatService{c: c}
 	c.Chat.IncomingWebhooks = &ChatIncomingWebhooksService{c: c}
 	c.Chat.Messages = &ChatMessagesService{c: c}
@@ -193,6 +255,13 @@ func NewClient(opts ...Option) *Client {
 	c.Connectors.Providers = &ConnectorsProvidersService{c: c}
 	c.Consent = &ConsentService{c: c}
 	c.Contact = &ContactService{c: c}
+	c.ContactBlock = &ContactBlockService{c: c}
+	c.ContactPrivacy = &ContactPrivacyService{c: c}
+	c.CourseAccess = &CourseAccessService{c: c}
+	c.CourseCommerce = &CourseCommerceService{c: c}
+	c.CourseLearnerExtras = &CourseLearnerExtrasService{c: c}
+	c.CourseLearners = &CourseLearnersService{c: c}
+	c.CoursePaths = &CoursePathsService{c: c}
 	c.Courses = &CoursesService{c: c}
 	c.Courses.Quizzes = &CoursesQuizzesService{c: c}
 	c.CustomEmoji = &CustomEmojiService{c: c}
@@ -215,7 +284,20 @@ func NewClient(opts ...Option) *Client {
 	c.Drafts = &DraftsService{c: c}
 	c.EmbeddableHosts = &EmbeddableHostsService{c: c}
 	c.EmbedFeeds = &EmbedFeedsService{c: c}
+	c.EventAgendaPublic = &EventAgendaPublicService{c: c}
+	c.EventAttendees = &EventAttendeesService{c: c}
+	c.EventAttendeesPublic = &EventAttendeesPublicService{c: c}
+	c.EventMyAgenda = &EventMyAgendaService{c: c}
+	c.EventNotices = &EventNoticesService{c: c}
+	c.EventPromoCodes = &EventPromoCodesService{c: c}
+	c.EventRsvpPrivacy = &EventRsvpPrivacyService{c: c}
 	c.Events = &EventsService{c: c}
+	c.EventSeriesPublic = &EventSeriesPublicService{c: c}
+	c.EventSessions = &EventSessionsService{c: c}
+	c.EventSpeakers = &EventSpeakersService{c: c}
+	c.EventTickets = &EventTicketsService{c: c}
+	c.EventTicketsPublic = &EventTicketsPublicService{c: c}
+	c.EventTicketWebhook = &EventTicketWebhookService{c: c}
 	c.Extensions = &ExtensionsService{c: c}
 	c.Extensions.API = &ExtensionsAPIService{c: c}
 	c.Extensions.Registry = &ExtensionsRegistryService{c: c}
@@ -229,11 +311,15 @@ func NewClient(opts ...Option) *Client {
 	c.Forum.Tools = &ForumToolsService{c: c}
 	c.Forum.Topics = &ForumTopicsService{c: c}
 	c.Forum.Translations = &ForumTranslationsService{c: c}
+	c.ForumTopicTranslation = &ForumTopicTranslationService{c: c}
+	c.GoogleIndexing = &GoogleIndexingService{c: c}
 	c.Groups = &GroupsService{c: c}
 	c.Groups.Grants = &GroupsGrantsService{c: c}
 	c.Groups.Identity = &GroupsIdentityService{c: c}
 	c.Groups.Mailbox = &GroupsMailboxService{c: c}
 	c.Groups.Messages = &GroupsMessagesService{c: c}
+	c.Growth = &GrowthService{c: c}
+	c.Icons = &IconsService{c: c}
 	c.Integrations = &IntegrationsService{c: c}
 	c.Integrations.Cloudflare = &IntegrationsCloudflareService{c: c}
 	c.Integrations.Deepl = &IntegrationsDeeplService{c: c}
@@ -242,11 +328,13 @@ func NewClient(opts ...Option) *Client {
 	c.Integrations.Slack = &IntegrationsSlackService{c: c}
 	c.Invites = &InvitesService{c: c}
 	c.Items = &ItemsService{c: c}
+	c.LegalUpdates = &LegalUpdatesService{c: c}
 	c.Library = &LibraryService{c: c}
 	c.Mail = &MailService{c: c}
 	c.Mail.Provider = &MailProviderService{c: c}
 	c.Mail.Templates = &MailTemplatesService{c: c}
 	c.Mail.Unsubscribe = &MailUnsubscribeService{c: c}
+	c.MarkdownDialect = &MarkdownDialectService{c: c}
 	c.MCP = &MCPService{c: c}
 	c.Members = &MembersService{c: c}
 	c.Messages = &MessagesService{c: c}
@@ -254,26 +342,39 @@ func NewClient(opts ...Option) *Client {
 	c.Moderation.ContentRules = &ModerationContentRulesService{c: c}
 	c.Moderation.FlagTypes = &ModerationFlagTypesService{c: c}
 	c.Moderation.Screening = &ModerationScreeningService{c: c}
+	c.MyActivity = &MyActivityService{c: c}
+	c.MyCoursePaths = &MyCoursePathsService{c: c}
+	c.MyLearning = &MyLearningService{c: c}
 	c.Newsletter = &NewsletterService{c: c}
 	c.Notifications = &NotificationsService{c: c}
 	c.Notifications.Push = &NotificationsPushService{c: c}
 	c.Onboarding = &OnboardingService{c: c}
+	c.OrgImportJob = &OrgImportJobService{c: c}
+	c.OrgPayments = &OrgPaymentsService{c: c}
 	c.Orgs = &OrgsService{c: c}
 	c.Orgs.Captcha = &OrgsCaptchaService{c: c}
 	c.Orgs.Health = &OrgsHealthService{c: c}
 	c.Orgs.Settings = &OrgsSettingsService{c: c}
+	c.OrgSms = &OrgSmsService{c: c}
 	c.Public = &PublicService{c: c}
 	c.Public.Blog = &PublicBlogService{c: c}
+	c.Public.BlogMedia = &PublicBlogMediaService{c: c}
+	c.Public.BlogTaxonomy = &PublicBlogTaxonomyService{c: c}
 	c.Public.Cards = &PublicCardsService{c: c}
 	c.Public.Careers = &PublicCareersService{c: c}
 	c.Public.Changelog = &PublicChangelogService{c: c}
+	c.Public.ChangelogMarkdown = &PublicChangelogMarkdownService{c: c}
+	c.Public.ChangelogWidget = &PublicChangelogWidgetService{c: c}
 	c.Public.Consent = &PublicConsentService{c: c}
 	c.Public.Contact = &PublicContactService{c: c}
+	c.Public.CourseCatalog = &PublicCourseCatalogService{c: c}
+	c.Public.CourseCommerce = &PublicCourseCommerceService{c: c}
 	c.Public.Courses = &PublicCoursesService{c: c}
 	c.Public.CustomEmoji = &PublicCustomEmojiService{c: c}
 	c.Public.Domains = &PublicDomainsService{c: c}
 	c.Public.Events = &PublicEventsService{c: c}
 	c.Public.ExtensionRegistry = &PublicExtensionRegistryService{c: c}
+	c.Public.FaqFollow = &PublicFaqFollowService{c: c}
 	c.Public.Forms = &PublicFormsService{c: c}
 	c.Public.Forum = &PublicForumService{c: c}
 	c.Public.Forum.Discovery = &PublicForumDiscoveryService{c: c}
@@ -282,6 +383,12 @@ func NewClient(opts ...Option) *Client {
 	c.Public.Forum.Taxonomy = &PublicForumTaxonomyService{c: c}
 	c.Public.Forum.Threads = &PublicForumThreadsService{c: c}
 	c.Public.Forum.Topics = &PublicForumTopicsService{c: c}
+	c.Public.ForumAccount = &PublicForumAccountService{c: c}
+	c.Public.ForumBookmark = &PublicForumBookmarkService{c: c}
+	c.Public.ForumCategory = &PublicForumCategoryService{c: c}
+	c.Public.ForumProfile = &PublicForumProfileService{c: c}
+	c.Public.ForumSearch = &PublicForumSearchService{c: c}
+	c.Public.Growth = &PublicGrowthService{c: c}
 	c.Public.Identity = &PublicIdentityService{c: c}
 	c.Public.Interactions = &PublicInteractionsService{c: c}
 	c.Public.Legal = &PublicLegalService{c: c}
@@ -296,9 +403,21 @@ func NewClient(opts ...Option) *Client {
 	c.Public.ReaderPolicy = &PublicReaderPolicyService{c: c}
 	c.Public.Relations = &PublicRelationsService{c: c}
 	c.Public.Roadmap = &PublicRoadmapService{c: c}
+	c.Public.RoadmapItem = &PublicRoadmapItemService{c: c}
+	c.Public.RoadmapLanes = &PublicRoadmapLanesService{c: c}
+	c.Public.RoadmapVote = &PublicRoadmapVoteService{c: c}
+	c.Public.RoadmapWrite = &PublicRoadmapWriteService{c: c}
 	c.Public.Sites = &PublicSitesService{c: c}
+	c.Public.SpaceAuthors = &PublicSpaceAuthorsService{c: c}
 	c.Public.Spaces = &PublicSpacesService{c: c}
 	c.Public.Status = &PublicStatusService{c: c}
+	c.Public.StatusAccess = &PublicStatusAccessService{c: c}
+	c.Public.StatusAlerts = &PublicStatusAlertsService{c: c}
+	c.Public.StatusEmbeds = &PublicStatusEmbedsService{c: c}
+	c.Public.StatusHooks = &PublicStatusHooksService{c: c}
+	c.Public.StatusIncidents = &PublicStatusIncidentsService{c: c}
+	c.Public.Statuspage = &PublicStatuspageService{c: c}
+	c.Public.StatusSiblings = &PublicStatusSiblingsService{c: c}
 	c.Public.ThemeComponentRegistry = &PublicThemeComponentRegistryService{c: c}
 	c.Public.ThemeRegistry = &PublicThemeRegistryService{c: c}
 	c.Public.Translations = &PublicTranslationsService{c: c}
@@ -306,8 +425,12 @@ func NewClient(opts ...Option) *Client {
 	c.Questions = &QuestionsService{c: c}
 	c.ReaderAuth = &ReaderAuthService{c: c}
 	c.ReaderDomain = &ReaderDomainService{c: c}
+	c.ReaderImageSign = &ReaderImageSignService{c: c}
 	c.ReaderPolicy = &ReaderPolicyService{c: c}
+	c.ReaderSignOut = &ReaderSignOutService{c: c}
 	c.ReaderSignups = &ReaderSignupsService{c: c}
+	c.ReleaseReview = &ReleaseReviewService{c: c}
+	c.ReleaseTranslation = &ReleaseTranslationService{c: c}
 	c.Roadmap = &RoadmapService{c: c}
 	c.Roles = &RolesService{c: c}
 	c.Roles.Custom = &RolesCustomService{c: c}
@@ -317,9 +440,17 @@ func NewClient(opts ...Option) *Client {
 	c.Sdks = &SdksService{c: c}
 	c.Search = &SearchService{c: c}
 	c.Search.EmbeddingProvider = &SearchEmbeddingProviderService{c: c}
+	c.SectionLibrary = &SectionLibraryService{c: c}
 	c.ServiceAccounts = &ServiceAccountsService{c: c}
 	c.Sessions = &SessionsService{c: c}
+	c.SiteFrontPage = &SiteFrontPageService{c: c}
+	c.SiteLabels = &SiteLabelsService{c: c}
+	c.SitePreview = &SitePreviewService{c: c}
 	c.Sites = &SitesService{c: c}
+	c.SpaceAuthors = &SpaceAuthorsService{c: c}
+	c.SpaceFrontPage = &SpaceFrontPageService{c: c}
+	c.SpaceLabels = &SpaceLabelsService{c: c}
+	c.SpacePiecePage = &SpacePiecePageService{c: c}
 	c.Spaces = &SpacesService{c: c}
 	c.Spaces.Addresses = &SpacesAddressesService{c: c}
 	c.Spaces.Assets = &SpacesAssetsService{c: c}
@@ -341,6 +472,11 @@ func NewClient(opts ...Option) *Client {
 	c.SSO.SCIM = &SSOSCIMService{c: c}
 	c.Status = &StatusService{c: c}
 	c.Status.Monitors = &StatusMonitorsService{c: c}
+	c.StatusAccess = &StatusAccessService{c: c}
+	c.StatusIntegrations = &StatusIntegrationsService{c: c}
+	c.StatusMetrics = &StatusMetricsService{c: c}
+	c.StatusTemplates = &StatusTemplatesService{c: c}
+	c.StatusTranslations = &StatusTranslationsService{c: c}
 	c.Templates = &TemplatesService{c: c}
 	c.Themes = &ThemesService{c: c}
 	c.Themes.Bundles = &ThemesBundlesService{c: c}
@@ -355,6 +491,7 @@ func NewClient(opts ...Option) *Client {
 	c.Users.Avatar = &UsersAvatarService{c: c}
 	c.Users.Progression = &UsersProgressionService{c: c}
 	c.Users.Wallet = &UsersWalletService{c: c}
+	c.Versioning = &VersioningService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 	return c
 }

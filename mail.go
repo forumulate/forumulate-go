@@ -51,8 +51,8 @@ func (s *MailService) List(ctx context.Context, orgID string, query *MailListQue
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *MailService) ListAutoPaging(ctx context.Context, orgID string, query *MailListQuery, opts ...RequestOption) *Iter[SuppressionRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SuppressionRow, string, error) {
+func (s *MailService) ListAutoPaging(ctx context.Context, orgID string, query *MailListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -61,7 +61,7 @@ func (s *MailService) ListAutoPaging(ctx context.Context, orgID string, query *M
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SuppressionRow](raw, "suppressions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -122,8 +122,8 @@ func (s *MailService) Log(ctx context.Context, orgID string, query *MailLogQuery
 }
 
 // LogAutoPaging walks every item of Log across all pages.
-func (s *MailService) LogAutoPaging(ctx context.Context, orgID string, query *MailLogQuery, opts ...RequestOption) *Iter[MailLogRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]MailLogRow, string, error) {
+func (s *MailService) LogAutoPaging(ctx context.Context, orgID string, query *MailLogQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -132,7 +132,7 @@ func (s *MailService) LogAutoPaging(ctx context.Context, orgID string, query *Ma
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[MailLogRow](raw, "log")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -253,8 +253,8 @@ func (s *MailTemplatesService) List(ctx context.Context, orgID string, query *Ma
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *MailTemplatesService) ListAutoPaging(ctx context.Context, orgID string, query *MailTemplatesListQuery, opts ...RequestOption) *Iter[EmailTemplateSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]EmailTemplateSummary, string, error) {
+func (s *MailTemplatesService) ListAutoPaging(ctx context.Context, orgID string, query *MailTemplatesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -263,7 +263,7 @@ func (s *MailTemplatesService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[EmailTemplateSummary](raw, "templates")
+		return decodePage[any](raw, "")
 	})
 }
 

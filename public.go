@@ -13,18 +13,31 @@ import (
 type PublicService struct {
 	c                      *Client
 	Blog                   *PublicBlogService
+	BlogMedia              *PublicBlogMediaService
+	BlogTaxonomy           *PublicBlogTaxonomyService
 	Cards                  *PublicCardsService
 	Careers                *PublicCareersService
 	Changelog              *PublicChangelogService
+	ChangelogMarkdown      *PublicChangelogMarkdownService
+	ChangelogWidget        *PublicChangelogWidgetService
 	Consent                *PublicConsentService
 	Contact                *PublicContactService
+	CourseCatalog          *PublicCourseCatalogService
+	CourseCommerce         *PublicCourseCommerceService
 	Courses                *PublicCoursesService
 	CustomEmoji            *PublicCustomEmojiService
 	Domains                *PublicDomainsService
 	Events                 *PublicEventsService
 	ExtensionRegistry      *PublicExtensionRegistryService
+	FaqFollow              *PublicFaqFollowService
 	Forms                  *PublicFormsService
 	Forum                  *PublicForumService
+	ForumAccount           *PublicForumAccountService
+	ForumBookmark          *PublicForumBookmarkService
+	ForumCategory          *PublicForumCategoryService
+	ForumProfile           *PublicForumProfileService
+	ForumSearch            *PublicForumSearchService
+	Growth                 *PublicGrowthService
 	Identity               *PublicIdentityService
 	Interactions           *PublicInteractionsService
 	Legal                  *PublicLegalService
@@ -39,9 +52,21 @@ type PublicService struct {
 	ReaderPolicy           *PublicReaderPolicyService
 	Relations              *PublicRelationsService
 	Roadmap                *PublicRoadmapService
+	RoadmapItem            *PublicRoadmapItemService
+	RoadmapLanes           *PublicRoadmapLanesService
+	RoadmapVote            *PublicRoadmapVoteService
+	RoadmapWrite           *PublicRoadmapWriteService
 	Sites                  *PublicSitesService
+	SpaceAuthors           *PublicSpaceAuthorsService
 	Spaces                 *PublicSpacesService
 	Status                 *PublicStatusService
+	StatusAccess           *PublicStatusAccessService
+	StatusAlerts           *PublicStatusAlertsService
+	StatusEmbeds           *PublicStatusEmbedsService
+	StatusHooks            *PublicStatusHooksService
+	StatusIncidents        *PublicStatusIncidentsService
+	Statuspage             *PublicStatuspageService
+	StatusSiblings         *PublicStatusSiblingsService
 	ThemeComponentRegistry *PublicThemeComponentRegistryService
 	ThemeRegistry          *PublicThemeRegistryService
 	Translations           *PublicTranslationsService
@@ -62,8 +87,8 @@ func (s *PublicService) Captcha(ctx context.Context, orgID string, opts ...Reque
 // Gate get the gate in a space
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/gate
-func (s *PublicService) Gate(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicGateResponse, error) {
-	var out PublicGateResponse
+func (s *PublicService) Gate(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ReaderGate, error) {
+	var out ReaderGate
 	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/gate", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -72,7 +97,8 @@ func (s *PublicService) Gate(ctx context.Context, orgID string, spaceID string, 
 
 // PublicHubIntroQuery are the optional query parameters of PublicService.HubIntro.
 type PublicHubIntroQuery struct {
-	Share *string
+	Share  *string
+	Locale *string
 }
 
 func (p *PublicHubIntroQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -82,6 +108,9 @@ func (p *PublicHubIntroQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Share != nil {
 		v.Set("share", *p.Share)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -101,8 +130,9 @@ func (s *PublicService) HubIntro(ctx context.Context, orgID string, spaceID stri
 // PublicSearchQuery are the optional query parameters of PublicService.Search.
 type PublicSearchQuery struct {
 	// How many hits to return.
-	Limit *int64
-	Q     *string
+	Limit       *int64
+	Collections *string
+	Q           *string
 }
 
 func (p *PublicSearchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -112,6 +142,9 @@ func (p *PublicSearchQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Collections != nil {
+		v.Set("collections", *p.Collections)
 	}
 	if p.Q != nil {
 		v.Set("q", *p.Q)
@@ -193,7 +226,8 @@ func (s *PublicService) PagePDF(ctx context.Context, orgID string, spaceID strin
 
 // PublicFaqQuery are the optional query parameters of PublicService.Faq.
 type PublicFaqQuery struct {
-	Share *string
+	Share  *string
+	Locale *string
 }
 
 func (p *PublicFaqQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -203,6 +237,9 @@ func (p *PublicFaqQuery) encode(opts []RequestOption) (url.Values, []RequestOpti
 	}
 	if p.Share != nil {
 		v.Set("share", *p.Share)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -264,7 +301,7 @@ func (s *PublicService) APIOriginsAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "origins")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -313,7 +350,7 @@ func (s *PublicService) ScriptOriginsAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "origins")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -449,8 +486,8 @@ func (s *PublicService) Updates(ctx context.Context, orgID string, spaceID strin
 }
 
 // UpdatesAutoPaging walks every item of Updates across all pages.
-func (s *PublicService) UpdatesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicUpdatesQuery, opts ...RequestOption) *Iter[SpaceUpdateRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SpaceUpdateRow, string, error) {
+func (s *PublicService) UpdatesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicUpdatesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -459,7 +496,7 @@ func (s *PublicService) UpdatesAutoPaging(ctx context.Context, orgID string, spa
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SpaceUpdateRow](raw, "updates")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -531,8 +568,8 @@ func (s *PublicService) Tags(ctx context.Context, orgID string, spaceID string, 
 }
 
 // TagsAutoPaging walks every item of Tags across all pages.
-func (s *PublicService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicTagsQuery, opts ...RequestOption) *Iter[PublicTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicTagsResponseTag, string, error) {
+func (s *PublicService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicTagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -541,7 +578,7 @@ func (s *PublicService) TagsAutoPaging(ctx context.Context, orgID string, spaceI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicTagsResponseTag](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -580,8 +617,8 @@ func (s *PublicService) TagPages(ctx context.Context, orgID string, spaceID stri
 }
 
 // TagPagesAutoPaging walks every item of TagPages across all pages.
-func (s *PublicService) TagPagesAutoPaging(ctx context.Context, orgID string, spaceID string, tag string, query *PublicTagPagesQuery, opts ...RequestOption) *Iter[PublicTagPagesResponsePage] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicTagPagesResponsePage, string, error) {
+func (s *PublicService) TagPagesAutoPaging(ctx context.Context, orgID string, spaceID string, tag string, query *PublicTagPagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -590,19 +627,23 @@ func (s *PublicService) TagPagesAutoPaging(ctx context.Context, orgID string, sp
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicTagPagesResponsePage](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
 // PublicPageMarkdownQuery are the optional query parameters of PublicService.PageMarkdown.
 type PublicPageMarkdownQuery struct {
-	Form *string
+	Locale *string
+	Form   *string
 }
 
 func (p *PublicPageMarkdownQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	if p.Form != nil {
 		v.Set("form", *p.Form)
@@ -766,12 +807,84 @@ func (s *PublicService) ExportAll(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
-// View create the view in a space
+// View create the view in a space (pages)
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/pages/{pageId}/view
 func (s *PublicService) View(ctx context.Context, orgID string, spaceID string, pageID string, opts ...RequestOption) (*ErrorEnvelope, error) {
 	var out ErrorEnvelope
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/view", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicUpdatesRSSPublicUpdatesRSSQuery are the optional query parameters of PublicService.UpdatesRSSPublicUpdatesRSS.
+type PublicUpdatesRSSPublicUpdatesRSSQuery struct {
+	Locale *string
+}
+
+func (p *PublicUpdatesRSSPublicUpdatesRSSQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
+// UpdatesRSSPublicUpdatesRSS a docs page's Updates block as an RSS feed
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/pages/{pageRef}/updates.rss
+func (s *PublicService) UpdatesRSSPublicUpdatesRSS(ctx context.Context, orgID string, spaceID string, pageRef string, query *PublicUpdatesRSSPublicUpdatesRSSQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageRef)+"/updates.rss", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// RSS a careers board's open roles as RSS (`?tag=` narrows to one team)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/careers/rss.xml
+func (s *PublicService) RSS(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/rss.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Atom a careers board's open roles as Atom (`?tag=` narrows to one team)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/careers/atom.xml
+func (s *PublicService) Atom(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/atom.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// JSONFeed a careers board's open roles as JSON Feed (`?tag=` narrows to one team)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/careers/feed.json
+func (s *PublicService) JSONFeed(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/feed.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Subscribe join a careers board’s talent community (email when a role opens)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/careers/subscribe
+func (s *PublicService) Subscribe(ctx context.Context, orgID string, spaceID string, body PublicSubscribeParams, opts ...RequestOption) (*PublicSubscribeResponse, error) {
+	var out PublicSubscribeResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/subscribe", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -817,6 +930,18 @@ type PublicBlogIndexQuery struct {
 	Page   *int64
 	Cursor *string
 	Share  *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Pinned *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Featured *string
+	Preview  *string
+	Tags     *string
+	TagMatch *string
+	// Comma-separated post ids to leave out — a front page’s feeds de-duplicating each other.
+	Exclude []string
+	// Skip this many posts before the page starts (added to the page’s own offset).
+	Offset *int64
+	Locale *string
 	Sort   *string
 }
 
@@ -852,6 +977,30 @@ func (p *PublicBlogIndexQuery) encode(opts []RequestOption) (url.Values, []Reque
 	if p.Share != nil {
 		v.Set("share", *p.Share)
 	}
+	if p.Pinned != nil {
+		v.Set("pinned", *p.Pinned)
+	}
+	if p.Featured != nil {
+		v.Set("featured", *p.Featured)
+	}
+	if p.Preview != nil {
+		v.Set("preview", *p.Preview)
+	}
+	if p.Tags != nil {
+		v.Set("tags", *p.Tags)
+	}
+	if p.TagMatch != nil {
+		v.Set("tagMatch", *p.TagMatch)
+	}
+	for _, x := range p.Exclude {
+		v.Add("exclude", x)
+	}
+	if p.Offset != nil {
+		v.Set("offset", strconv.FormatInt(*p.Offset, 10))
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
 	}
@@ -871,8 +1020,8 @@ func (s *PublicBlogService) Index(ctx context.Context, orgID string, spaceID str
 }
 
 // IndexAutoPaging walks every item of Index across all pages.
-func (s *PublicBlogService) IndexAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogIndexQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *PublicBlogService) IndexAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogIndexQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -881,7 +1030,7 @@ func (s *PublicBlogService) IndexAutoPaging(ctx context.Context, orgID string, s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "articles")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -920,8 +1069,8 @@ func (s *PublicBlogService) Tags(ctx context.Context, orgID string, spaceID stri
 }
 
 // TagsAutoPaging walks every item of Tags across all pages.
-func (s *PublicBlogService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogTagsQuery, opts ...RequestOption) *Iter[PublicBlogTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicBlogTagsResponseTag, string, error) {
+func (s *PublicBlogService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogTagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -930,7 +1079,7 @@ func (s *PublicBlogService) TagsAutoPaging(ctx context.Context, orgID string, sp
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicBlogTagsResponseTag](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -973,8 +1122,8 @@ func (s *PublicBlogService) Search(ctx context.Context, orgID string, spaceID st
 }
 
 // SearchAutoPaging walks every item of Search across all pages.
-func (s *PublicBlogService) SearchAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogSearchQuery, opts ...RequestOption) *Iter[PublicBlogSearchResponseHit] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicBlogSearchResponseHit, string, error) {
+func (s *PublicBlogService) SearchAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogSearchQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -983,7 +1132,7 @@ func (s *PublicBlogService) SearchAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicBlogSearchResponseHit](raw, "hits")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1083,8 +1232,8 @@ func (s *PublicBlogService) Archive(ctx context.Context, orgID string, spaceID s
 }
 
 // ArchiveAutoPaging walks every item of Archive across all pages.
-func (s *PublicBlogService) ArchiveAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogArchiveQuery, opts ...RequestOption) *Iter[PublicBlogArchiveResponseMonth] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicBlogArchiveResponseMonth, string, error) {
+func (s *PublicBlogService) ArchiveAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogArchiveQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1093,7 +1242,7 @@ func (s *PublicBlogService) ArchiveAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicBlogArchiveResponseMonth](raw, "months")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1119,7 +1268,7 @@ func (p *PublicBlogSeriesQuery) encode(opts []RequestOption) (url.Values, []Requ
 	return v, opts
 }
 
-// Series list series in a space
+// Series list series in a space (blog)
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/blog/series
 func (s *PublicBlogService) Series(ctx context.Context, orgID string, spaceID string, query *PublicBlogSeriesQuery, opts ...RequestOption) (*PublicBlogSeriesResponse, error) {
@@ -1132,8 +1281,8 @@ func (s *PublicBlogService) Series(ctx context.Context, orgID string, spaceID st
 }
 
 // SeriesAutoPaging walks every item of Series across all pages.
-func (s *PublicBlogService) SeriesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogSeriesQuery, opts ...RequestOption) *Iter[PublicBlogSeriesResponseSery] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicBlogSeriesResponseSery, string, error) {
+func (s *PublicBlogService) SeriesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogSeriesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1142,16 +1291,33 @@ func (s *PublicBlogService) SeriesAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicBlogSeriesResponseSery](raw, "series")
+		return decodePage[any](raw, "")
 	})
+}
+
+// PublicBlogPieceMarkdownQuery are the optional query parameters of PublicBlogService.PieceMarkdown.
+type PublicBlogPieceMarkdownQuery struct {
+	Locale *string
+}
+
+func (p *PublicBlogPieceMarkdownQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
 }
 
 // PieceMarkdown read a blog article as markdown
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/blog/t/{slug}.md
-func (s *PublicBlogService) PieceMarkdown(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (any, error) {
+func (s *PublicBlogService) PieceMarkdown(ctx context.Context, orgID string, spaceID string, slug string, query *PublicBlogPieceMarkdownQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/t/"+pathEscape(slug)+".md", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/t/"+pathEscape(slug)+".md", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -1159,7 +1325,8 @@ func (s *PublicBlogService) PieceMarkdown(ctx context.Context, orgID string, spa
 
 // PublicBlogArticleQuery are the optional query parameters of PublicBlogService.Article.
 type PublicBlogArticleQuery struct {
-	Share *string
+	Share  *string
+	Locale *string
 }
 
 func (p *PublicBlogArticleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1169,6 +1336,9 @@ func (p *PublicBlogArticleQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Share != nil {
 		v.Set("share", *p.Share)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -1207,6 +1377,98 @@ func (s *PublicBlogService) Comment(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
+// PublicBlogMediaService holds the operations under client.Public.BlogMedia.
+type PublicBlogMediaService struct {
+	c *Client
+}
+
+// MediaZip a published post's library media as one zip
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/blog/t/{slug}/media.zip
+func (s *PublicBlogMediaService) MediaZip(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/t/"+pathEscape(slug)+"/media.zip", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PublicBlogTaxonomyService holds the operations under client.Public.BlogTaxonomy.
+type PublicBlogTaxonomyService struct {
+	c *Client
+}
+
+// Tag get the tag (public reader spaces blog)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/blog/tags/{tag}
+func (s *PublicBlogTaxonomyService) Tag(ctx context.Context, orgID string, spaceID string, tag string, opts ...RequestOption) (*PublicBlogTaxonomyTagResponse, error) {
+	var out PublicBlogTaxonomyTagResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(tag), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicBlogTaxonomyAuthorListQuery are the optional query parameters of PublicBlogTaxonomyService.AuthorList.
+type PublicBlogTaxonomyAuthorListQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicBlogTaxonomyAuthorListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// AuthorList list authors in a space (public reader blog)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/blog/authors
+func (s *PublicBlogTaxonomyService) AuthorList(ctx context.Context, orgID string, spaceID string, query *PublicBlogTaxonomyAuthorListQuery, opts ...RequestOption) (*PublicBlogTaxonomyAuthorListResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicBlogTaxonomyAuthorListResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AuthorListAutoPaging walks every item of AuthorList across all pages.
+func (s *PublicBlogTaxonomyService) AuthorListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicBlogTaxonomyAuthorListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// Author get the author (blog)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/blog/authors/{ref}
+func (s *PublicBlogTaxonomyService) Author(ctx context.Context, orgID string, spaceID string, ref string, opts ...RequestOption) (*PublicBlogTaxonomyAuthorResponse, error) {
+	var out PublicBlogTaxonomyAuthorResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors/"+pathEscape(ref), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicCardsService holds the operations under client.Public.Cards.
 type PublicCardsService struct {
 	c *Client
@@ -1229,6 +1491,17 @@ func (s *PublicCardsService) SocialCardPng(ctx context.Context, orgID string, sp
 func (s *PublicCardsService) PageSocialCardPng(ctx context.Context, orgID string, spaceID string, pageID string, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/social-card.png", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CollectionSocialCardPng file of social card (c)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/c/{collection}/social-card.png
+func (s *PublicCardsService) CollectionSocialCardPng(ctx context.Context, orgID string, spaceID string, collection string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/c/"+pathEscape(collection)+"/social-card.png", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -1283,6 +1556,34 @@ type PublicCareersService struct {
 	c *Client
 }
 
+// PublicCareersFormQuery are the optional query parameters of PublicCareersService.Form.
+type PublicCareersFormQuery struct {
+	PageID *string
+}
+
+func (p *PublicCareersFormQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.PageID != nil {
+		v.Set("pageId", *p.PageID)
+	}
+	return v, opts
+}
+
+// Form get the form in a space (public reader careers)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/careers/form
+func (s *PublicCareersService) Form(ctx context.Context, orgID string, spaceID string, query *PublicCareersFormQuery, opts ...RequestOption) (*PublicCareersFormResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicCareersFormResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/form", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Attach create an attachment in a space (careers)
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/careers/attachments
@@ -1321,23 +1622,61 @@ func (s *PublicChangelogService) Comment(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
+// PublicChangelogPieceMarkdownQuery are the optional query parameters of PublicChangelogService.PieceMarkdown.
+type PublicChangelogPieceMarkdownQuery struct {
+	Locale *string
+}
+
+func (p *PublicChangelogPieceMarkdownQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
 // PieceMarkdown read a changelog release as markdown
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/t/{slug}.md
-func (s *PublicChangelogService) PieceMarkdown(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (any, error) {
+func (s *PublicChangelogService) PieceMarkdown(ctx context.Context, orgID string, spaceID string, slug string, query *PublicChangelogPieceMarkdownQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/t/"+pathEscape(slug)+".md", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/t/"+pathEscape(slug)+".md", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// PublicChangelogReleaseQuery are the optional query parameters of PublicChangelogService.Release.
+type PublicChangelogReleaseQuery struct {
+	More   *float64
+	Locale *string
+}
+
+func (p *PublicChangelogReleaseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.More != nil {
+		v.Set("more", strconv.FormatFloat(*p.More, 'f', -1, 64))
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
 // Release read a changelog release
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/t/{slug}
-func (s *PublicChangelogService) Release(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicChangelogReleaseResponse, error) {
+func (s *PublicChangelogService) Release(ctx context.Context, orgID string, spaceID string, slug string, query *PublicChangelogReleaseQuery, opts ...RequestOption) (*PublicChangelogReleaseResponse, error) {
+	v, opts := query.encode(opts)
 	var out PublicChangelogReleaseResponse
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/t/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/t/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1374,8 +1713,27 @@ type PublicChangelogListQuery struct {
 	Share  *string
 	Year   *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
-	Since  *string
-	Cursor *string
+	Since   *string
+	Cursor  *string
+	Match   *string
+	Month   *string
+	Version *string
+	Type    *string
+	Channel *string
+	Family  *string
+	From    *string
+	To      *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Breaking *string
+	Q        *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Pinned *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Featured *string
+	Sort     *string
+	Preview  *string
+	Locale   *string
+	Tag      *string
 }
 
 func (p *PublicChangelogListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1400,6 +1758,54 @@ func (p *PublicChangelogListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Match != nil {
+		v.Set("match", *p.Match)
+	}
+	if p.Month != nil {
+		v.Set("month", *p.Month)
+	}
+	if p.Version != nil {
+		v.Set("version", *p.Version)
+	}
+	if p.Type != nil {
+		v.Set("type", *p.Type)
+	}
+	if p.Channel != nil {
+		v.Set("channel", *p.Channel)
+	}
+	if p.Family != nil {
+		v.Set("family", *p.Family)
+	}
+	if p.From != nil {
+		v.Set("from", *p.From)
+	}
+	if p.To != nil {
+		v.Set("to", *p.To)
+	}
+	if p.Breaking != nil {
+		v.Set("breaking", *p.Breaking)
+	}
+	if p.Q != nil {
+		v.Set("q", *p.Q)
+	}
+	if p.Pinned != nil {
+		v.Set("pinned", *p.Pinned)
+	}
+	if p.Featured != nil {
+		v.Set("featured", *p.Featured)
+	}
+	if p.Sort != nil {
+		v.Set("sort", *p.Sort)
+	}
+	if p.Preview != nil {
+		v.Set("preview", *p.Preview)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	if p.Tag != nil {
+		v.Set("tag", *p.Tag)
 	}
 	return v, opts
 }
@@ -1442,6 +1848,17 @@ func (s *PublicChangelogService) RSS(ctx context.Context, orgID string, spaceID 
 	return out, nil
 }
 
+// Atom atom feed of the changelog
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/atom.xml
+func (s *PublicChangelogService) Atom(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/atom.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // JSONFeed jSON feed of the changelog
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/feed.json
@@ -1451,6 +1868,99 @@ func (s *PublicChangelogService) JSONFeed(ctx context.Context, orgID string, spa
 		return nil, err
 	}
 	return out, nil
+}
+
+// PublicChangelogMarkdownService holds the operations under client.Public.ChangelogMarkdown.
+type PublicChangelogMarkdownService struct {
+	c *Client
+}
+
+// Whole read the whole changelog as markdown
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/changelog.md
+func (s *PublicChangelogMarkdownService) Whole(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/changelog.md", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PublicChangelogWidgetService holds the operations under client.Public.ChangelogWidget.
+type PublicChangelogWidgetService struct {
+	c *Client
+}
+
+// PublicChangelogWidgetGetQuery are the optional query parameters of PublicChangelogWidgetService.Get.
+type PublicChangelogWidgetGetQuery struct {
+	Limit *float64
+}
+
+func (p *PublicChangelogWidgetGetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatFloat(*p.Limit, 'f', -1, 64))
+	}
+	return v, opts
+}
+
+// Get get the widget in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/widget
+func (s *PublicChangelogWidgetService) Get(ctx context.Context, orgID string, spaceID string, query *PublicChangelogWidgetGetQuery, opts ...RequestOption) (*ChangelogWidgetResponse, error) {
+	v, opts := query.encode(opts)
+	var out ChangelogWidgetResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/widget", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Hit create the hit in a space
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/changelog/widget/hit
+func (s *PublicChangelogWidgetService) Hit(ctx context.Context, orgID string, spaceID string, body PublicChangelogWidgetHitParams, opts ...RequestOption) (*ErrorEnvelope, error) {
+	var out ErrorEnvelope
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/widget/hit", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Watching get the watch in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/changelog/watch
+func (s *PublicChangelogWidgetService) Watching(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicChangelogWidgetWatchingResponse, error) {
+	var out PublicChangelogWidgetWatchingResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/watch", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Watch replace the watch in a space
+//
+// PUT /public/orgs/{orgId}/spaces/{spaceId}/changelog/watch
+func (s *PublicChangelogWidgetService) Watch(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicChangelogWidgetWatchResponse, error) {
+	var out PublicChangelogWidgetWatchResponse
+	if err := s.c.do(ctx, "PUT", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/watch", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Unwatch delete the watch in a space
+//
+// DELETE /public/orgs/{orgId}/spaces/{spaceId}/changelog/watch
+func (s *PublicChangelogWidgetService) Unwatch(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicChangelogWidgetUnwatchResponse, error) {
+	var out PublicChangelogWidgetUnwatchResponse
+	if err := s.c.do(ctx, "DELETE", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/watch", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // PublicConsentService holds the operations under client.Public.Consent.
@@ -1485,12 +1995,29 @@ type PublicContactService struct {
 	c *Client
 }
 
+// PublicContactExistsQuery are the optional query parameters of PublicContactService.Exists.
+type PublicContactExistsQuery struct {
+	Preview *string
+}
+
+func (p *PublicContactExistsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Preview != nil {
+		v.Set("preview", *p.Preview)
+	}
+	return v, opts
+}
+
 // Exists get the contact in a space (public reader)
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/contact
-func (s *PublicContactService) Exists(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicContactExistsResponse, error) {
+func (s *PublicContactService) Exists(ctx context.Context, orgID string, spaceID string, query *PublicContactExistsQuery, opts ...RequestOption) (*PublicContactExistsResponse, error) {
+	v, opts := query.encode(opts)
 	var out PublicContactExistsResponse
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1518,6 +2045,146 @@ func (s *PublicContactService) Attach(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
+// PublicCourseCatalogService holds the operations under client.Public.CourseCatalog.
+type PublicCourseCatalogService struct {
+	c *Client
+}
+
+// PublicCourseCatalogCoursesQuery are the optional query parameters of PublicCourseCatalogService.Courses.
+type PublicCourseCatalogCoursesQuery struct {
+	Path *string
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicCourseCatalogCoursesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Path != nil {
+		v.Set("path", *p.Path)
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Courses list courses in an organization (public reader)
+//
+// GET /public/orgs/{orgId}/courses
+func (s *PublicCourseCatalogService) Courses(ctx context.Context, orgID string, query *PublicCourseCatalogCoursesQuery, opts ...RequestOption) (*PublicCourseCatalogCoursesResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicCourseCatalogCoursesResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/courses", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CoursesAutoPaging walks every item of Courses across all pages.
+func (s *PublicCourseCatalogService) CoursesAutoPaging(ctx context.Context, orgID string, query *PublicCourseCatalogCoursesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/courses", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// PublicCourseCatalogPathsQuery are the optional query parameters of PublicCourseCatalogService.Paths.
+type PublicCourseCatalogPathsQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicCourseCatalogPathsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Paths list course paths in an organization (public reader)
+//
+// GET /public/orgs/{orgId}/course-paths
+func (s *PublicCourseCatalogService) Paths(ctx context.Context, orgID string, query *PublicCourseCatalogPathsQuery, opts ...RequestOption) (*PublicCourseCatalogPathsResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicCourseCatalogPathsResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/course-paths", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PathsAutoPaging walks every item of Paths across all pages.
+func (s *PublicCourseCatalogService) PathsAutoPaging(ctx context.Context, orgID string, query *PublicCourseCatalogPathsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/course-paths", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// PublicCourseCommerceService holds the operations under client.Public.CourseCommerce.
+type PublicCourseCommerceService struct {
+	c *Client
+}
+
+// PublicCourseCommerceQuoteQuery are the optional query parameters of PublicCourseCommerceService.Quote.
+type PublicCourseCommerceQuoteQuery struct {
+	Coupon *string
+}
+
+func (p *PublicCourseCommerceQuoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Coupon != nil {
+		v.Set("coupon", *p.Coupon)
+	}
+	return v, opts
+}
+
+// Quote get the quote in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/course/commerce/quote
+func (s *PublicCourseCommerceService) Quote(ctx context.Context, orgID string, spaceID string, query *PublicCourseCommerceQuoteQuery, opts ...RequestOption) (*CourseQuote, error) {
+	v, opts := query.encode(opts)
+	var out CourseQuote
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/commerce/quote", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicCoursesService holds the operations under client.Public.Courses.
 type PublicCoursesService struct {
 	c *Client
@@ -1526,8 +2193,8 @@ type PublicCoursesService struct {
 // Outline get the outline in a space (public reader)
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/course/outline
-func (s *PublicCoursesService) Outline(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CourseOutline, error) {
-	var out CourseOutline
+func (s *PublicCoursesService) Outline(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*GatedOutline, error) {
+	var out GatedOutline
 	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/outline", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -1596,8 +2263,8 @@ func (s *PublicCustomEmojiService) List(ctx context.Context, orgID string, query
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *PublicCustomEmojiService) ListAutoPaging(ctx context.Context, orgID string, query *PublicCustomEmojiListQuery, opts ...RequestOption) *Iter[PublicCustomEmojiListResponseEmojiItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicCustomEmojiListResponseEmojiItem, string, error) {
+func (s *PublicCustomEmojiService) ListAutoPaging(ctx context.Context, orgID string, query *PublicCustomEmojiListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1606,7 +2273,7 @@ func (s *PublicCustomEmojiService) ListAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicCustomEmojiListResponseEmojiItem](raw, "emoji")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1691,9 +2358,16 @@ type PublicEventsService struct {
 // PublicEventsListQuery are the optional query parameters of PublicEventsService.List.
 type PublicEventsListQuery struct {
 	// Events per page, once a version is stated.
-	Limit  *int64
-	Scope  *string
+	Limit *int64
+	Scope *string
+	Tag   *string
+	Mode  *string
+	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
+	From *string
+	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
+	To     *string
 	Cursor *string
+	Share  *string
 }
 
 func (p *PublicEventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1707,8 +2381,23 @@ func (p *PublicEventsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	if p.Scope != nil {
 		v.Set("scope", *p.Scope)
 	}
+	if p.Tag != nil {
+		v.Set("tag", *p.Tag)
+	}
+	if p.Mode != nil {
+		v.Set("mode", *p.Mode)
+	}
+	if p.From != nil {
+		v.Set("from", *p.From)
+	}
+	if p.To != nil {
+		v.Set("to", *p.To)
+	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
 	}
 	return v, opts
 }
@@ -1726,8 +2415,8 @@ func (s *PublicEventsService) List(ctx context.Context, orgID string, spaceID st
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *PublicEventsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicEventsListQuery, opts ...RequestOption) *Iter[EventSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]EventSummary, string, error) {
+func (s *PublicEventsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicEventsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1736,38 +2425,137 @@ func (s *PublicEventsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[EventSummary](raw, "events")
+		return decodePage[any](raw, "")
 	})
+}
+
+// PublicEventsFeedQuery are the optional query parameters of PublicEventsService.Feed.
+type PublicEventsFeedQuery struct {
+	Tag   *string
+	Share *string
+}
+
+func (p *PublicEventsFeedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Tag != nil {
+		v.Set("tag", *p.Tag)
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
+	}
+	return v, opts
 }
 
 // Feed file of calendar
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/events/calendar.ics
-func (s *PublicEventsService) Feed(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+func (s *PublicEventsService) Feed(ctx context.Context, orgID string, spaceID string, query *PublicEventsFeedQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/calendar.ics", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/calendar.ics", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Get get the event (public reader)
+// RSS rSS feed of the event
 //
-// GET /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}
-func (s *PublicEventsService) Get(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*EventSummary, error) {
-	var out EventSummary
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle), nil, nil, &out, opts); err != nil {
+// GET /public/orgs/{orgId}/spaces/{spaceId}/events/rss.xml
+func (s *PublicEventsService) RSS(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/rss.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Atom atom feed of the event
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/events/atom.xml
+func (s *PublicEventsService) Atom(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/atom.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// JSONFeed jSON feed of the event
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/events/feed.json
+func (s *PublicEventsService) JSONFeed(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/feed.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Subscribe subscribe the event
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/events/subscribe
+func (s *PublicEventsService) Subscribe(ctx context.Context, orgID string, spaceID string, body PublicEventsSubscribeParams, opts ...RequestOption) (*PublicEventsSubscribeResponse, error) {
+	var out PublicEventsSubscribeResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/subscribe", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// PublicEventsGetQuery are the optional query parameters of PublicEventsService.Get.
+type PublicEventsGetQuery struct {
+	Share *string
+}
+
+func (p *PublicEventsGetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
+	}
+	return v, opts
+}
+
+// Get get the event (public reader)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}
+func (s *PublicEventsService) Get(ctx context.Context, orgID string, spaceID string, handle string, query *PublicEventsGetQuery, opts ...RequestOption) (*EventSummary, error) {
+	v, opts := query.encode(opts)
+	var out EventSummary
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle), v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicEventsIcsQuery are the optional query parameters of PublicEventsService.Ics.
+type PublicEventsIcsQuery struct {
+	Share *string
+}
+
+func (p *PublicEventsIcsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
+	}
+	return v, opts
+}
+
 // Ics file of calendar (for a named one)
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}/calendar.ics
-func (s *PublicEventsService) Ics(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (any, error) {
+func (s *PublicEventsService) Ics(ctx context.Context, orgID string, spaceID string, handle string, query *PublicEventsIcsQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/calendar.ics", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/calendar.ics", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -1817,8 +2605,8 @@ func (s *PublicExtensionRegistryService) List(ctx context.Context, query *Public
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *PublicExtensionRegistryService) ListAutoPaging(ctx context.Context, query *PublicExtensionRegistryListQuery, opts ...RequestOption) *Iter[RegistryListing] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RegistryListing, string, error) {
+func (s *PublicExtensionRegistryService) ListAutoPaging(ctx context.Context, query *PublicExtensionRegistryListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1827,7 +2615,7 @@ func (s *PublicExtensionRegistryService) ListAutoPaging(ctx context.Context, que
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RegistryListing](raw, "extensions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1837,6 +2625,22 @@ func (s *PublicExtensionRegistryService) ListAutoPaging(ctx context.Context, que
 func (s *PublicExtensionRegistryService) Get(ctx context.Context, slug string, opts ...RequestOption) (*PublicExtensionRegistryGetResponse, error) {
 	var out PublicExtensionRegistryGetResponse
 	if err := s.c.do(ctx, "GET", "/registry/extensions/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicFaqFollowService holds the operations under client.Public.FaqFollow.
+type PublicFaqFollowService struct {
+	c *Client
+}
+
+// Follow follow the FAQ
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/faq/follow
+func (s *PublicFaqFollowService) Follow(ctx context.Context, orgID string, spaceID string, body PublicFaqFollowFollowParams, opts ...RequestOption) (*PublicFaqFollowFollowResponse, error) {
+	var out PublicFaqFollowFollowResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/faq/follow", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1995,14 +2799,29 @@ type PublicForumIndexQuery struct {
 	Tag      *string
 	Kind     *string
 	Category *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Pinned *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Featured *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Bountied *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	IncludeSubcategories *string
+	Tags                 *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Media    *string
+	Previews *string
 	// Which page of results to return, 1-based.
-	Page   *int64
-	Share  *string
-	Filter *string
-	Period *string
-	Cursor *string
-	Solved *string
-	Sort   *string
+	Page     *int64
+	Share    *string
+	Filter   *string
+	Period   *string
+	Cursor   *string
+	Preview  *string
+	Locale   *string
+	TagMatch *string
+	Solved   *string
+	Sort     *string
 }
 
 func (p *PublicForumIndexQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -2022,6 +2841,27 @@ func (p *PublicForumIndexQuery) encode(opts []RequestOption) (url.Values, []Requ
 	if p.Category != nil {
 		v.Set("category", *p.Category)
 	}
+	if p.Pinned != nil {
+		v.Set("pinned", *p.Pinned)
+	}
+	if p.Featured != nil {
+		v.Set("featured", *p.Featured)
+	}
+	if p.Bountied != nil {
+		v.Set("bountied", *p.Bountied)
+	}
+	if p.IncludeSubcategories != nil {
+		v.Set("includeSubcategories", *p.IncludeSubcategories)
+	}
+	if p.Tags != nil {
+		v.Set("tags", *p.Tags)
+	}
+	if p.Media != nil {
+		v.Set("media", *p.Media)
+	}
+	if p.Previews != nil {
+		v.Set("previews", *p.Previews)
+	}
 	if p.Page != nil {
 		v.Set("page", strconv.FormatInt(*p.Page, 10))
 	}
@@ -2036,6 +2876,15 @@ func (p *PublicForumIndexQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Preview != nil {
+		v.Set("preview", *p.Preview)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	if p.TagMatch != nil {
+		v.Set("tagMatch", *p.TagMatch)
 	}
 	if p.Solved != nil {
 		v.Set("solved", *p.Solved)
@@ -2059,8 +2908,8 @@ func (s *PublicForumService) Index(ctx context.Context, orgID string, spaceID st
 }
 
 // IndexAutoPaging walks every item of Index across all pages.
-func (s *PublicForumService) IndexAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumIndexQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *PublicForumService) IndexAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumIndexQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2069,7 +2918,7 @@ func (s *PublicForumService) IndexAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "topics")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2141,8 +2990,8 @@ func (s *PublicForumDiscoveryService) Bookmarks(ctx context.Context, orgID strin
 }
 
 // BookmarksAutoPaging walks every item of Bookmarks across all pages.
-func (s *PublicForumDiscoveryService) BookmarksAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumDiscoveryBookmarksQuery, opts ...RequestOption) *Iter[PublicForumDiscoveryBookmarksResponseTopic] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumDiscoveryBookmarksResponseTopic, string, error) {
+func (s *PublicForumDiscoveryService) BookmarksAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumDiscoveryBookmarksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2151,7 +3000,7 @@ func (s *PublicForumDiscoveryService) BookmarksAutoPaging(ctx context.Context, o
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicForumDiscoveryBookmarksResponseTopic](raw, "topics")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2194,8 +3043,8 @@ func (s *PublicForumDiscoveryService) MentionSuggest(ctx context.Context, orgID 
 }
 
 // MentionSuggestAutoPaging walks every item of MentionSuggest across all pages.
-func (s *PublicForumDiscoveryService) MentionSuggestAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumDiscoveryMentionSuggestQuery, opts ...RequestOption) *Iter[PublicForumDiscoveryMentionSuggestResponseSuggestion] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumDiscoveryMentionSuggestResponseSuggestion, string, error) {
+func (s *PublicForumDiscoveryService) MentionSuggestAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumDiscoveryMentionSuggestQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2204,7 +3053,7 @@ func (s *PublicForumDiscoveryService) MentionSuggestAutoPaging(ctx context.Conte
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicForumDiscoveryMentionSuggestResponseSuggestion](raw, "suggestions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2269,6 +3118,44 @@ type PublicForumFeedsService struct {
 	c *Client
 }
 
+// PublicForumFeedsNewCountQuery are the optional query parameters of PublicForumFeedsService.NewCount.
+type PublicForumFeedsNewCountQuery struct {
+	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
+	Since    *string
+	Category *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	IncludeSubcategories *string
+}
+
+func (p *PublicForumFeedsNewCountQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Since != nil {
+		v.Set("since", *p.Since)
+	}
+	if p.Category != nil {
+		v.Set("category", *p.Category)
+	}
+	if p.IncludeSubcategories != nil {
+		v.Set("includeSubcategories", *p.IncludeSubcategories)
+	}
+	return v, opts
+}
+
+// NewCount get the new count in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/new-count
+func (s *PublicForumFeedsService) NewCount(ctx context.Context, orgID string, spaceID string, query *PublicForumFeedsNewCountQuery, opts ...RequestOption) (*PublicForumFeedsNewCountResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicForumFeedsNewCountResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/new-count", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // RSS rSS feed of the forum
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/forum/rss.xml
@@ -2315,6 +3202,7 @@ type PublicForumPeopleDirectoryQuery struct {
 	Cursor *string
 	// Rows per page — the spelling used everywhere else in this API.
 	Limit *int64
+	Scope *string
 	Order *string
 	Sort  *string
 }
@@ -2335,6 +3223,9 @@ func (p *PublicForumPeopleDirectoryQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Scope != nil {
+		v.Set("scope", *p.Scope)
 	}
 	if p.Order != nil {
 		v.Set("order", *p.Order)
@@ -2368,7 +3259,7 @@ func (s *PublicForumPeopleService) DirectoryAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "members")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2407,8 +3298,8 @@ func (s *PublicForumPeopleService) Badges(ctx context.Context, orgID string, spa
 }
 
 // BadgesAutoPaging walks every item of Badges across all pages.
-func (s *PublicForumPeopleService) BadgesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumPeopleBadgesQuery, opts ...RequestOption) *Iter[PublicForumPeopleBadgesResponseBadge] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumPeopleBadgesResponseBadge, string, error) {
+func (s *PublicForumPeopleService) BadgesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumPeopleBadgesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2417,7 +3308,7 @@ func (s *PublicForumPeopleService) BadgesAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicForumPeopleBadgesResponseBadge](raw, "badges")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2455,17 +3346,6 @@ func (s *PublicForumPeopleService) Leaderboard(ctx context.Context, orgID string
 func (s *PublicForumPeopleService) Profile(ctx context.Context, orgID string, spaceID string, userID string, opts ...RequestOption) (*PublicForumPeopleProfileResponse, error) {
 	var out PublicForumPeopleProfileResponse
 	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/u/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// UserSummary get the summary in a space
-//
-// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/u/{userId}/summary
-func (s *PublicForumPeopleService) UserSummary(ctx context.Context, orgID string, spaceID string, userID string, opts ...RequestOption) (*UserSummary, error) {
-	var out UserSummary
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/u/"+pathEscape(userID)+"/summary", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -2554,8 +3434,8 @@ func (s *PublicForumPeopleService) OnlineRoster(ctx context.Context, orgID strin
 }
 
 // OnlineRosterAutoPaging walks every item of OnlineRoster across all pages.
-func (s *PublicForumPeopleService) OnlineRosterAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumPeopleOnlineRosterQuery, opts ...RequestOption) *Iter[PublicForumPeopleOnlineRosterResponseOnlineItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumPeopleOnlineRosterResponseOnlineItem, string, error) {
+func (s *PublicForumPeopleService) OnlineRosterAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumPeopleOnlineRosterQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2564,7 +3444,7 @@ func (s *PublicForumPeopleService) OnlineRosterAutoPaging(ctx context.Context, o
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicForumPeopleOnlineRosterResponseOnlineItem](raw, "online")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2575,6 +3455,8 @@ type PublicForumTaxonomyService struct {
 
 // PublicForumTaxonomyCategoriesListQuery are the optional query parameters of PublicForumTaxonomyService.CategoriesList.
 type PublicForumTaxonomyCategoriesListQuery struct {
+	// Answer each category in this language: its `name` and `description` are replaced by the entry in its `translations` map for this code (exact, then by language: `pt-BR` → `pt`).
+	Locale *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
@@ -2585,6 +3467,9 @@ func (p *PublicForumTaxonomyCategoriesListQuery) encode(opts []RequestOption) (u
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
@@ -2608,8 +3493,8 @@ func (s *PublicForumTaxonomyService) CategoriesList(ctx context.Context, orgID s
 }
 
 // CategoriesListAutoPaging walks every item of CategoriesList across all pages.
-func (s *PublicForumTaxonomyService) CategoriesListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumTaxonomyCategoriesListQuery, opts ...RequestOption) *Iter[CategorySummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CategorySummary, string, error) {
+func (s *PublicForumTaxonomyService) CategoriesListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumTaxonomyCategoriesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2618,7 +3503,7 @@ func (s *PublicForumTaxonomyService) CategoriesListAutoPaging(ctx context.Contex
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CategorySummary](raw, "categories")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2635,10 +3520,7 @@ func (s *PublicForumTaxonomyService) CategoryFormTemplate(ctx context.Context, o
 
 // PublicForumTaxonomyCategoriesOverviewQuery are the optional query parameters of PublicForumTaxonomyService.CategoriesOverview.
 type PublicForumTaxonomyCategoriesOverviewQuery struct {
-	// Rows per page.
-	Limit *int64
-	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
-	Cursor *string
+	Latest *float64
 }
 
 func (p *PublicForumTaxonomyCategoriesOverviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -2646,11 +3528,8 @@ func (p *PublicForumTaxonomyCategoriesOverviewQuery) encode(opts []RequestOption
 	if p == nil {
 		return v, opts
 	}
-	if p.Limit != nil {
-		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
-	}
-	if p.Cursor != nil {
-		v.Set("cursor", *p.Cursor)
+	if p.Latest != nil {
+		v.Set("latest", strconv.FormatFloat(*p.Latest, 'f', -1, 64))
 	}
 	return v, opts
 }
@@ -2665,70 +3544,6 @@ func (s *PublicForumTaxonomyService) CategoriesOverview(ctx context.Context, org
 		return nil, err
 	}
 	return &out, nil
-}
-
-// CategoriesOverviewAutoPaging walks every item of CategoriesOverview across all pages.
-func (s *PublicForumTaxonomyService) CategoriesOverviewAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumTaxonomyCategoriesOverviewQuery, opts ...RequestOption) *Iter[PublicForumTaxonomyCategoriesOverviewResponseCategory] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumTaxonomyCategoriesOverviewResponseCategory, string, error) {
-		v, opts := query.encode(opts)
-		if cursor != "" {
-			v.Set("cursor", cursor)
-		}
-		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/overview", v, nil, opts)
-		if err != nil {
-			return nil, "", err
-		}
-		return decodePage[PublicForumTaxonomyCategoriesOverviewResponseCategory](raw, "categories")
-	})
-}
-
-// PublicForumTaxonomyTagsQuery are the optional query parameters of PublicForumTaxonomyService.Tags.
-type PublicForumTaxonomyTagsQuery struct {
-	// Rows per page.
-	Limit *int64
-	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
-	Cursor *string
-}
-
-func (p *PublicForumTaxonomyTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
-	v := url.Values{}
-	if p == nil {
-		return v, opts
-	}
-	if p.Limit != nil {
-		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
-	}
-	if p.Cursor != nil {
-		v.Set("cursor", *p.Cursor)
-	}
-	return v, opts
-}
-
-// Tags list tags in a space (public reader forum)
-//
-// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/tags
-func (s *PublicForumTaxonomyService) Tags(ctx context.Context, orgID string, spaceID string, query *PublicForumTaxonomyTagsQuery, opts ...RequestOption) (*PublicForumTaxonomyTagsResponse, error) {
-	v, opts := query.encode(opts)
-	var out PublicForumTaxonomyTagsResponse
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tags", v, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// TagsAutoPaging walks every item of Tags across all pages.
-func (s *PublicForumTaxonomyService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumTaxonomyTagsQuery, opts ...RequestOption) *Iter[PublicForumTaxonomyTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumTaxonomyTagsResponseTag, string, error) {
-		v, opts := query.encode(opts)
-		if cursor != "" {
-			v.Set("cursor", cursor)
-		}
-		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tags", v, nil, opts)
-		if err != nil {
-			return nil, "", err
-		}
-		return decodePage[PublicForumTaxonomyTagsResponseTag](raw, "tags")
-	})
 }
 
 // TagAbout get the tag (public reader spaces forum)
@@ -2780,6 +3595,17 @@ type PublicForumThreadsService struct {
 	c *Client
 }
 
+// Summary create the summary in a space
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/summary
+func (s *PublicForumThreadsService) Summary(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicForumThreadsSummaryResponse, error) {
+	var out PublicForumThreadsSummaryResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/summary", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Stream get the stream in a space
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/stream
@@ -2796,20 +3622,49 @@ func (s *PublicForumThreadsService) StreamStream(ctx context.Context, orgID stri
 	return s.c.stream(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/stream", nil, nil, opts, handler)
 }
 
+// PublicForumThreadsPieceMarkdownQuery are the optional query parameters of PublicForumThreadsService.PieceMarkdown.
+type PublicForumThreadsPieceMarkdownQuery struct {
+	Locale *string
+}
+
+func (p *PublicForumThreadsPieceMarkdownQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
 // PieceMarkdown read a forum topic as markdown
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}.md
-func (s *PublicForumThreadsService) PieceMarkdown(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (any, error) {
+func (s *PublicForumThreadsService) PieceMarkdown(ctx context.Context, orgID string, spaceID string, slug string, query *PublicForumThreadsPieceMarkdownQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+".md", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+".md", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// View create the view in a space (forum t)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/view
+func (s *PublicForumThreadsService) View(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*ErrorEnvelope, error) {
+	var out ErrorEnvelope
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/view", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicForumThreadsTopicQuery are the optional query parameters of PublicForumThreadsService.Topic.
 type PublicForumThreadsTopicQuery struct {
-	Share *string
+	Share  *string
+	Locale *string
 }
 
 func (p *PublicForumThreadsTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -2819,6 +3674,9 @@ func (p *PublicForumThreadsTopicQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Share != nil {
 		v.Set("share", *p.Share)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -2884,6 +3742,17 @@ func (s *PublicForumTopicsService) React(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
+// Vote replace the vote in a space (public reader t)
+//
+// PUT /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/posts/{postId}/vote
+func (s *PublicForumTopicsService) Vote(ctx context.Context, orgID string, spaceID string, slug string, postID string, body PublicForumTopicsVoteParams, opts ...RequestOption) (*PublicForumTopicsVoteResponse, error) {
+	var out PublicForumTopicsVoteResponse
+	if err := s.c.do(ctx, "PUT", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/posts/"+pathEscape(postID)+"/vote", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicForumTopicsReactorsQuery are the optional query parameters of PublicForumTopicsService.Reactors.
 type PublicForumTopicsReactorsQuery struct {
 	// Rows per page.
@@ -2906,7 +3775,7 @@ func (p *PublicForumTopicsReactorsQuery) encode(opts []RequestOption) (url.Value
 	return v, opts
 }
 
-// Reactors list reactions in a space
+// Reactors list reactions in a space (forum)
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/posts/{postId}/reactions
 func (s *PublicForumTopicsService) Reactors(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicForumTopicsReactorsQuery, opts ...RequestOption) (*PublicForumTopicsReactorsResponse, error) {
@@ -2919,8 +3788,8 @@ func (s *PublicForumTopicsService) Reactors(ctx context.Context, orgID string, s
 }
 
 // ReactorsAutoPaging walks every item of Reactors across all pages.
-func (s *PublicForumTopicsService) ReactorsAutoPaging(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicForumTopicsReactorsQuery, opts ...RequestOption) *Iter[PublicForumTopicsReactorsResponseReaction] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicForumTopicsReactorsResponseReaction, string, error) {
+func (s *PublicForumTopicsService) ReactorsAutoPaging(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicForumTopicsReactorsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2929,7 +3798,7 @@ func (s *PublicForumTopicsService) ReactorsAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicForumTopicsReactorsResponseReaction](raw, "reactions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2950,39 +3819,6 @@ func (s *PublicForumTopicsService) Flag(ctx context.Context, orgID string, space
 func (s *PublicForumTopicsService) FlagTopic(ctx context.Context, orgID string, spaceID string, slug string, body PublicForumTopicsFlagTopicParams, opts ...RequestOption) (*PublicForumTopicsFlagTopicResponse, error) {
 	var out PublicForumTopicsFlagTopicResponse
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/flag", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// Bookmark create the bookmark in a space (public reader forum t)
-//
-// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/bookmark
-func (s *PublicForumTopicsService) Bookmark(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicForumTopicsBookmarkResponse, error) {
-	var out PublicForumTopicsBookmarkResponse
-	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/bookmark", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// BookmarkPost create the bookmark in a space (public reader forum t posts)
-//
-// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/posts/{postId}/bookmark
-func (s *PublicForumTopicsService) BookmarkPost(ctx context.Context, orgID string, spaceID string, slug string, postID string, opts ...RequestOption) (*PublicForumTopicsBookmarkPostResponse, error) {
-	var out PublicForumTopicsBookmarkPostResponse
-	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/posts/"+pathEscape(postID)+"/bookmark", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// BookmarkReminder replace the reminder in a space (public reader t)
-//
-// PUT /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/bookmark/reminder
-func (s *PublicForumTopicsService) BookmarkReminder(ctx context.Context, orgID string, spaceID string, slug string, body PublicForumTopicsBookmarkReminderParams, opts ...RequestOption) (*PublicForumTopicsBookmarkReminderResponse, error) {
-	var out PublicForumTopicsBookmarkReminderResponse
-	if err := s.c.do(ctx, "PUT", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/bookmark/reminder", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -3067,8 +3903,8 @@ func (s *PublicForumTopicsService) PostRevisions(ctx context.Context, orgID stri
 }
 
 // PostRevisionsAutoPaging walks every item of PostRevisions across all pages.
-func (s *PublicForumTopicsService) PostRevisionsAutoPaging(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicForumTopicsPostRevisionsQuery, opts ...RequestOption) *Iter[PostRevisionMeta] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PostRevisionMeta, string, error) {
+func (s *PublicForumTopicsService) PostRevisionsAutoPaging(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicForumTopicsPostRevisionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -3077,7 +3913,7 @@ func (s *PublicForumTopicsService) PostRevisionsAutoPaging(ctx context.Context, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PostRevisionMeta](raw, "revisions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -3143,6 +3979,291 @@ func (s *PublicForumTopicsService) TopicPostsRSS(ctx context.Context, orgID stri
 	return out, nil
 }
 
+// PublicForumAccountService holds the operations under client.Public.ForumAccount.
+type PublicForumAccountService struct {
+	c *Client
+}
+
+// PublicForumAccountListQuery are the optional query parameters of PublicForumAccountService.List.
+type PublicForumAccountListQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Unread *string
+	Cursor *string
+}
+
+func (p *PublicForumAccountListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Unread != nil {
+		v.Set("unread", *p.Unread)
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// List the signed-in reader's notifications, newest first
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/me/notifications
+func (s *PublicForumAccountService) List(ctx context.Context, orgID string, spaceID string, query *PublicForumAccountListQuery, opts ...RequestOption) (*PublicForumAccountListResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicForumAccountListResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/me/notifications", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListAutoPaging walks every item of List across all pages.
+func (s *PublicForumAccountService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumAccountListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/me/notifications", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// MarkRead mark one of the reader’s notifications read
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/me/notifications/{id}/read
+func (s *PublicForumAccountService) MarkRead(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*PublicForumAccountMarkReadResponse, error) {
+	var out PublicForumAccountMarkReadResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/me/notifications/"+pathEscape(id)+"/read", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// MarkAllRead mark every one of the reader’s notifications read
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/me/notifications/read-all
+func (s *PublicForumAccountService) MarkAllRead(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicForumAccountMarkAllReadResponse, error) {
+	var out PublicForumAccountMarkAllReadResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/me/notifications/read-all", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicForumBookmarkService holds the operations under client.Public.ForumBookmark.
+type PublicForumBookmarkService struct {
+	c *Client
+}
+
+// Bookmark create the bookmark in a space (public reader forum t)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/bookmark
+func (s *PublicForumBookmarkService) Bookmark(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicForumBookmarkBookmarkResponse, error) {
+	var out PublicForumBookmarkBookmarkResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/bookmark", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// BookmarkPost create the bookmark in a space (public reader forum t posts)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/posts/{postId}/bookmark
+func (s *PublicForumBookmarkService) BookmarkPost(ctx context.Context, orgID string, spaceID string, slug string, postID string, opts ...RequestOption) (*PublicForumBookmarkBookmarkPostResponse, error) {
+	var out PublicForumBookmarkBookmarkPostResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/posts/"+pathEscape(postID)+"/bookmark", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// BookmarkReminder replace the reminder in a space (public reader t)
+//
+// PUT /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/bookmark/reminder
+func (s *PublicForumBookmarkService) BookmarkReminder(ctx context.Context, orgID string, spaceID string, slug string, body PublicForumBookmarkBookmarkReminderParams, opts ...RequestOption) (*PublicForumBookmarkBookmarkReminderResponse, error) {
+	var out PublicForumBookmarkBookmarkReminderResponse
+	if err := s.c.do(ctx, "PUT", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/bookmark/reminder", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DismissPin dismiss pin in a space (public reader t)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/dismiss-pin
+func (s *PublicForumBookmarkService) DismissPin(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicForumBookmarkDismissPinResponse, error) {
+	var out PublicForumBookmarkDismissPinResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/t/"+pathEscape(slug)+"/dismiss-pin", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicForumCategoryService holds the operations under client.Public.ForumCategory.
+type PublicForumCategoryService struct {
+	c *Client
+}
+
+// Category get the category
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/category/{slug}
+func (s *PublicForumCategoryService) Category(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicForumCategoryCategoryResponse, error) {
+	var out PublicForumCategoryCategoryResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/category/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Notify create the notify in a space (public reader category)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/forum/category/{slug}/notify
+func (s *PublicForumCategoryService) Notify(ctx context.Context, orgID string, spaceID string, slug string, body PublicForumCategoryNotifyParams, opts ...RequestOption) (*PublicForumCategoryNotifyResponse, error) {
+	var out PublicForumCategoryNotifyResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/category/"+pathEscape(slug)+"/notify", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Tags list tags in a space (public reader forum)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/tags
+func (s *PublicForumCategoryService) Tags(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicForumCategoryTagsResponse, error) {
+	var out PublicForumCategoryTagsResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tags", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicForumProfileService holds the operations under client.Public.ForumProfile.
+type PublicForumProfileService struct {
+	c *Client
+}
+
+// PublicForumProfileUserSummaryQuery are the optional query parameters of PublicForumProfileService.UserSummary.
+type PublicForumProfileUserSummaryQuery struct {
+	Rail *string
+}
+
+func (p *PublicForumProfileUserSummaryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Rail != nil {
+		v.Set("rail", *p.Rail)
+	}
+	return v, opts
+}
+
+// UserSummary get the summary in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/u/{userId}/summary
+func (s *PublicForumProfileService) UserSummary(ctx context.Context, orgID string, spaceID string, userID string, query *PublicForumProfileUserSummaryQuery, opts ...RequestOption) (*PublicUserSummary, error) {
+	v, opts := query.encode(opts)
+	var out PublicUserSummary
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/u/"+pathEscape(userID)+"/summary", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicForumSearchService holds the operations under client.Public.ForumSearch.
+type PublicForumSearchService struct {
+	c *Client
+}
+
+// PublicForumSearchFullQuery are the optional query parameters of PublicForumSearchService.Full.
+type PublicForumSearchFullQuery struct {
+	// Hits per page.
+	Limit *int64
+	// Hits skipped.
+	Offset *int64
+	Q      *string
+}
+
+func (p *PublicForumSearchFullQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Offset != nil {
+		v.Set("offset", strconv.FormatInt(*p.Offset, 10))
+	}
+	if p.Q != nil {
+		v.Set("q", *p.Q)
+	}
+	return v, opts
+}
+
+// Full search a public forum with Discourse operators (ranked, paged)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/forum/search/full
+func (s *PublicForumSearchService) Full(ctx context.Context, orgID string, spaceID string, query *PublicForumSearchFullQuery, opts ...RequestOption) (*PublicForumSearchFullResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicForumSearchFullResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/search/full", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// FullAutoPaging walks every item of Full across all pages.
+func (s *PublicForumSearchService) FullAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicForumSearchFullQuery, opts ...RequestOption) *Iter[ForumSearchHit] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]ForumSearchHit, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("offset", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/search/full", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[ForumSearchHit](raw, "hits")
+	})
+}
+
+// PublicGrowthService holds the operations under client.Public.Growth.
+type PublicGrowthService struct {
+	c *Client
+}
+
+// Goal create the goal in a space
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/pages/{pageId}/goal
+func (s *PublicGrowthService) Goal(ctx context.Context, orgID string, spaceID string, pageID string, body PublicGrowthGoalParams, opts ...RequestOption) (*PublicGrowthGoalResponse, error) {
+	var out PublicGrowthGoalResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/goal", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Exposure create the exposure in a space
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/pages/{pageId}/exposure
+func (s *PublicGrowthService) Exposure(ctx context.Context, orgID string, spaceID string, pageID string, body PublicGrowthExposureParams, opts ...RequestOption) (*PublicGrowthExposureResponse, error) {
+	var out PublicGrowthExposureResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/exposure", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicIdentityService holds the operations under client.Public.Identity.
 type PublicIdentityService struct {
 	c *Client
@@ -3205,8 +4326,8 @@ func (s *PublicIdentityService) SignupFields(ctx context.Context, orgID string, 
 }
 
 // SignupFieldsAutoPaging walks every item of SignupFields across all pages.
-func (s *PublicIdentityService) SignupFieldsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicIdentitySignupFieldsQuery, opts ...RequestOption) *Iter[PublicIdentitySignupFieldsResponseField] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicIdentitySignupFieldsResponseField, string, error) {
+func (s *PublicIdentityService) SignupFieldsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicIdentitySignupFieldsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -3215,7 +4336,7 @@ func (s *PublicIdentityService) SignupFieldsAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicIdentitySignupFieldsResponseField](raw, "fields")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -3319,8 +4440,8 @@ func (s *PublicInteractionsService) ListComments(ctx context.Context, orgID stri
 }
 
 // ListCommentsAutoPaging walks every item of ListComments across all pages.
-func (s *PublicInteractionsService) ListCommentsAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *PublicInteractionsListCommentsQuery, opts ...RequestOption) *Iter[CommentSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CommentSummary, string, error) {
+func (s *PublicInteractionsService) ListCommentsAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *PublicInteractionsListCommentsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -3329,7 +4450,7 @@ func (s *PublicInteractionsService) ListCommentsAutoPaging(ctx context.Context, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CommentSummary](raw, "comments")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -3388,6 +4509,17 @@ func (s *PublicInteractionsService) Feedback(ctx context.Context, orgID string, 
 	return &out, nil
 }
 
+// FaqSearchEvent create a search event in a space
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/faq/search-events
+func (s *PublicInteractionsService) FaqSearchEvent(ctx context.Context, orgID string, spaceID string, body PublicInteractionsFaqSearchEventParams, opts ...RequestOption) (*ErrorEnvelope, error) {
+	var out ErrorEnvelope
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/faq/search-events", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicLegalService holds the operations under client.Public.Legal.
 type PublicLegalService struct {
 	c *Client
@@ -3426,12 +4558,127 @@ func (s *PublicLegalService) Versions(ctx context.Context, orgID string, kind st
 	return &out, nil
 }
 
+// Edition get the version
+//
+// GET /public/orgs/{orgId}/legal/{kind}/versions/{edition}
+func (s *PublicLegalService) Edition(ctx context.Context, orgID string, kind string, edition string, opts ...RequestOption) (*PublicLegalEditionResponse, error) {
+	var out PublicLegalEditionResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind)+"/versions/"+pathEscape(edition), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicLegalDiffQuery are the optional query parameters of PublicLegalService.Diff.
+type PublicLegalDiffQuery struct {
+	From *string
+	To   *string
+}
+
+func (p *PublicLegalDiffQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.From != nil {
+		v.Set("from", *p.From)
+	}
+	if p.To != nil {
+		v.Set("to", *p.To)
+	}
+	return v, opts
+}
+
+// Diff get the diff in an organization (public reader)
+//
+// GET /public/orgs/{orgId}/legal/{kind}/diff
+func (s *PublicLegalService) Diff(ctx context.Context, orgID string, kind string, query *PublicLegalDiffQuery, opts ...RequestOption) (*PublicLegalDiffResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicLegalDiffResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind)+"/diff", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// RSS rSS feed of the legal
+//
+// GET /public/orgs/{orgId}/legal/rss.xml
+func (s *PublicLegalService) RSS(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/rss.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Atom atom feed of the legal
+//
+// GET /public/orgs/{orgId}/legal/atom.xml
+func (s *PublicLegalService) Atom(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/atom.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// JSONFeed jSON feed of the legal
+//
+// GET /public/orgs/{orgId}/legal/feed.json
+func (s *PublicLegalService) JSONFeed(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/feed.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Trust jSON feed of trust
+//
+// GET /public/orgs/{orgId}/legal/trust.json
+func (s *PublicLegalService) Trust(ctx context.Context, orgID string, opts ...RequestOption) (*PublicLegalTrustResponse, error) {
+	var out PublicLegalTrustResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/trust.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Subprocessors list subprocessors in an organization
+//
+// GET /public/orgs/{orgId}/legal/{kind}/subprocessors
+func (s *PublicLegalService) Subprocessors(ctx context.Context, orgID string, kind string, opts ...RequestOption) (*PublicLegalSubprocessorsResponse, error) {
+	var out PublicLegalSubprocessorsResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind)+"/subprocessors", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicLegalGetQuery are the optional query parameters of PublicLegalService.Get.
+type PublicLegalGetQuery struct {
+	Locale *string
+}
+
+func (p *PublicLegalGetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
 // Get get the legal
 //
 // GET /public/orgs/{orgId}/legal/{kind}
-func (s *PublicLegalService) Get(ctx context.Context, orgID string, kind string, opts ...RequestOption) (*PublicLegalGetResponse, error) {
+func (s *PublicLegalService) Get(ctx context.Context, orgID string, kind string, query *PublicLegalGetQuery, opts ...RequestOption) (*PublicLegalGetResponse, error) {
+	v, opts := query.encode(opts)
 	var out PublicLegalGetResponse
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -3698,8 +4945,8 @@ func (s *PublicOpenapiService) Languages(ctx context.Context, orgID string, spac
 }
 
 // LanguagesAutoPaging walks every item of Languages across all pages.
-func (s *PublicOpenapiService) LanguagesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicOpenapiLanguagesQuery, opts ...RequestOption) *Iter[PublicOpenapiLanguagesResponseLanguage] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicOpenapiLanguagesResponseLanguage, string, error) {
+func (s *PublicOpenapiService) LanguagesAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicOpenapiLanguagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -3708,7 +4955,7 @@ func (s *PublicOpenapiService) LanguagesAutoPaging(ctx context.Context, orgID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicOpenapiLanguagesResponseLanguage](raw, "languages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -3763,6 +5010,38 @@ func (s *PublicOpenapiService) DownloadPackage(ctx context.Context, orgID string
 	v, opts := query.encode(opts)
 	var out any
 	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/sdk/"+pathEscape(language)+"/package", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PublicOpenapiSpecQuery are the optional query parameters of PublicOpenapiService.Spec.
+type PublicOpenapiSpecQuery struct {
+	SpecID *string
+	Format *string
+}
+
+func (p *PublicOpenapiSpecQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.SpecID != nil {
+		v.Set("specId", *p.SpecID)
+	}
+	if p.Format != nil {
+		v.Set("format", *p.Format)
+	}
+	return v, opts
+}
+
+// Spec get the spec in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/api-export/spec
+func (s *PublicOpenapiService) Spec(ctx context.Context, orgID string, spaceID string, query *PublicOpenapiSpecQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/api-export/spec", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -3874,7 +5153,7 @@ func (s *PublicOrgsService) ScriptOriginsAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "origins")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -4025,8 +5304,8 @@ func (s *PublicRelationsService) Resolve(ctx context.Context, orgID string, quer
 }
 
 // ResolveAutoPaging walks every item of Resolve across all pages.
-func (s *PublicRelationsService) ResolveAutoPaging(ctx context.Context, orgID string, query *PublicRelationsResolveQuery, opts ...RequestOption) *Iter[ResolvedRelation] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ResolvedRelation, string, error) {
+func (s *PublicRelationsService) ResolveAutoPaging(ctx context.Context, orgID string, query *PublicRelationsResolveQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -4035,7 +5314,7 @@ func (s *PublicRelationsService) ResolveAutoPaging(ctx context.Context, orgID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ResolvedRelation](raw, "items")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -4044,25 +5323,25 @@ type PublicRoadmapService struct {
 	c *Client
 }
 
-// Submit create an item in a space (public reader roadmap)
-//
-// POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/items
-func (s *PublicRoadmapService) Submit(ctx context.Context, orgID string, spaceID string, body PublicRoadmapSubmitParams, opts ...RequestOption) (*PublicRoadmapSubmitResponse, error) {
-	var out PublicRoadmapSubmitResponse
-	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/items", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // PublicRoadmapBoardQuery are the optional query parameters of PublicRoadmapService.Board.
 type PublicRoadmapBoardQuery struct {
 	// Items per LANE — not lanes.
 	Limit  *int64
 	Cursor *string
 	// Which page of results to return, 1-based.
-	Page  *int64
-	Share *string
+	Page    *int64
+	Share   *string
+	Preview *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Pinned *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Featured *string
+	Sort     *string
+	Tag      *string
+	Status   *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Mine *string
+	Q    *string
 }
 
 func (p *PublicRoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -4082,6 +5361,30 @@ func (p *PublicRoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []Re
 	if p.Share != nil {
 		v.Set("share", *p.Share)
 	}
+	if p.Preview != nil {
+		v.Set("preview", *p.Preview)
+	}
+	if p.Pinned != nil {
+		v.Set("pinned", *p.Pinned)
+	}
+	if p.Featured != nil {
+		v.Set("featured", *p.Featured)
+	}
+	if p.Sort != nil {
+		v.Set("sort", *p.Sort)
+	}
+	if p.Tag != nil {
+		v.Set("tag", *p.Tag)
+	}
+	if p.Status != nil {
+		v.Set("status", *p.Status)
+	}
+	if p.Mine != nil {
+		v.Set("mine", *p.Mine)
+	}
+	if p.Q != nil {
+		v.Set("q", *p.Q)
+	}
 	return v, opts
 }
 
@@ -4098,8 +5401,8 @@ func (s *PublicRoadmapService) Board(ctx context.Context, orgID string, spaceID 
 }
 
 // BoardAutoPaging walks every item of Board across all pages.
-func (s *PublicRoadmapService) BoardAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicRoadmapBoardQuery, opts ...RequestOption) *Iter[PublicRoadmapBoardResponseLane] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicRoadmapBoardResponseLane, string, error) {
+func (s *PublicRoadmapService) BoardAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicRoadmapBoardQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -4108,8 +5411,19 @@ func (s *PublicRoadmapService) BoardAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicRoadmapBoardResponseLane](raw, "lanes")
+		return decodePage[any](raw, "")
 	})
+}
+
+// Votes your votes on a roadmap
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/roadmap/votes
+func (s *PublicRoadmapService) Votes(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicRoadmapVotesResponse, error) {
+	var out PublicRoadmapVotesResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/votes", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // RSS rSS feed of the roadmap
@@ -4162,8 +5476,8 @@ func (s *PublicRoadmapService) Search(ctx context.Context, orgID string, spaceID
 }
 
 // SearchAutoPaging walks every item of Search across all pages.
-func (s *PublicRoadmapService) SearchAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicRoadmapSearchQuery, opts ...RequestOption) *Iter[PublicRoadmapSearchResponseHit] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicRoadmapSearchResponseHit, string, error) {
+func (s *PublicRoadmapService) SearchAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicRoadmapSearchQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -4172,7 +5486,7 @@ func (s *PublicRoadmapService) SearchAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicRoadmapSearchResponseHit](raw, "hits")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -4215,11 +5529,152 @@ func (s *PublicRoadmapService) Item(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
+// PublicRoadmapItemService holds the operations under client.Public.RoadmapItem.
+type PublicRoadmapItemService struct {
+	c *Client
+}
+
+// Voters list voters in a space (public reader roadmap t)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/voters
+func (s *PublicRoadmapItemService) Voters(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicRoadmapItemVotersResponse, error) {
+	var out PublicRoadmapItemVotersResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/voters", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// React create the react in a space (public reader roadmap t posts)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/posts/{postId}/react
+func (s *PublicRoadmapItemService) React(ctx context.Context, orgID string, spaceID string, slug string, postID string, body PublicRoadmapItemReactParams, opts ...RequestOption) (*PublicRoadmapItemReactResponse, error) {
+	var out PublicRoadmapItemReactResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/posts/"+pathEscape(postID)+"/react", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicRoadmapItemReactorsQuery are the optional query parameters of PublicRoadmapItemService.Reactors.
+type PublicRoadmapItemReactorsQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicRoadmapItemReactorsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Reactors list reactions in a space (roadmap)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/posts/{postId}/reactions
+func (s *PublicRoadmapItemService) Reactors(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicRoadmapItemReactorsQuery, opts ...RequestOption) (*PublicRoadmapItemReactorsResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicRoadmapItemReactorsResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/posts/"+pathEscape(postID)+"/reactions", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ReactorsAutoPaging walks every item of Reactors across all pages.
+func (s *PublicRoadmapItemService) ReactorsAutoPaging(ctx context.Context, orgID string, spaceID string, slug string, postID string, query *PublicRoadmapItemReactorsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/posts/"+pathEscape(postID)+"/reactions", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// PublicRoadmapLanesService holds the operations under client.Public.RoadmapLanes.
+type PublicRoadmapLanesService struct {
+	c *Client
+}
+
+// PublicRoadmapLanesLanesQuery are the optional query parameters of PublicRoadmapLanesService.Lanes.
+type PublicRoadmapLanesLanesQuery struct {
+	Share *string
+}
+
+func (p *PublicRoadmapLanesLanesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
+	}
+	return v, opts
+}
+
+// Lanes list lanes in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/roadmap/lanes
+func (s *PublicRoadmapLanesService) Lanes(ctx context.Context, orgID string, spaceID string, query *PublicRoadmapLanesLanesQuery, opts ...RequestOption) (*PublicRoadmapLanesLanesResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicRoadmapLanesLanesResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/lanes", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicRoadmapVoteService holds the operations under client.Public.RoadmapVote.
+type PublicRoadmapVoteService struct {
+	c *Client
+}
+
+// Vote create the vote in a space (public reader roadmap t)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/vote
+func (s *PublicRoadmapVoteService) Vote(ctx context.Context, orgID string, spaceID string, slug string, body PublicRoadmapVoteVoteParams, opts ...RequestOption) (*PublicRoadmapVoteVoteResponse, error) {
+	var out PublicRoadmapVoteVoteResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/vote", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicRoadmapWriteService holds the operations under client.Public.RoadmapWrite.
+type PublicRoadmapWriteService struct {
+	c *Client
+}
+
+// Submit create an item in a space (public reader roadmap)
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/items
+func (s *PublicRoadmapWriteService) Submit(ctx context.Context, orgID string, spaceID string, body PublicRoadmapWriteSubmitParams, opts ...RequestOption) (*PublicRoadmapWriteSubmitResponse, error) {
+	var out PublicRoadmapWriteSubmitResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/items", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Comment create the comment in a space (roadmap)
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/comment
-func (s *PublicRoadmapService) Comment(ctx context.Context, orgID string, spaceID string, slug string, body PublicRoadmapCommentParams, opts ...RequestOption) (*PublicRoadmapCommentResponse, error) {
-	var out PublicRoadmapCommentResponse
+func (s *PublicRoadmapWriteService) Comment(ctx context.Context, orgID string, spaceID string, slug string, body PublicRoadmapWriteCommentParams, opts ...RequestOption) (*PublicRoadmapWriteCommentResponse, error) {
+	var out PublicRoadmapWriteCommentResponse
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/comment", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
@@ -4229,20 +5684,53 @@ func (s *PublicRoadmapService) Comment(ctx context.Context, orgID string, spaceI
 // Watch create the watch in a space
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/watch
-func (s *PublicRoadmapService) Watch(ctx context.Context, orgID string, spaceID string, slug string, body PublicRoadmapWatchParams, opts ...RequestOption) (*PublicRoadmapWatchResponse, error) {
-	var out PublicRoadmapWatchResponse
+func (s *PublicRoadmapWriteService) Watch(ctx context.Context, orgID string, spaceID string, slug string, body PublicRoadmapWriteWatchParams, opts ...RequestOption) (*PublicRoadmapWriteWatchResponse, error) {
+	var out PublicRoadmapWriteWatchResponse
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/watch", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Vote create the vote in a space (public reader roadmap t)
+// FollowItem follow the topic
 //
-// POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/vote
-func (s *PublicRoadmapService) Vote(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*PublicRoadmapVoteResponse, error) {
-	var out PublicRoadmapVoteResponse
-	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/vote", nil, nil, &out, opts); err != nil {
+// PUT /public/orgs/{orgId}/spaces/{spaceId}/roadmap/t/{slug}/follow
+func (s *PublicRoadmapWriteService) FollowItem(ctx context.Context, orgID string, spaceID string, slug string, body PublicRoadmapWriteFollowItemParams, opts ...RequestOption) (*PublicRoadmapWriteFollowItemResponse, error) {
+	var out PublicRoadmapWriteFollowItemResponse
+	if err := s.c.do(ctx, "PUT", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/t/"+pathEscape(slug)+"/follow", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// BoardFollowState follow the roadmap
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/roadmap/follow
+func (s *PublicRoadmapWriteService) BoardFollowState(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicRoadmapWriteBoardFollowStateResponse, error) {
+	var out PublicRoadmapWriteBoardFollowStateResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/follow", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// FollowBoard follow the roadmap (replace)
+//
+// PUT /public/orgs/{orgId}/spaces/{spaceId}/roadmap/follow
+func (s *PublicRoadmapWriteService) FollowBoard(ctx context.Context, orgID string, spaceID string, body PublicRoadmapWriteFollowBoardParams, opts ...RequestOption) (*PublicRoadmapWriteFollowBoardResponse, error) {
+	var out PublicRoadmapWriteFollowBoardResponse
+	if err := s.c.do(ctx, "PUT", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/follow", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Subscribe subscribe the roadmap
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/roadmap/subscribe
+func (s *PublicRoadmapWriteService) Subscribe(ctx context.Context, orgID string, spaceID string, body PublicRoadmapWriteSubscribeParams, opts ...RequestOption) (*PublicRoadmapWriteSubscribeResponse, error) {
+	var out PublicRoadmapWriteSubscribeResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/subscribe", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -4348,6 +5836,71 @@ func (s *PublicSitesService) Ask(ctx context.Context, orgID string, slug string,
 	return &out, nil
 }
 
+// PublicSpaceAuthorsService holds the operations under client.Public.SpaceAuthors.
+type PublicSpaceAuthorsService struct {
+	c *Client
+}
+
+// PublicSpaceAuthorsAuthorListQuery are the optional query parameters of PublicSpaceAuthorsService.AuthorList.
+type PublicSpaceAuthorsAuthorListQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicSpaceAuthorsAuthorListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// AuthorList list authors in a space (public reader)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/authors
+func (s *PublicSpaceAuthorsService) AuthorList(ctx context.Context, orgID string, spaceID string, query *PublicSpaceAuthorsAuthorListQuery, opts ...RequestOption) (*PublicSpaceAuthorsAuthorListResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicSpaceAuthorsAuthorListResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AuthorListAutoPaging walks every item of AuthorList across all pages.
+func (s *PublicSpaceAuthorsService) AuthorListAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicSpaceAuthorsAuthorListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// Author get the author
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/authors/{ref}
+func (s *PublicSpaceAuthorsService) Author(ctx context.Context, orgID string, spaceID string, ref string, opts ...RequestOption) (*PublicSpaceAuthorsAuthorResponse, error) {
+	var out PublicSpaceAuthorsAuthorResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors/"+pathEscape(ref), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // PublicSpacesService holds the operations under client.Public.Spaces.
 type PublicSpacesService struct {
 	c *Client
@@ -4388,8 +5941,8 @@ func (s *PublicSpacesService) List(ctx context.Context, query *PublicSpacesListQ
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *PublicSpacesService) ListAutoPaging(ctx context.Context, query *PublicSpacesListQuery, opts ...RequestOption) *Iter[PublicSpacesListResponseSpace] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PublicSpacesListResponseSpace, string, error) {
+func (s *PublicSpacesService) ListAutoPaging(ctx context.Context, query *PublicSpacesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -4398,7 +5951,7 @@ func (s *PublicSpacesService) ListAutoPaging(ctx context.Context, query *PublicS
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PublicSpacesListResponseSpace](raw, "spaces")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -4431,7 +5984,9 @@ func (s *PublicStatusService) Subscribe(ctx context.Context, orgID string, space
 
 // PublicStatusBoardQuery are the optional query parameters of PublicStatusService.Board.
 type PublicStatusBoardQuery struct {
-	Share *string
+	Share   *string
+	Preview *string
+	Locale  *string
 }
 
 func (p *PublicStatusBoardQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -4441,6 +5996,12 @@ func (p *PublicStatusBoardQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Share != nil {
 		v.Set("share", *p.Share)
+	}
+	if p.Preview != nil {
+		v.Set("preview", *p.Preview)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -4457,7 +6018,7 @@ func (s *PublicStatusService) Board(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
-// Badge get the badge svg in a space
+// Badge a status badge (SVG)
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/status/badge.svg
 func (s *PublicStatusService) Badge(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
@@ -4488,6 +6049,428 @@ func (s *PublicStatusService) RSS(ctx context.Context, orgID string, spaceID str
 		return nil, err
 	}
 	return out, nil
+}
+
+// Atom atom feed of the status
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/atom.xml
+func (s *PublicStatusService) Atom(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/atom.xml", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// JSONFeed jSON feed of the status
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/feed.json
+func (s *PublicStatusService) JSONFeed(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/feed.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MaintenanceIcs file of maintenance
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/maintenance.ics
+func (s *PublicStatusService) MaintenanceIcs(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/maintenance.ics", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PublicStatusAccessService holds the operations under client.Public.StatusAccess.
+type PublicStatusAccessService struct {
+	c *Client
+}
+
+// Facts whether a status page is gated
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/access
+func (s *PublicStatusAccessService) Facts(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusAccessFacts, error) {
+	var out StatusAccessFacts
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/access", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Check may this reader read a status page?
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/access/check
+func (s *PublicStatusAccessService) Check(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PublicStatusAccessCheckResponse, error) {
+	var out PublicStatusAccessCheckResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/access/check", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicStatusAlertsService holds the operations under client.Public.StatusAlerts.
+type PublicStatusAlertsService struct {
+	c *Client
+}
+
+// PublicStatusAlertsOptionsQuery are the optional query parameters of PublicStatusAlertsService.Options.
+type PublicStatusAlertsOptionsQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicStatusAlertsOptionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Options which alert channels a reader can subscribe with
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/alerts
+func (s *PublicStatusAlertsService) Options(ctx context.Context, orgID string, spaceID string, query *PublicStatusAlertsOptionsQuery, opts ...RequestOption) (*StatusReaderAlertOptions, error) {
+	v, opts := query.encode(opts)
+	var out StatusReaderAlertOptions
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OptionsAutoPaging walks every item of Options across all pages.
+func (s *PublicStatusAlertsService) OptionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicStatusAlertsOptionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// Start subscribe a Slack hook, webhook or phone to this status page
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/status/alerts
+func (s *PublicStatusAlertsService) Start(ctx context.Context, orgID string, spaceID string, body PublicStatusAlertsStartParams, opts ...RequestOption) (*PublicStatusAlertsStartResponse, error) {
+	var out PublicStatusAlertsStartResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Verify confirm a reader alert with the code it was sent
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/status/alerts/{alertId}/verify
+func (s *PublicStatusAlertsService) Verify(ctx context.Context, orgID string, spaceID string, alertID string, body PublicStatusAlertsVerifyParams, opts ...RequestOption) (*PublicStatusAlertsVerifyResponse, error) {
+	var out PublicStatusAlertsVerifyResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts/"+pathEscape(alertID)+"/verify", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Unsubscribe stop a reader alert, with the token every delivery carries
+//
+// POST /public/orgs/{orgId}/spaces/{spaceId}/status/alerts/{alertId}/unsubscribe
+func (s *PublicStatusAlertsService) Unsubscribe(ctx context.Context, orgID string, spaceID string, alertID string, body PublicStatusAlertsUnsubscribeParams, opts ...RequestOption) (*PublicStatusAlertsUnsubscribeResponse, error) {
+	var out PublicStatusAlertsUnsubscribeResponse
+	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts/"+pathEscape(alertID)+"/unsubscribe", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicStatusEmbedsService holds the operations under client.Public.StatusEmbeds.
+type PublicStatusEmbedsService struct {
+	c *Client
+}
+
+// Day one component's day, in hourly buckets
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/day.json
+func (s *PublicStatusEmbedsService) Day(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusDayHours, error) {
+	var out StatusDayHours
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/day.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Latency a status page's response times
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/latency
+func (s *PublicStatusEmbedsService) Latency(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusLatency, error) {
+	var out StatusLatency
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/latency", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// MetricSeries a status page's custom metric series
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/metrics
+func (s *PublicStatusEmbedsService) MetricSeries(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusMetricsAnswer, error) {
+	var out StatusMetricsAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// WidgetJSON what is happening on a status page right now
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/widget.json
+func (s *PublicStatusEmbedsService) WidgetJSON(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusWidgetAnswer, error) {
+	var out StatusWidgetAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/widget.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// WidgetJS get the widget JS in a space
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/widget.js
+func (s *PublicStatusEmbedsService) WidgetJS(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/widget.js", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PublicStatusHooksService holds the operations under client.Public.StatusHooks.
+type PublicStatusHooksService struct {
+	c *Client
+}
+
+// Receive receive a Datadog or PagerDuty alert for a status page
+//
+// POST /public/status-hooks/{token}
+func (s *PublicStatusHooksService) Receive(ctx context.Context, token string, body any, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "POST", "/public/status-hooks/"+pathEscape(token), nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PublicStatusIncidentsService holds the operations under client.Public.StatusIncidents.
+type PublicStatusIncidentsService struct {
+	c *Client
+}
+
+// Archive a status page's incident archive
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/incidents
+func (s *PublicStatusIncidentsService) Archive(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*IncidentArchivePage, error) {
+	var out IncidentArchivePage
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicStatusIncidentsOneQuery are the optional query parameters of PublicStatusIncidentsService.One.
+type PublicStatusIncidentsOneQuery struct {
+	Share  *string
+	Locale *string
+}
+
+func (p *PublicStatusIncidentsOneQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
+// One one incident on a status page
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}
+func (s *PublicStatusIncidentsService) One(ctx context.Context, orgID string, spaceID string, incidentID string, query *PublicStatusIncidentsOneQuery, opts ...RequestOption) (*PublicStatusIncidentsOneResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicStatusIncidentsOneResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID), v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicStatuspageService holds the operations under client.Public.Statuspage.
+type PublicStatuspageService struct {
+	c *Client
+}
+
+// Summary statuspage-compatible summary (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/summary.json
+func (s *PublicStatuspageService) Summary(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2Summary, error) {
+	var out V2Summary
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/summary.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Status statuspage-compatible overall status (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/status.json
+func (s *PublicStatuspageService) Status(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2StatusAnswer, error) {
+	var out V2StatusAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/status.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Components statuspage-compatible components and groups (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/components.json
+func (s *PublicStatuspageService) Components(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2ComponentsAnswer, error) {
+	var out V2ComponentsAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/components.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Incidents statuspage-compatible incidents (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/incidents.json
+func (s *PublicStatuspageService) Incidents(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2IncidentsAnswer, error) {
+	var out V2IncidentsAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/incidents.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Unresolved statuspage-compatible unresolved incidents (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/incidents/unresolved.json
+func (s *PublicStatuspageService) Unresolved(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2IncidentsAnswer, error) {
+	var out V2IncidentsAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/incidents/unresolved.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Maintenances statuspage-compatible scheduled maintenances (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/scheduled-maintenances.json
+func (s *PublicStatuspageService) Maintenances(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2MaintenancesAnswer, error) {
+	var out V2MaintenancesAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/scheduled-maintenances.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Upcoming statuspage-compatible upcoming maintenance (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/scheduled-maintenances/upcoming.json
+func (s *PublicStatuspageService) Upcoming(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2MaintenancesAnswer, error) {
+	var out V2MaintenancesAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/scheduled-maintenances/upcoming.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Active statuspage-compatible maintenance under way (API v2)
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/api/v2/scheduled-maintenances/active.json
+func (s *PublicStatuspageService) Active(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*V2MaintenancesAnswer, error) {
+	var out V2MaintenancesAnswer
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/api/v2/scheduled-maintenances/active.json", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublicStatusSiblingsService holds the operations under client.Public.StatusSiblings.
+type PublicStatusSiblingsService struct {
+	c *Client
+}
+
+// PublicStatusSiblingsSiblingsQuery are the optional query parameters of PublicStatusSiblingsService.Siblings.
+type PublicStatusSiblingsSiblingsQuery struct {
+	Share *string
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *PublicStatusSiblingsSiblingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Share != nil {
+		v.Set("share", *p.Share)
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Siblings a status page's sibling pages
+//
+// GET /public/orgs/{orgId}/spaces/{spaceId}/status/siblings
+func (s *PublicStatusSiblingsService) Siblings(ctx context.Context, orgID string, spaceID string, query *PublicStatusSiblingsSiblingsQuery, opts ...RequestOption) (*PublicStatusSiblingsSiblingsResponse, error) {
+	v, opts := query.encode(opts)
+	var out PublicStatusSiblingsSiblingsResponse
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/siblings", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SiblingsAutoPaging walks every item of Siblings across all pages.
+func (s *PublicStatusSiblingsService) SiblingsAutoPaging(ctx context.Context, orgID string, spaceID string, query *PublicStatusSiblingsSiblingsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/siblings", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
 }
 
 // PublicThemeComponentRegistryService holds the operations under client.Public.ThemeComponentRegistry.
@@ -4677,7 +6660,7 @@ func (p *PublicTranslationsMapQuery) encode(opts []RequestOption) (url.Values, [
 	return v, opts
 }
 
-// Map get the translation
+// Map get the translation (public reader i18n)
 //
 // GET /public/orgs/{orgId}/i18n/{locale}
 func (s *PublicTranslationsService) Map(ctx context.Context, orgID string, locale string, query *PublicTranslationsMapQuery, opts ...RequestOption) (*PublicTranslationsMapResponse, error) {

@@ -52,8 +52,8 @@ func (s *SpaceTemplatesService) List(ctx context.Context, orgID string, query *S
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpaceTemplatesService) ListAutoPaging(ctx context.Context, orgID string, query *SpaceTemplatesListQuery, opts ...RequestOption) *Iter[TemplateView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]TemplateView, string, error) {
+func (s *SpaceTemplatesService) ListAutoPaging(ctx context.Context, orgID string, query *SpaceTemplatesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +62,7 @@ func (s *SpaceTemplatesService) ListAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[TemplateView](raw, "templates")
+		return decodePage[any](raw, "")
 	})
 }
 

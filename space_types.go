@@ -48,8 +48,8 @@ func (s *SpaceTypesService) List(ctx context.Context, query *SpaceTypesListQuery
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpaceTypesService) ListAutoPaging(ctx context.Context, query *SpaceTypesListQuery, opts ...RequestOption) *Iter[SpaceTypeSpec] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SpaceTypeSpec, string, error) {
+func (s *SpaceTypesService) ListAutoPaging(ctx context.Context, query *SpaceTypesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *SpaceTypesService) ListAutoPaging(ctx context.Context, query *SpaceType
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SpaceTypeSpec](raw, "spaceTypes")
+		return decodePage[any](raw, "")
 	})
 }
 

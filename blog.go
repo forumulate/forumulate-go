@@ -51,8 +51,8 @@ func (s *BlogService) Tags(ctx context.Context, orgID string, spaceID string, qu
 }
 
 // TagsAutoPaging walks every item of Tags across all pages.
-func (s *BlogService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogTagsQuery, opts ...RequestOption) *Iter[BlogTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]BlogTagsResponseTag, string, error) {
+func (s *BlogService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogTagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -61,7 +61,7 @@ func (s *BlogService) TagsAutoPaging(ctx context.Context, orgID string, spaceID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[BlogTagsResponseTag](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -127,8 +127,8 @@ func (s *BlogService) Bookmarks(ctx context.Context, orgID string, spaceID strin
 }
 
 // BookmarksAutoPaging walks every item of Bookmarks across all pages.
-func (s *BlogService) BookmarksAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogBookmarksQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *BlogService) BookmarksAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogBookmarksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -137,7 +137,7 @@ func (s *BlogService) BookmarksAutoPaging(ctx context.Context, orgID string, spa
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "articles")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -218,8 +218,8 @@ func (s *BlogArticlesService) List(ctx context.Context, orgID string, spaceID st
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *BlogArticlesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogArticlesListQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *BlogArticlesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogArticlesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -228,7 +228,7 @@ func (s *BlogArticlesService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "articles")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -311,8 +311,8 @@ func (s *BlogArticlesService) SlugHistory(ctx context.Context, orgID string, spa
 }
 
 // SlugHistoryAutoPaging walks every item of SlugHistory across all pages.
-func (s *BlogArticlesService) SlugHistoryAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *BlogArticlesSlugHistoryQuery, opts ...RequestOption) *Iter[SlugHistoryEntry] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SlugHistoryEntry, string, error) {
+func (s *BlogArticlesService) SlugHistoryAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *BlogArticlesSlugHistoryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -321,7 +321,7 @@ func (s *BlogArticlesService) SlugHistoryAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SlugHistoryEntry](raw, "history")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -435,149 +435,12 @@ func (s *BlogArticlesService) Bookmark(ctx context.Context, orgID string, spaceI
 	return &out, nil
 }
 
-// Vote create the vote in a space (blog posts)
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/vote
-func (s *BlogArticlesService) Vote(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*BlogArticlesVoteResponse, error) {
-	var out BlogArticlesVoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/vote", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// React create the react in a space (blog posts)
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/react
-func (s *BlogArticlesService) React(ctx context.Context, orgID string, spaceID string, postID string, body BlogArticlesReactParams, opts ...RequestOption) (*BlogArticlesReactResponse, error) {
-	var out BlogArticlesReactResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/react", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// EditPost update the post (blog)
-//
-// PATCH /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}
-func (s *BlogArticlesService) EditPost(ctx context.Context, orgID string, spaceID string, postID string, body BlogArticlesEditPostParams, opts ...RequestOption) (*BlogArticlesEditPostResponse, error) {
-	var out BlogArticlesEditPostResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID), nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// DeletePost delete the post (blog)
-//
-// DELETE /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}
-func (s *BlogArticlesService) DeletePost(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*BlogArticlesDeletePostResponse, error) {
-	var out BlogArticlesDeletePostResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID), nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// BlogArticlesRevisionsQuery are the optional query parameters of BlogArticlesService.Revisions.
-type BlogArticlesRevisionsQuery struct {
-	// Rows per page.
-	Limit *int64
-	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
-	Cursor *string
-}
-
-func (p *BlogArticlesRevisionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
-	v := url.Values{}
-	if p == nil {
-		return v, opts
-	}
-	if p.Limit != nil {
-		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
-	}
-	if p.Cursor != nil {
-		v.Set("cursor", *p.Cursor)
-	}
-	return v, opts
-}
-
-// Revisions list revisions in a space (blog posts)
-//
-// GET /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/revisions
-func (s *BlogArticlesService) Revisions(ctx context.Context, orgID string, spaceID string, postID string, query *BlogArticlesRevisionsQuery, opts ...RequestOption) (*BlogArticlesRevisionsResponse, error) {
-	v, opts := query.encode(opts)
-	var out BlogArticlesRevisionsResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/revisions", v, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// RevisionsAutoPaging walks every item of Revisions across all pages.
-func (s *BlogArticlesService) RevisionsAutoPaging(ctx context.Context, orgID string, spaceID string, postID string, query *BlogArticlesRevisionsQuery, opts ...RequestOption) *Iter[PostRevisionMeta] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PostRevisionMeta, string, error) {
-		v, opts := query.encode(opts)
-		if cursor != "" {
-			v.Set("cursor", cursor)
-		}
-		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/revisions", v, nil, opts)
-		if err != nil {
-			return nil, "", err
-		}
-		return decodePage[PostRevisionMeta](raw, "revisions")
-	})
-}
-
-// RevisionDiff get the revision (blog)
-//
-// GET /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/revisions/{revision}
-func (s *BlogArticlesService) RevisionDiff(ctx context.Context, orgID string, spaceID string, postID string, revision string, opts ...RequestOption) (*BlogArticlesRevisionDiffResponse, error) {
-	var out BlogArticlesRevisionDiffResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/revisions/"+pathEscape(revision), nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// Flag flag the post (blog)
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/flag
-func (s *BlogArticlesService) Flag(ctx context.Context, orgID string, spaceID string, postID string, body BlogArticlesFlagParams, opts ...RequestOption) (*BlogArticlesFlagResponse, error) {
-	var out BlogArticlesFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/flag", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetPostStatus create the status in a space (blog posts)
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/status
-func (s *BlogArticlesService) SetPostStatus(ctx context.Context, orgID string, spaceID string, postID string, body BlogArticlesSetPostStatusParams, opts ...RequestOption) (*BlogArticlesSetPostStatusResponse, error) {
-	var out BlogArticlesSetPostStatusResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/status", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // RecoverArticle create the recover in a space (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/recover
 func (s *BlogArticlesService) RecoverArticle(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*BlogArticlesRecoverArticleResponse, error) {
 	var out BlogArticlesRecoverArticleResponse
 	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/recover", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// RecoverPost create the recover in a space (blog posts)
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/recover
-func (s *BlogArticlesService) RecoverPost(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*BlogArticlesRecoverPostResponse, error) {
-	var out BlogArticlesRecoverPostResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/recover", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -623,8 +486,8 @@ func (s *BlogModerationService) Flags(ctx context.Context, orgID string, spaceID
 }
 
 // FlagsAutoPaging walks every item of Flags across all pages.
-func (s *BlogModerationService) FlagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogModerationFlagsQuery, opts ...RequestOption) *Iter[FlagRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FlagRow, string, error) {
+func (s *BlogModerationService) FlagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogModerationFlagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -633,7 +496,7 @@ func (s *BlogModerationService) FlagsAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FlagRow](raw, "flags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -698,8 +561,8 @@ func (s *BlogNewsletterService) Subscribers(ctx context.Context, orgID string, s
 }
 
 // SubscribersAutoPaging walks every item of Subscribers across all pages.
-func (s *BlogNewsletterService) SubscribersAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogNewsletterSubscribersQuery, opts ...RequestOption) *Iter[SubscriberSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SubscriberSummary, string, error) {
+func (s *BlogNewsletterService) SubscribersAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogNewsletterSubscribersQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -708,7 +571,7 @@ func (s *BlogNewsletterService) SubscribersAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SubscriberSummary](raw, "subscribers")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -757,8 +620,8 @@ func (s *BlogNewsletterService) Broadcasts(ctx context.Context, orgID string, sp
 }
 
 // BroadcastsAutoPaging walks every item of Broadcasts across all pages.
-func (s *BlogNewsletterService) BroadcastsAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogNewsletterBroadcastsQuery, opts ...RequestOption) *Iter[BroadcastSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]BroadcastSummary, string, error) {
+func (s *BlogNewsletterService) BroadcastsAutoPaging(ctx context.Context, orgID string, spaceID string, query *BlogNewsletterBroadcastsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -767,7 +630,7 @@ func (s *BlogNewsletterService) BroadcastsAutoPaging(ctx context.Context, orgID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[BroadcastSummary](raw, "broadcasts")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -838,6 +701,6 @@ func (s *BlogNewsletterService) SubscriberTagsAutoPaging(ctx context.Context, or
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }

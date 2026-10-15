@@ -111,6 +111,28 @@ func (s *ThemesBundlesService) SiteDraft(ctx context.Context, orgID string, site
 	return &out, nil
 }
 
+// SetSiteDraft list draft theme in an organization (replace)
+//
+// PUT /orgs/{orgId}/sites/{siteId}/theme/draft
+func (s *ThemesBundlesService) SetSiteDraft(ctx context.Context, orgID string, siteID string, body ThemesBundlesSetSiteDraftParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PatchSiteDraft list draft theme in an organization (update)
+//
+// PATCH /orgs/{orgId}/sites/{siteId}/theme/draft
+func (s *ThemesBundlesService) PatchSiteDraft(ctx context.Context, orgID string, siteID string, body ThemesBundlesPatchSiteDraftParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DiscardSiteDraft list draft theme in an organization (delete)
 //
 // DELETE /orgs/{orgId}/sites/{siteId}/theme/draft
@@ -240,8 +262,8 @@ func (s *ThemesComponentMarketplaceService) Mine(ctx context.Context, orgID stri
 }
 
 // MineAutoPaging walks every item of Mine across all pages.
-func (s *ThemesComponentMarketplaceService) MineAutoPaging(ctx context.Context, orgID string, query *ThemesComponentMarketplaceMineQuery, opts ...RequestOption) *Iter[OwnComponentListing] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]OwnComponentListing, string, error) {
+func (s *ThemesComponentMarketplaceService) MineAutoPaging(ctx context.Context, orgID string, query *ThemesComponentMarketplaceMineQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -250,7 +272,7 @@ func (s *ThemesComponentMarketplaceService) MineAutoPaging(ctx context.Context, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[OwnComponentListing](raw, "listings")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -404,8 +426,8 @@ func (s *ThemesComponentsService) List(ctx context.Context, orgID string, query 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ThemesComponentsService) ListAutoPaging(ctx context.Context, orgID string, query *ThemesComponentsListQuery, opts ...RequestOption) *Iter[ComponentInstallItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ComponentInstallItem, string, error) {
+func (s *ThemesComponentsService) ListAutoPaging(ctx context.Context, orgID string, query *ThemesComponentsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -414,7 +436,7 @@ func (s *ThemesComponentsService) ListAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ComponentInstallItem](raw, "components")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -557,8 +579,8 @@ func (s *ThemesLibraryService) List(ctx context.Context, orgID string, query *Th
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ThemesLibraryService) ListAutoPaging(ctx context.Context, orgID string, query *ThemesLibraryListQuery, opts ...RequestOption) *Iter[ThemeLibraryItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ThemeLibraryItem, string, error) {
+func (s *ThemesLibraryService) ListAutoPaging(ctx context.Context, orgID string, query *ThemesLibraryListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -567,7 +589,7 @@ func (s *ThemesLibraryService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ThemeLibraryItem](raw, "themes")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -755,8 +777,8 @@ func (s *ThemesMarketplaceService) Mine(ctx context.Context, orgID string, query
 }
 
 // MineAutoPaging walks every item of Mine across all pages.
-func (s *ThemesMarketplaceService) MineAutoPaging(ctx context.Context, orgID string, query *ThemesMarketplaceMineQuery, opts ...RequestOption) *Iter[OwnThemeListing] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]OwnThemeListing, string, error) {
+func (s *ThemesMarketplaceService) MineAutoPaging(ctx context.Context, orgID string, query *ThemesMarketplaceMineQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -765,7 +787,7 @@ func (s *ThemesMarketplaceService) MineAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[OwnThemeListing](raw, "listings")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -837,8 +859,8 @@ func (s *ThemesMarketplaceService) BrowseRegistry(ctx context.Context, orgID str
 }
 
 // BrowseRegistryAutoPaging walks every item of BrowseRegistry across all pages.
-func (s *ThemesMarketplaceService) BrowseRegistryAutoPaging(ctx context.Context, orgID string, query *ThemesMarketplaceBrowseRegistryQuery, opts ...RequestOption) *Iter[RegistryTheme] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RegistryTheme, string, error) {
+func (s *ThemesMarketplaceService) BrowseRegistryAutoPaging(ctx context.Context, orgID string, query *ThemesMarketplaceBrowseRegistryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -847,7 +869,7 @@ func (s *ThemesMarketplaceService) BrowseRegistryAutoPaging(ctx context.Context,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RegistryTheme](raw, "themes")
+		return decodePage[any](raw, "")
 	})
 }
 

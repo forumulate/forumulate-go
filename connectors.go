@@ -50,8 +50,8 @@ func (s *ConnectorsService) List(ctx context.Context, orgID string, spaceID stri
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ConnectorsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ConnectorsListQuery, opts ...RequestOption) *Iter[ConnectorSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ConnectorSummary, string, error) {
+func (s *ConnectorsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ConnectorsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -60,7 +60,7 @@ func (s *ConnectorsService) ListAutoPaging(ctx context.Context, orgID string, sp
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ConnectorSummary](raw, "connectors")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -175,8 +175,8 @@ func (s *ConnectorsService) Activity(ctx context.Context, orgID string, spaceID 
 }
 
 // ActivityAutoPaging walks every item of Activity across all pages.
-func (s *ConnectorsService) ActivityAutoPaging(ctx context.Context, orgID string, spaceID string, connectorID string, query *ConnectorsActivityQuery, opts ...RequestOption) *Iter[ConnectorActivityEntry] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ConnectorActivityEntry, string, error) {
+func (s *ConnectorsService) ActivityAutoPaging(ctx context.Context, orgID string, spaceID string, connectorID string, query *ConnectorsActivityQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -185,7 +185,7 @@ func (s *ConnectorsService) ActivityAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ConnectorActivityEntry](raw, "activity")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -243,8 +243,8 @@ func (s *ConnectorsKbService) Chunks(ctx context.Context, query *ConnectorsKbChu
 }
 
 // ChunksAutoPaging walks every item of Chunks across all pages.
-func (s *ConnectorsKbService) ChunksAutoPaging(ctx context.Context, query *ConnectorsKbChunksQuery, opts ...RequestOption) *Iter[ConnectorChunkedItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ConnectorChunkedItem, string, error) {
+func (s *ConnectorsKbService) ChunksAutoPaging(ctx context.Context, query *ConnectorsKbChunksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -253,7 +253,7 @@ func (s *ConnectorsKbService) ChunksAutoPaging(ctx context.Context, query *Conne
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ConnectorChunkedItem](raw, "items")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -369,8 +369,8 @@ func (s *ConnectorsProvidersService) List(ctx context.Context, orgID string, que
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ConnectorsProvidersService) ListAutoPaging(ctx context.Context, orgID string, query *ConnectorsProvidersListQuery, opts ...RequestOption) *Iter[ChatProviderDef] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatProviderDef, string, error) {
+func (s *ConnectorsProvidersService) ListAutoPaging(ctx context.Context, orgID string, query *ConnectorsProvidersListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -379,6 +379,6 @@ func (s *ConnectorsProvidersService) ListAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatProviderDef](raw, "providers")
+		return decodePage[any](raw, "")
 	})
 }

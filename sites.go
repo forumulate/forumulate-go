@@ -48,8 +48,8 @@ func (s *SitesService) List(ctx context.Context, orgID string, query *SitesListQ
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SitesService) ListAutoPaging(ctx context.Context, orgID string, query *SitesListQuery, opts ...RequestOption) *Iter[SiteSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SiteSummary, string, error) {
+func (s *SitesService) ListAutoPaging(ctx context.Context, orgID string, query *SitesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *SitesService) ListAutoPaging(ctx context.Context, orgID string, query *
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SiteSummary](raw, "sites")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -84,15 +84,62 @@ func (s *SitesService) Get(ctx context.Context, orgID string, siteID string, opt
 	return &out, nil
 }
 
+// SitesReplaceQuery are the optional query parameters of SitesService.Replace.
+type SitesReplaceQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	DryRun *string
+}
+
+func (p *SitesReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Replace replace the site
+//
+// PUT /orgs/{orgId}/sites/{siteId}
+func (s *SitesService) Replace(ctx context.Context, orgID string, siteID string, body SitesReplaceParams, query *SitesReplaceQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID), v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SitesUpdateQuery are the optional query parameters of SitesService.Update.
+type SitesUpdateQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	DryRun *string
+}
+
+func (p *SitesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
 // Update update the site
 //
 // PATCH /orgs/{orgId}/sites/{siteId}
-func (s *SitesService) Update(ctx context.Context, orgID string, siteID string, body SitesUpdateParams, opts ...RequestOption) (*SitesUpdateResponse, error) {
-	var out SitesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID), nil, body, &out, opts); err != nil {
+func (s *SitesService) Update(ctx context.Context, orgID string, siteID string, body SitesUpdateParams, query *SitesUpdateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // Remove delete the site
@@ -152,8 +199,8 @@ func (s *SitesService) ListDomains(ctx context.Context, orgID string, siteID str
 }
 
 // ListDomainsAutoPaging walks every item of ListDomains across all pages.
-func (s *SitesService) ListDomainsAutoPaging(ctx context.Context, orgID string, siteID string, query *SitesListDomainsQuery, opts ...RequestOption) *Iter[DomainSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DomainSummary, string, error) {
+func (s *SitesService) ListDomainsAutoPaging(ctx context.Context, orgID string, siteID string, query *SitesListDomainsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -162,7 +209,7 @@ func (s *SitesService) ListDomainsAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DomainSummary](raw, "domains")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -175,6 +222,28 @@ func (s *SitesService) AddDomain(ctx context.Context, orgID string, siteID strin
 		return nil, err
 	}
 	return &out, nil
+}
+
+// DomainSetup get the setup in an organization
+//
+// GET /orgs/{orgId}/sites/{siteId}/domains/{domainId}/setup
+func (s *SitesService) DomainSetup(ctx context.Context, orgID string, siteID string, domainID string, opts ...RequestOption) (*DomainSetupDto, error) {
+	var out DomainSetupDto
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/setup", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetDomainWww replace the www in an organization
+//
+// PUT /orgs/{orgId}/sites/{siteId}/domains/{domainId}/www
+func (s *SitesService) SetDomainWww(ctx context.Context, orgID string, siteID string, domainID string, body SitesSetDomainWwwParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/www", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // AllocateSubdomain create the subdomain in an organization

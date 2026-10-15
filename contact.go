@@ -48,8 +48,8 @@ func (s *ContactService) Departments(ctx context.Context, orgID string, spaceID 
 }
 
 // DepartmentsAutoPaging walks every item of Departments across all pages.
-func (s *ContactService) DepartmentsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactDepartmentsQuery, opts ...RequestOption) *Iter[Department] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]Department, string, error) {
+func (s *ContactService) DepartmentsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactDepartmentsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *ContactService) DepartmentsAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[Department](raw, "departments")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -108,8 +108,8 @@ func (s *ContactService) FormFields(ctx context.Context, orgID string, spaceID s
 }
 
 // FormFieldsAutoPaging walks every item of FormFields across all pages.
-func (s *ContactService) FormFieldsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactFormFieldsQuery, opts ...RequestOption) *Iter[ContactField] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ContactField, string, error) {
+func (s *ContactService) FormFieldsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactFormFieldsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -118,7 +118,7 @@ func (s *ContactService) FormFieldsAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ContactField](raw, "fields")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -133,12 +133,46 @@ func (s *ContactService) SetFormFields(ctx context.Context, orgID string, spaceI
 	return &out, nil
 }
 
+// Form get the form in a space (contact)
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/contact/form
+func (s *ContactService) Form(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ContactFormResponse, error) {
+	var out ContactFormResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetForm update the form in a space (contact)
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/contact/form
+func (s *ContactService) SetForm(ctx context.Context, orgID string, spaceID string, body ContactSetFormParams, opts ...RequestOption) (*ContactSetFormResponse, error) {
+	var out ContactSetFormResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ExportCSV file of export (spaces contact)
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/contact/export.csv
+func (s *ContactService) ExportCSV(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/export.csv", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ContactListQuery are the optional query parameters of ContactService.List.
 type ContactListQuery struct {
 	// Submissions per page, once a version is stated.
 	Limit *int64
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Unhandled *string
+	Folder    *string
 	Cursor    *string
 }
 
@@ -152,6 +186,9 @@ func (p *ContactListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	}
 	if p.Unhandled != nil {
 		v.Set("unhandled", *p.Unhandled)
+	}
+	if p.Folder != nil {
+		v.Set("folder", *p.Folder)
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
@@ -172,8 +209,8 @@ func (s *ContactService) List(ctx context.Context, orgID string, spaceID string,
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ContactService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactListQuery, opts ...RequestOption) *Iter[SubmissionRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SubmissionRow, string, error) {
+func (s *ContactService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -182,7 +219,7 @@ func (s *ContactService) ListAutoPaging(ctx context.Context, orgID string, space
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SubmissionRow](raw, "submissions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -192,6 +229,17 @@ func (s *ContactService) ListAutoPaging(ctx context.Context, orgID string, space
 func (s *ContactService) SetHandled(ctx context.Context, orgID string, spaceID string, id string, body ContactSetHandledParams, opts ...RequestOption) (*ContactSetHandledResponse, error) {
 	var out ContactSetHandledResponse
 	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id), nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetStatus update the status in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/contact/{id}/status
+func (s *ContactService) SetStatus(ctx context.Context, orgID string, spaceID string, id string, body ContactSetStatusParams, opts ...RequestOption) (*ContactSetStatusResponse, error) {
+	var out ContactSetStatusResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/status", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -242,8 +290,8 @@ func (s *ContactService) Replies(ctx context.Context, orgID string, spaceID stri
 }
 
 // RepliesAutoPaging walks every item of Replies across all pages.
-func (s *ContactService) RepliesAutoPaging(ctx context.Context, orgID string, spaceID string, id string, query *ContactRepliesQuery, opts ...RequestOption) *Iter[InboxReply] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]InboxReply, string, error) {
+func (s *ContactService) RepliesAutoPaging(ctx context.Context, orgID string, spaceID string, id string, query *ContactRepliesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -252,7 +300,7 @@ func (s *ContactService) RepliesAutoPaging(ctx context.Context, orgID string, sp
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[InboxReply](raw, "replies")
+		return decodePage[any](raw, "")
 	})
 }
 

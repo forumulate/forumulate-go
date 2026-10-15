@@ -52,8 +52,8 @@ func (s *GroupsService) List(ctx context.Context, orgID string, query *GroupsLis
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *GroupsService) ListAutoPaging(ctx context.Context, orgID string, query *GroupsListQuery, opts ...RequestOption) *Iter[GroupSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]GroupSummary, string, error) {
+func (s *GroupsService) ListAutoPaging(ctx context.Context, orgID string, query *GroupsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +62,7 @@ func (s *GroupsService) ListAutoPaging(ctx context.Context, orgID string, query 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[GroupSummary](raw, "groups")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -189,8 +189,8 @@ func (s *GroupsService) Requests(ctx context.Context, orgID string, groupID stri
 }
 
 // RequestsAutoPaging walks every item of Requests across all pages.
-func (s *GroupsService) RequestsAutoPaging(ctx context.Context, orgID string, groupID string, query *GroupsRequestsQuery, opts ...RequestOption) *Iter[JoinRequestRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]JoinRequestRow, string, error) {
+func (s *GroupsService) RequestsAutoPaging(ctx context.Context, orgID string, groupID string, query *GroupsRequestsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -199,7 +199,7 @@ func (s *GroupsService) RequestsAutoPaging(ctx context.Context, orgID string, gr
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[JoinRequestRow](raw, "requests")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -262,8 +262,8 @@ func (s *GroupsGrantsService) List(ctx context.Context, orgID string, query *Gro
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *GroupsGrantsService) ListAutoPaging(ctx context.Context, orgID string, query *GroupsGrantsListQuery, opts ...RequestOption) *Iter[GroupGrantRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]GroupGrantRow, string, error) {
+func (s *GroupsGrantsService) ListAutoPaging(ctx context.Context, orgID string, query *GroupsGrantsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -272,7 +272,7 @@ func (s *GroupsGrantsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[GroupGrantRow](raw, "grants")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -414,8 +414,8 @@ func (s *GroupsMessagesService) Inbox(ctx context.Context, orgID string, groupID
 }
 
 // InboxAutoPaging walks every item of Inbox across all pages.
-func (s *GroupsMessagesService) InboxAutoPaging(ctx context.Context, orgID string, groupID string, query *GroupsMessagesInboxQuery, opts ...RequestOption) *Iter[ChannelSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChannelSummary, string, error) {
+func (s *GroupsMessagesService) InboxAutoPaging(ctx context.Context, orgID string, groupID string, query *GroupsMessagesInboxQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -424,6 +424,6 @@ func (s *GroupsMessagesService) InboxAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChannelSummary](raw, "threads")
+		return decodePage[any](raw, "")
 	})
 }

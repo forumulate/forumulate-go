@@ -51,8 +51,8 @@ func (s *ModerationService) Reviewables(ctx context.Context, orgID string, query
 }
 
 // ReviewablesAutoPaging walks every item of Reviewables across all pages.
-func (s *ModerationService) ReviewablesAutoPaging(ctx context.Context, orgID string, query *ModerationReviewablesQuery, opts ...RequestOption) *Iter[Reviewable] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]Reviewable, string, error) {
+func (s *ModerationService) ReviewablesAutoPaging(ctx context.Context, orgID string, query *ModerationReviewablesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -61,7 +61,7 @@ func (s *ModerationService) ReviewablesAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[Reviewable](raw, "reviewables")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -199,8 +199,8 @@ func (s *ModerationService) FlagHistory(ctx context.Context, orgID string, flagI
 }
 
 // FlagHistoryAutoPaging walks every item of FlagHistory across all pages.
-func (s *ModerationService) FlagHistoryAutoPaging(ctx context.Context, orgID string, flagID string, query *ModerationFlagHistoryQuery, opts ...RequestOption) *Iter[FlagHistoryEntry] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FlagHistoryEntry, string, error) {
+func (s *ModerationService) FlagHistoryAutoPaging(ctx context.Context, orgID string, flagID string, query *ModerationFlagHistoryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -209,7 +209,7 @@ func (s *ModerationService) FlagHistoryAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FlagHistoryEntry](raw, "history")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -248,8 +248,8 @@ func (s *ModerationService) ListWords(ctx context.Context, orgID string, query *
 }
 
 // ListWordsAutoPaging walks every item of ListWords across all pages.
-func (s *ModerationService) ListWordsAutoPaging(ctx context.Context, orgID string, query *ModerationListWordsQuery, opts ...RequestOption) *Iter[WatchedWordSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]WatchedWordSummary, string, error) {
+func (s *ModerationService) ListWordsAutoPaging(ctx context.Context, orgID string, query *ModerationListWordsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -258,7 +258,7 @@ func (s *ModerationService) ListWordsAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[WatchedWordSummary](raw, "words")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -319,8 +319,8 @@ func (s *ModerationService) ListSuspensions(ctx context.Context, orgID string, q
 }
 
 // ListSuspensionsAutoPaging walks every item of ListSuspensions across all pages.
-func (s *ModerationService) ListSuspensionsAutoPaging(ctx context.Context, orgID string, query *ModerationListSuspensionsQuery, opts ...RequestOption) *Iter[SuspensionSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SuspensionSummary, string, error) {
+func (s *ModerationService) ListSuspensionsAutoPaging(ctx context.Context, orgID string, query *ModerationListSuspensionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -329,7 +329,7 @@ func (s *ModerationService) ListSuspensionsAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SuspensionSummary](raw, "suspensions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -412,8 +412,8 @@ func (s *ModerationService) ListWatchedUsers(ctx context.Context, orgID string, 
 }
 
 // ListWatchedUsersAutoPaging walks every item of ListWatchedUsers across all pages.
-func (s *ModerationService) ListWatchedUsersAutoPaging(ctx context.Context, orgID string, query *ModerationListWatchedUsersQuery, opts ...RequestOption) *Iter[WatchedUserRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]WatchedUserRow, string, error) {
+func (s *ModerationService) ListWatchedUsersAutoPaging(ctx context.Context, orgID string, query *ModerationListWatchedUsersQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -422,7 +422,7 @@ func (s *ModerationService) ListWatchedUsersAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[WatchedUserRow](raw, "watchedUsers")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -482,8 +482,8 @@ func (s *ModerationService) Log(ctx context.Context, orgID string, query *Modera
 }
 
 // LogAutoPaging walks every item of Log across all pages.
-func (s *ModerationService) LogAutoPaging(ctx context.Context, orgID string, query *ModerationLogQuery, opts ...RequestOption) *Iter[StaffActionSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]StaffActionSummary, string, error) {
+func (s *ModerationService) LogAutoPaging(ctx context.Context, orgID string, query *ModerationLogQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -492,7 +492,7 @@ func (s *ModerationService) LogAutoPaging(ctx context.Context, orgID string, que
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[StaffActionSummary](raw, "actions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -536,8 +536,8 @@ func (s *ModerationContentRulesService) List(ctx context.Context, orgID string, 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ModerationContentRulesService) ListAutoPaging(ctx context.Context, orgID string, query *ModerationContentRulesListQuery, opts ...RequestOption) *Iter[ContentRule] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ContentRule, string, error) {
+func (s *ModerationContentRulesService) ListAutoPaging(ctx context.Context, orgID string, query *ModerationContentRulesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -546,7 +546,7 @@ func (s *ModerationContentRulesService) ListAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ContentRule](raw, "rules")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -638,8 +638,8 @@ func (s *ModerationFlagTypesService) Catalogue(ctx context.Context, orgID string
 }
 
 // CatalogueAutoPaging walks every item of Catalogue across all pages.
-func (s *ModerationFlagTypesService) CatalogueAutoPaging(ctx context.Context, orgID string, query *ModerationFlagTypesCatalogueQuery, opts ...RequestOption) *Iter[FlagTypeCatalogueEntry] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FlagTypeCatalogueEntry, string, error) {
+func (s *ModerationFlagTypesService) CatalogueAutoPaging(ctx context.Context, orgID string, query *ModerationFlagTypesCatalogueQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -648,7 +648,7 @@ func (s *ModerationFlagTypesService) CatalogueAutoPaging(ctx context.Context, or
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FlagTypeCatalogueEntry](raw, "catalogue")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -714,8 +714,8 @@ func (s *ModerationScreeningService) List(ctx context.Context, orgID string, que
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ModerationScreeningService) ListAutoPaging(ctx context.Context, orgID string, query *ModerationScreeningListQuery, opts ...RequestOption) *Iter[ScreenedRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ScreenedRow, string, error) {
+func (s *ModerationScreeningService) ListAutoPaging(ctx context.Context, orgID string, query *ModerationScreeningListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -724,7 +724,7 @@ func (s *ModerationScreeningService) ListAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ScreenedRow](raw, "screened")
+		return decodePage[any](raw, "")
 	})
 }
 

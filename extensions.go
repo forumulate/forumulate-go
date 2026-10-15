@@ -51,8 +51,8 @@ func (s *ExtensionsService) List(ctx context.Context, orgID string, query *Exten
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ExtensionsService) ListAutoPaging(ctx context.Context, orgID string, query *ExtensionsListQuery, opts ...RequestOption) *Iter[InstalledExtensionSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]InstalledExtensionSummary, string, error) {
+func (s *ExtensionsService) ListAutoPaging(ctx context.Context, orgID string, query *ExtensionsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -61,7 +61,7 @@ func (s *ExtensionsService) ListAutoPaging(ctx context.Context, orgID string, qu
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[InstalledExtensionSummary](raw, "installed")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -100,8 +100,8 @@ func (s *ExtensionsService) Available(ctx context.Context, orgID string, query *
 }
 
 // AvailableAutoPaging walks every item of Available across all pages.
-func (s *ExtensionsService) AvailableAutoPaging(ctx context.Context, orgID string, query *ExtensionsAvailableQuery, opts ...RequestOption) *Iter[AvailableExtension] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]AvailableExtension, string, error) {
+func (s *ExtensionsService) AvailableAutoPaging(ctx context.Context, orgID string, query *ExtensionsAvailableQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -110,7 +110,7 @@ func (s *ExtensionsService) AvailableAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[AvailableExtension](raw, "available")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -193,8 +193,8 @@ func (s *ExtensionsService) Deliveries(ctx context.Context, orgID string, id str
 }
 
 // DeliveriesAutoPaging walks every item of Deliveries across all pages.
-func (s *ExtensionsService) DeliveriesAutoPaging(ctx context.Context, orgID string, id string, query *ExtensionsDeliveriesQuery, opts ...RequestOption) *Iter[ExtensionDelivery] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ExtensionDelivery, string, error) {
+func (s *ExtensionsService) DeliveriesAutoPaging(ctx context.Context, orgID string, id string, query *ExtensionsDeliveriesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -203,7 +203,7 @@ func (s *ExtensionsService) DeliveriesAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ExtensionDelivery](raw, "deliveries")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -291,8 +291,8 @@ func (s *ExtensionsAPIService) SpacePages(ctx context.Context, spaceID string, q
 }
 
 // SpacePagesAutoPaging walks every item of SpacePages across all pages.
-func (s *ExtensionsAPIService) SpacePagesAutoPaging(ctx context.Context, spaceID string, query *ExtensionsAPISpacePagesQuery, opts ...RequestOption) *Iter[ExtPageSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ExtPageSummary, string, error) {
+func (s *ExtensionsAPIService) SpacePagesAutoPaging(ctx context.Context, spaceID string, query *ExtensionsAPISpacePagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -301,7 +301,7 @@ func (s *ExtensionsAPIService) SpacePagesAutoPaging(ctx context.Context, spaceID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ExtPageSummary](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -351,8 +351,8 @@ func (s *ExtensionsAPIService) Comments(ctx context.Context, pageID string, quer
 }
 
 // CommentsAutoPaging walks every item of Comments across all pages.
-func (s *ExtensionsAPIService) CommentsAutoPaging(ctx context.Context, pageID string, query *ExtensionsAPICommentsQuery, opts ...RequestOption) *Iter[ExtComment] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ExtComment, string, error) {
+func (s *ExtensionsAPIService) CommentsAutoPaging(ctx context.Context, pageID string, query *ExtensionsAPICommentsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -361,7 +361,7 @@ func (s *ExtensionsAPIService) CommentsAutoPaging(ctx context.Context, pageID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ExtComment](raw, "comments")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -411,8 +411,8 @@ func (s *ExtensionsAPIService) Members(ctx context.Context, query *ExtensionsAPI
 }
 
 // MembersAutoPaging walks every item of Members across all pages.
-func (s *ExtensionsAPIService) MembersAutoPaging(ctx context.Context, query *ExtensionsAPIMembersQuery, opts ...RequestOption) *Iter[ExtMember] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ExtMember, string, error) {
+func (s *ExtensionsAPIService) MembersAutoPaging(ctx context.Context, query *ExtensionsAPIMembersQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -421,7 +421,7 @@ func (s *ExtensionsAPIService) MembersAutoPaging(ctx context.Context, query *Ext
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ExtMember](raw, "members")
+		return decodePage[any](raw, "")
 	})
 }
 

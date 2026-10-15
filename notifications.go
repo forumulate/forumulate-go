@@ -169,8 +169,8 @@ func (s *NotificationsService) List(ctx context.Context, orgID string, query *No
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *NotificationsService) ListAutoPaging(ctx context.Context, orgID string, query *NotificationsListQuery, opts ...RequestOption) *Iter[NotificationSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]NotificationSummary, string, error) {
+func (s *NotificationsService) ListAutoPaging(ctx context.Context, orgID string, query *NotificationsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -179,7 +179,7 @@ func (s *NotificationsService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[NotificationSummary](raw, "notifications")
+		return decodePage[any](raw, "")
 	})
 }
 

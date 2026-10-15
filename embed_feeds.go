@@ -48,8 +48,8 @@ func (s *EmbedFeedsService) List(ctx context.Context, orgID string, query *Embed
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *EmbedFeedsService) ListAutoPaging(ctx context.Context, orgID string, query *EmbedFeedsListQuery, opts ...RequestOption) *Iter[EmbedFeedsListResponseFeed] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]EmbedFeedsListResponseFeed, string, error) {
+func (s *EmbedFeedsService) ListAutoPaging(ctx context.Context, orgID string, query *EmbedFeedsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *EmbedFeedsService) ListAutoPaging(ctx context.Context, orgID string, qu
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[EmbedFeedsListResponseFeed](raw, "feeds")
+		return decodePage[any](raw, "")
 	})
 }
 

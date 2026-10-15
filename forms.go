@@ -50,8 +50,8 @@ func (s *FormsService) List(ctx context.Context, orgID string, query *FormsListQ
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *FormsService) ListAutoPaging(ctx context.Context, orgID string, query *FormsListQuery, opts ...RequestOption) *Iter[FormSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FormSummary, string, error) {
+func (s *FormsService) ListAutoPaging(ctx context.Context, orgID string, query *FormsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -60,7 +60,7 @@ func (s *FormsService) ListAutoPaging(ctx context.Context, orgID string, query *
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FormSummary](raw, "forms")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -147,8 +147,8 @@ func (s *FormsService) ListSubmissions(ctx context.Context, orgID string, formID
 }
 
 // ListSubmissionsAutoPaging walks every item of ListSubmissions across all pages.
-func (s *FormsService) ListSubmissionsAutoPaging(ctx context.Context, orgID string, formID string, query *FormsListSubmissionsQuery, opts ...RequestOption) *Iter[FormSubmissionRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FormSubmissionRow, string, error) {
+func (s *FormsService) ListSubmissionsAutoPaging(ctx context.Context, orgID string, formID string, query *FormsListSubmissionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -157,7 +157,7 @@ func (s *FormsService) ListSubmissionsAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FormSubmissionRow](raw, "submissions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -238,8 +238,8 @@ func (s *FormsSubmissionsService) ByEmail(ctx context.Context, orgID string, que
 }
 
 // ByEmailAutoPaging walks every item of ByEmail across all pages.
-func (s *FormsSubmissionsService) ByEmailAutoPaging(ctx context.Context, orgID string, query *FormsSubmissionsByEmailQuery, opts ...RequestOption) *Iter[FormSubmissionRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FormSubmissionRow, string, error) {
+func (s *FormsSubmissionsService) ByEmailAutoPaging(ctx context.Context, orgID string, query *FormsSubmissionsByEmailQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -248,7 +248,7 @@ func (s *FormsSubmissionsService) ByEmailAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FormSubmissionRow](raw, "submissions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -320,8 +320,8 @@ func (s *FormsTemplatesService) List(ctx context.Context, orgID string, spaceID 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *FormsTemplatesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *FormsTemplatesListQuery, opts ...RequestOption) *Iter[FormsTemplatesListResponseFormTemplate] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FormsTemplatesListResponseFormTemplate, string, error) {
+func (s *FormsTemplatesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *FormsTemplatesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -330,7 +330,7 @@ func (s *FormsTemplatesService) ListAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FormsTemplatesListResponseFormTemplate](raw, "formTemplates")
+		return decodePage[any](raw, "")
 	})
 }
 

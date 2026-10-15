@@ -48,8 +48,8 @@ func (s *CustomEmojiService) List(ctx context.Context, orgID string, query *Cust
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *CustomEmojiService) ListAutoPaging(ctx context.Context, orgID string, query *CustomEmojiListQuery, opts ...RequestOption) *Iter[CustomEmoji] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CustomEmoji, string, error) {
+func (s *CustomEmojiService) ListAutoPaging(ctx context.Context, orgID string, query *CustomEmojiListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *CustomEmojiService) ListAutoPaging(ctx context.Context, orgID string, q
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CustomEmoji](raw, "emoji")
+		return decodePage[any](raw, "")
 	})
 }
 

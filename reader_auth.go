@@ -12,7 +12,7 @@ type ReaderAuthService struct {
 	c *Client
 }
 
-// GetOrg get the reader auth in an organization
+// GetOrg the organization's reader sign-in registry
 //
 // GET /orgs/{orgId}/reader-auth
 func (s *ReaderAuthService) GetOrg(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
@@ -23,7 +23,7 @@ func (s *ReaderAuthService) GetOrg(ctx context.Context, orgID string, opts ...Re
 	return out, nil
 }
 
-// SetOrg replace the reader auth in an organization
+// SetOrg replace the organization's reader sign-in registry
 //
 // PUT /orgs/{orgId}/reader-auth
 func (s *ReaderAuthService) SetOrg(ctx context.Context, orgID string, body ReaderAuthSetOrgParams, opts ...RequestOption) (any, error) {
@@ -32,6 +32,17 @@ func (s *ReaderAuthService) SetOrg(ctx context.Context, orgID string, body Reade
 		return nil, err
 	}
 	return out, nil
+}
+
+// PatchOrg change part of the organization's reader sign-in registry
+//
+// PATCH /orgs/{orgId}/reader-auth
+func (s *ReaderAuthService) PatchOrg(ctx context.Context, orgID string, body ReaderAuthPatchOrgParams, opts ...RequestOption) (*ReaderAuthPatchOrgResponse, error) {
+	var out ReaderAuthPatchOrgResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/reader-auth", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // ReaderAuthSetupOrgQuery are the optional query parameters of ReaderAuthService.SetupOrg.
@@ -107,6 +118,17 @@ func (s *ReaderAuthService) GetSpace(ctx context.Context, orgID string, spaceID 
 func (s *ReaderAuthService) SetSpace(ctx context.Context, orgID string, spaceID string, body ReaderAuthSetSpaceParams, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PatchSpace change part of one space's reader sign-in override
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/reader-auth
+func (s *ReaderAuthService) PatchSpace(ctx context.Context, orgID string, spaceID string, body ReaderAuthPatchSpaceParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

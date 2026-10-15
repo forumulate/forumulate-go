@@ -16,8 +16,14 @@ type EventsService struct {
 // EventsListQuery are the optional query parameters of EventsService.List.
 type EventsListQuery struct {
 	// Events per page, once a version is stated.
-	Limit  *int64
-	Scope  *string
+	Limit *int64
+	Scope *string
+	Tag   *string
+	Mode  *string
+	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
+	From *string
+	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
+	To     *string
 	Cursor *string
 }
 
@@ -31,6 +37,18 @@ func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Scope != nil {
 		v.Set("scope", *p.Scope)
+	}
+	if p.Tag != nil {
+		v.Set("tag", *p.Tag)
+	}
+	if p.Mode != nil {
+		v.Set("mode", *p.Mode)
+	}
+	if p.From != nil {
+		v.Set("from", *p.From)
+	}
+	if p.To != nil {
+		v.Set("to", *p.To)
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
@@ -51,8 +69,8 @@ func (s *EventsService) List(ctx context.Context, orgID string, spaceID string, 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *EventsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *EventsListQuery, opts ...RequestOption) *Iter[EventSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]EventSummary, string, error) {
+func (s *EventsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *EventsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -61,7 +79,7 @@ func (s *EventsService) ListAutoPaging(ctx context.Context, orgID string, spaceI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[EventSummary](raw, "events")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -110,8 +128,8 @@ func (s *EventsService) ListAllEvents(ctx context.Context, orgID string, spaceID
 }
 
 // ListAllEventsAutoPaging walks every item of ListAllEvents across all pages.
-func (s *EventsService) ListAllEventsAutoPaging(ctx context.Context, orgID string, spaceID string, query *EventsListAllEventsQuery, opts ...RequestOption) *Iter[EventSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]EventSummary, string, error) {
+func (s *EventsService) ListAllEventsAutoPaging(ctx context.Context, orgID string, spaceID string, query *EventsListAllEventsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -120,7 +138,7 @@ func (s *EventsService) ListAllEventsAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[EventSummary](raw, "events")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -157,11 +175,22 @@ func (s *EventsService) Remove(ctx context.Context, orgID string, spaceID string
 	return &out, nil
 }
 
+// Duplicate duplicate the event
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/duplicate
+func (s *EventsService) Duplicate(ctx context.Context, orgID string, spaceID string, handle string, body EventsDuplicateParams, opts ...RequestOption) (*EventsDuplicateResponse, error) {
+	var out EventsDuplicateResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/duplicate", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // MyRsvp get the rsvp in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/events/{handle}/rsvp
-func (s *EventsService) MyRsvp(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*EventsMyRsvpResponse, error) {
-	var out EventsMyRsvpResponse
+func (s *EventsService) MyRsvp(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*EventMyRsvp, error) {
+	var out EventMyRsvp
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/rsvp", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}

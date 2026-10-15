@@ -47,8 +47,8 @@ func (s *TokensService) List(ctx context.Context, query *TokensListQuery, opts .
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *TokensService) ListAutoPaging(ctx context.Context, query *TokensListQuery, opts ...RequestOption) *Iter[PATSummaryDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PATSummaryDto, string, error) {
+func (s *TokensService) ListAutoPaging(ctx context.Context, query *TokensListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -57,7 +57,7 @@ func (s *TokensService) ListAutoPaging(ctx context.Context, query *TokensListQue
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PATSummaryDto](raw, "pats")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -107,8 +107,8 @@ func (s *TokensService) Scopes(ctx context.Context, query *TokensScopesQuery, op
 }
 
 // ScopesAutoPaging walks every item of Scopes across all pages.
-func (s *TokensService) ScopesAutoPaging(ctx context.Context, query *TokensScopesQuery, opts ...RequestOption) *Iter[PATScopeDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PATScopeDto, string, error) {
+func (s *TokensService) ScopesAutoPaging(ctx context.Context, query *TokensScopesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -117,7 +117,7 @@ func (s *TokensService) ScopesAutoPaging(ctx context.Context, query *TokensScope
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PATScopeDto](raw, "scopes")
+		return decodePage[any](raw, "")
 	})
 }
 

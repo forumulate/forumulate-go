@@ -49,8 +49,8 @@ func (s *StatusService) ListChannels(ctx context.Context, orgID string, spaceID 
 }
 
 // ListChannelsAutoPaging walks every item of ListChannels across all pages.
-func (s *StatusService) ListChannelsAutoPaging(ctx context.Context, orgID string, spaceID string, query *StatusListChannelsQuery, opts ...RequestOption) *Iter[StatusChannel] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]StatusChannel, string, error) {
+func (s *StatusService) ListChannelsAutoPaging(ctx context.Context, orgID string, spaceID string, query *StatusListChannelsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -59,7 +59,7 @@ func (s *StatusService) ListChannelsAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[StatusChannel](raw, "channels")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -120,8 +120,8 @@ func (s *StatusService) MonitorsStatus(ctx context.Context, orgID string, spaceI
 }
 
 // MonitorsStatusAutoPaging walks every item of MonitorsStatus across all pages.
-func (s *StatusService) MonitorsStatusAutoPaging(ctx context.Context, orgID string, spaceID string, query *StatusMonitorsStatusQuery, opts ...RequestOption) *Iter[MonitorSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]MonitorSummary, string, error) {
+func (s *StatusService) MonitorsStatusAutoPaging(ctx context.Context, orgID string, spaceID string, query *StatusMonitorsStatusQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -130,7 +130,7 @@ func (s *StatusService) MonitorsStatusAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[MonitorSummary](raw, "monitors")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -170,8 +170,8 @@ func (s *StatusService) RemoveMonitor(ctx context.Context, orgID string, spaceID
 // GetSettings list settings in a space (status)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/status/settings
-func (s *StatusService) GetSettings(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusGetSettingsResponse, error) {
-	var out StatusGetSettingsResponse
+func (s *StatusService) GetSettings(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*StatusNotificationSettings, error) {
+	var out StatusNotificationSettings
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/settings", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -181,9 +181,69 @@ func (s *StatusService) GetSettings(ctx context.Context, orgID string, spaceID s
 // SetSettings replace settings in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/status/settings
-func (s *StatusService) SetSettings(ctx context.Context, orgID string, spaceID string, body StatusSetSettingsParams, opts ...RequestOption) (*StatusSetSettingsResponse, error) {
-	var out StatusSetSettingsResponse
+func (s *StatusService) SetSettings(ctx context.Context, orgID string, spaceID string, body StatusSetSettingsParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/settings", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// StatusGetGroupsQuery are the optional query parameters of StatusService.GetGroups.
+type StatusGetGroupsQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *StatusGetGroupsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// GetGroups list groups in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/status/groups
+func (s *StatusService) GetGroups(ctx context.Context, orgID string, spaceID string, query *StatusGetGroupsQuery, opts ...RequestOption) (*StatusGetGroupsResponse, error) {
+	v, opts := query.encode(opts)
+	var out StatusGetGroupsResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/groups", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetGroupsAutoPaging walks every item of GetGroups across all pages.
+func (s *StatusService) GetGroupsAutoPaging(ctx context.Context, orgID string, spaceID string, query *StatusGetGroupsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/groups", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// SetGroups replace groups in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/status/groups
+func (s *StatusService) SetGroups(ctx context.Context, orgID string, spaceID string, body StatusSetGroupsParams, opts ...RequestOption) (*StatusSetGroupsResponse, error) {
+	var out StatusSetGroupsResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/groups", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -238,12 +298,40 @@ type StatusMonitorsService struct {
 	c *Client
 }
 
+// StatusMonitorsPingGetQuery are the optional query parameters of StatusMonitorsService.PingGet.
+type StatusMonitorsPingGetQuery struct {
+	// What went wrong, in the job’s words (up to 500 characters).
+	Detail *string
+	// Name the state outright.
+	Status *string
+	// `false` = the job ran but part of it failed: the component reads partial_outage while pings keep arriving.
+	Ok *bool
+}
+
+func (p *StatusMonitorsPingGetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Detail != nil {
+		v.Set("detail", *p.Detail)
+	}
+	if p.Status != nil {
+		v.Set("status", *p.Status)
+	}
+	if p.Ok != nil {
+		v.Set("ok", strconv.FormatBool(*p.Ok))
+	}
+	return v, opts
+}
+
 // PingGet record a heartbeat for a monitor
 //
 // GET /status/ping/{monitorId}/{token}
-func (s *StatusMonitorsService) PingGet(ctx context.Context, monitorID string, token string, opts ...RequestOption) (*StatusMonitorsPingGetResponse, error) {
+func (s *StatusMonitorsService) PingGet(ctx context.Context, monitorID string, token string, query *StatusMonitorsPingGetQuery, opts ...RequestOption) (*StatusMonitorsPingGetResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusMonitorsPingGetResponse
-	if err := s.c.do(ctx, "GET", "/status/ping/"+pathEscape(monitorID)+"/"+pathEscape(token), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/status/ping/"+pathEscape(monitorID)+"/"+pathEscape(token), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -252,9 +340,9 @@ func (s *StatusMonitorsService) PingGet(ctx context.Context, monitorID string, t
 // PingPost record a heartbeat for a monitor, by POST
 //
 // POST /status/ping/{monitorId}/{token}
-func (s *StatusMonitorsService) PingPost(ctx context.Context, monitorID string, token string, opts ...RequestOption) (*StatusMonitorsPingPostResponse, error) {
+func (s *StatusMonitorsService) PingPost(ctx context.Context, monitorID string, token string, body StatusMonitorsPingPostParams, opts ...RequestOption) (*StatusMonitorsPingPostResponse, error) {
 	var out StatusMonitorsPingPostResponse
-	if err := s.c.do(ctx, "POST", "/status/ping/"+pathEscape(monitorID)+"/"+pathEscape(token), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/status/ping/"+pathEscape(monitorID)+"/"+pathEscape(token), nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

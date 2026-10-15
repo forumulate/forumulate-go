@@ -68,8 +68,8 @@ func (s *ItemsService) List(ctx context.Context, orgID string, spaceID string, q
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ItemsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ItemsListQuery, opts ...RequestOption) *Iter[ItemSummaryDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ItemSummaryDto, string, error) {
+func (s *ItemsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ItemsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -78,7 +78,7 @@ func (s *ItemsService) ListAutoPaging(ctx context.Context, orgID string, spaceID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ItemSummaryDto](raw, "items")
+		return decodePage[any](raw, "")
 	})
 }
 

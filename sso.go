@@ -75,8 +75,8 @@ func (s *SSOService) Providers(ctx context.Context, orgID string, query *SSOProv
 }
 
 // ProvidersAutoPaging walks every item of Providers across all pages.
-func (s *SSOService) ProvidersAutoPaging(ctx context.Context, orgID string, query *SSOProvidersQuery, opts ...RequestOption) *Iter[SSOProvidersResponseProvider] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SSOProvidersResponseProvider, string, error) {
+func (s *SSOService) ProvidersAutoPaging(ctx context.Context, orgID string, query *SSOProvidersQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -85,7 +85,7 @@ func (s *SSOService) ProvidersAutoPaging(ctx context.Context, orgID string, quer
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SSOProvidersResponseProvider](raw, "providers")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -129,8 +129,8 @@ func (s *SSOAtlasService) ListSSO(ctx context.Context, orgID string, query *SSOA
 }
 
 // ListSSOAutoPaging walks every item of ListSSO across all pages.
-func (s *SSOAtlasService) ListSSOAutoPaging(ctx context.Context, orgID string, query *SSOAtlasListSSOQuery, opts ...RequestOption) *Iter[SSOConnectionView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SSOConnectionView, string, error) {
+func (s *SSOAtlasService) ListSSOAutoPaging(ctx context.Context, orgID string, query *SSOAtlasListSSOQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -139,7 +139,7 @@ func (s *SSOAtlasService) ListSSOAutoPaging(ctx context.Context, orgID string, q
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SSOConnectionView](raw, "connections")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -266,8 +266,8 @@ func (s *SSOAtlasService) ListOauthClients(ctx context.Context, orgID string, qu
 }
 
 // ListOauthClientsAutoPaging walks every item of ListOauthClients across all pages.
-func (s *SSOAtlasService) ListOauthClientsAutoPaging(ctx context.Context, orgID string, query *SSOAtlasListOauthClientsQuery, opts ...RequestOption) *Iter[OauthClientView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]OauthClientView, string, error) {
+func (s *SSOAtlasService) ListOauthClientsAutoPaging(ctx context.Context, orgID string, query *SSOAtlasListOauthClientsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -276,7 +276,7 @@ func (s *SSOAtlasService) ListOauthClientsAutoPaging(ctx context.Context, orgID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[OauthClientView](raw, "clients")
+		return decodePage[any](raw, "")
 	})
 }
 

@@ -52,8 +52,8 @@ func (s *RoadmapService) Board(ctx context.Context, orgID string, spaceID string
 }
 
 // BoardAutoPaging walks every item of Board across all pages.
-func (s *RoadmapService) BoardAutoPaging(ctx context.Context, orgID string, spaceID string, query *RoadmapBoardQuery, opts ...RequestOption) *Iter[RoadmapBoardResponseLane] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RoadmapBoardResponseLane, string, error) {
+func (s *RoadmapService) BoardAutoPaging(ctx context.Context, orgID string, spaceID string, query *RoadmapBoardQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +62,7 @@ func (s *RoadmapService) BoardAutoPaging(ctx context.Context, orgID string, spac
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RoadmapBoardResponseLane](raw, "lanes")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -116,6 +116,77 @@ func (s *RoadmapService) Vote(ctx context.Context, orgID string, spaceID string,
 func (s *RoadmapService) Comment(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapCommentParams, opts ...RequestOption) (*RoadmapCommentResponse, error) {
 	var out RoadmapCommentResponse
 	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/comments", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// RoadmapProxyVotesQuery are the optional query parameters of RoadmapService.ProxyVotes.
+type RoadmapProxyVotesQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *RoadmapProxyVotesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// ProxyVotes list proxy votes in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/proxy-votes
+func (s *RoadmapService) ProxyVotes(ctx context.Context, orgID string, spaceID string, topicID string, query *RoadmapProxyVotesQuery, opts ...RequestOption) (*RoadmapProxyVotesResponse, error) {
+	v, opts := query.encode(opts)
+	var out RoadmapProxyVotesResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ProxyVotesAutoPaging walks every item of ProxyVotes across all pages.
+func (s *RoadmapService) ProxyVotesAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *RoadmapProxyVotesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// RecordProxyVote create a proxy vote in a space
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/proxy-votes
+func (s *RoadmapService) RecordProxyVote(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapRecordProxyVoteParams, opts ...RequestOption) (*RoadmapRecordProxyVoteResponse, error) {
+	var out RoadmapRecordProxyVoteResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// RemoveProxyVote delete the proxy vote
+//
+// DELETE /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/proxy-votes/{voteId}
+func (s *RoadmapService) RemoveProxyVote(ctx context.Context, orgID string, spaceID string, topicID string, voteID string, opts ...RequestOption) (*RoadmapRemoveProxyVoteResponse, error) {
+	var out RoadmapRemoveProxyVoteResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes/"+pathEscape(voteID), nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

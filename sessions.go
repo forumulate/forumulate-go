@@ -48,8 +48,8 @@ func (s *SessionsService) List(ctx context.Context, query *SessionsListQuery, op
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SessionsService) ListAutoPaging(ctx context.Context, query *SessionsListQuery, opts ...RequestOption) *Iter[ActiveSession] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ActiveSession, string, error) {
+func (s *SessionsService) ListAutoPaging(ctx context.Context, query *SessionsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,11 +58,11 @@ func (s *SessionsService) ListAutoPaging(ctx context.Context, query *SessionsLis
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ActiveSession](raw, "sessions")
+		return decodePage[any](raw, "")
 	})
 }
 
-// Revoke delete the session
+// Revoke delete the session (auth)
 //
 // DELETE /auth/sessions/{id}
 func (s *SessionsService) Revoke(ctx context.Context, id string, opts ...RequestOption) (*SessionsRevokeResponse, error) {

@@ -48,8 +48,8 @@ func (s *ServiceAccountsService) List(ctx context.Context, orgID string, query *
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ServiceAccountsService) ListAutoPaging(ctx context.Context, orgID string, query *ServiceAccountsListQuery, opts ...RequestOption) *Iter[ServiceAccountSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ServiceAccountSummary, string, error) {
+func (s *ServiceAccountsService) ListAutoPaging(ctx context.Context, orgID string, query *ServiceAccountsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *ServiceAccountsService) ListAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ServiceAccountSummary](raw, "accounts")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -130,8 +130,8 @@ func (s *ServiceAccountsService) Tokens(ctx context.Context, orgID string, id st
 }
 
 // TokensAutoPaging walks every item of Tokens across all pages.
-func (s *ServiceAccountsService) TokensAutoPaging(ctx context.Context, orgID string, id string, query *ServiceAccountsTokensQuery, opts ...RequestOption) *Iter[PATSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PATSummary, string, error) {
+func (s *ServiceAccountsService) TokensAutoPaging(ctx context.Context, orgID string, id string, query *ServiceAccountsTokensQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -140,7 +140,7 @@ func (s *ServiceAccountsService) TokensAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PATSummary](raw, "tokens")
+		return decodePage[any](raw, "")
 	})
 }
 

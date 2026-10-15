@@ -52,8 +52,8 @@ func (s *ChatService) Channels(ctx context.Context, orgID string, query *ChatCha
 }
 
 // ChannelsAutoPaging walks every item of Channels across all pages.
-func (s *ChatService) ChannelsAutoPaging(ctx context.Context, orgID string, query *ChatChannelsQuery, opts ...RequestOption) *Iter[ChannelSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChannelSummary, string, error) {
+func (s *ChatService) ChannelsAutoPaging(ctx context.Context, orgID string, query *ChatChannelsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +62,7 @@ func (s *ChatService) ChannelsAutoPaging(ctx context.Context, orgID string, quer
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChannelSummary](raw, "channels")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -209,8 +209,8 @@ func (s *ChatService) ListMessages(ctx context.Context, orgID string, channelID 
 }
 
 // ListMessagesAutoPaging walks every item of ListMessages across all pages.
-func (s *ChatService) ListMessagesAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatListMessagesQuery, opts ...RequestOption) *Iter[ChatMessageSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatMessageSummary, string, error) {
+func (s *ChatService) ListMessagesAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatListMessagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -219,7 +219,7 @@ func (s *ChatService) ListMessagesAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatMessageSummary](raw, "messages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -280,8 +280,8 @@ func (s *ChatService) ListIncomingWebhooks(ctx context.Context, orgID string, ch
 }
 
 // ListIncomingWebhooksAutoPaging walks every item of ListIncomingWebhooks across all pages.
-func (s *ChatService) ListIncomingWebhooksAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatListIncomingWebhooksQuery, opts ...RequestOption) *Iter[IncomingWebhookSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]IncomingWebhookSummary, string, error) {
+func (s *ChatService) ListIncomingWebhooksAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatListIncomingWebhooksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -290,7 +290,7 @@ func (s *ChatService) ListIncomingWebhooksAutoPaging(ctx context.Context, orgID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[IncomingWebhookSummary](raw, "webhooks")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -351,8 +351,8 @@ func (s *ChatService) Receipts(ctx context.Context, orgID string, channelID stri
 }
 
 // ReceiptsAutoPaging walks every item of Receipts across all pages.
-func (s *ChatService) ReceiptsAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatReceiptsQuery, opts ...RequestOption) *Iter[ReadReceipt] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ReadReceipt, string, error) {
+func (s *ChatService) ReceiptsAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatReceiptsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -361,7 +361,7 @@ func (s *ChatService) ReceiptsAutoPaging(ctx context.Context, orgID string, chan
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ReadReceipt](raw, "receipts")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -400,8 +400,8 @@ func (s *ChatService) Pins(ctx context.Context, orgID string, channelID string, 
 }
 
 // PinsAutoPaging walks every item of Pins across all pages.
-func (s *ChatService) PinsAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatPinsQuery, opts ...RequestOption) *Iter[ChatMessageSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatMessageSummary, string, error) {
+func (s *ChatService) PinsAutoPaging(ctx context.Context, orgID string, channelID string, query *ChatPinsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -410,7 +410,7 @@ func (s *ChatService) PinsAutoPaging(ctx context.Context, orgID string, channelI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatMessageSummary](raw, "messages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -549,8 +549,8 @@ func (s *ChatService) Online(ctx context.Context, orgID string, query *ChatOnlin
 }
 
 // OnlineAutoPaging walks every item of Online across all pages.
-func (s *ChatService) OnlineAutoPaging(ctx context.Context, orgID string, query *ChatOnlineQuery, opts ...RequestOption) *Iter[ChatOnlineResponseOnlineItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatOnlineResponseOnlineItem, string, error) {
+func (s *ChatService) OnlineAutoPaging(ctx context.Context, orgID string, query *ChatOnlineQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -559,7 +559,7 @@ func (s *ChatService) OnlineAutoPaging(ctx context.Context, orgID string, query 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatOnlineResponseOnlineItem](raw, "online")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -652,8 +652,8 @@ func (s *ChatMessagesService) Thread(ctx context.Context, orgID string, messageI
 }
 
 // ThreadAutoPaging walks every item of Thread across all pages.
-func (s *ChatMessagesService) ThreadAutoPaging(ctx context.Context, orgID string, messageID string, query *ChatMessagesThreadQuery, opts ...RequestOption) *Iter[ChatMessageSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatMessageSummary, string, error) {
+func (s *ChatMessagesService) ThreadAutoPaging(ctx context.Context, orgID string, messageID string, query *ChatMessagesThreadQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -662,7 +662,7 @@ func (s *ChatMessagesService) ThreadAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatMessageSummary](raw, "messages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -822,8 +822,8 @@ func (s *ChatMessagesService) ListBookmarks(ctx context.Context, orgID string, q
 }
 
 // ListBookmarksAutoPaging walks every item of ListBookmarks across all pages.
-func (s *ChatMessagesService) ListBookmarksAutoPaging(ctx context.Context, orgID string, query *ChatMessagesListBookmarksQuery, opts ...RequestOption) *Iter[ChatBookmarkSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatBookmarkSummary, string, error) {
+func (s *ChatMessagesService) ListBookmarksAutoPaging(ctx context.Context, orgID string, query *ChatMessagesListBookmarksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -832,7 +832,7 @@ func (s *ChatMessagesService) ListBookmarksAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatBookmarkSummary](raw, "bookmarks")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -887,8 +887,8 @@ func (s *ChatProvidersService) List(ctx context.Context, orgID string, query *Ch
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ChatProvidersService) ListAutoPaging(ctx context.Context, orgID string, query *ChatProvidersListQuery, opts ...RequestOption) *Iter[ChatProviderDef] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChatProviderDef, string, error) {
+func (s *ChatProvidersService) ListAutoPaging(ctx context.Context, orgID string, query *ChatProvidersListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -897,7 +897,7 @@ func (s *ChatProvidersService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChatProviderDef](raw, "providers")
+		return decodePage[any](raw, "")
 	})
 }
 

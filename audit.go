@@ -71,8 +71,8 @@ func (s *AuditService) List(ctx context.Context, orgID string, query *AuditListQ
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *AuditService) ListAutoPaging(ctx context.Context, orgID string, query *AuditListQuery, opts ...RequestOption) *Iter[AuditRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]AuditRow, string, error) {
+func (s *AuditService) ListAutoPaging(ctx context.Context, orgID string, query *AuditListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -81,7 +81,7 @@ func (s *AuditService) ListAutoPaging(ctx context.Context, orgID string, query *
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[AuditRow](raw, "items")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -121,7 +121,7 @@ func (p *AuditExportCSVQuery) encode(opts []RequestOption) (url.Values, []Reques
 	return v, opts
 }
 
-// ExportCSV file of export
+// ExportCSV file of export (audit)
 //
 // GET /orgs/{orgId}/audit/export.csv
 func (s *AuditService) ExportCSV(ctx context.Context, orgID string, query *AuditExportCSVQuery, opts ...RequestOption) (any, error) {
@@ -178,6 +178,6 @@ func (s *AuditService) ActionsAutoPaging(ctx context.Context, orgID string, quer
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "actions")
+		return decodePage[any](raw, "")
 	})
 }

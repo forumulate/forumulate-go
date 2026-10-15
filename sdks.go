@@ -48,8 +48,8 @@ func (s *SdksService) ListRegistries(ctx context.Context, orgID string, query *S
 }
 
 // ListRegistriesAutoPaging walks every item of ListRegistries across all pages.
-func (s *SdksService) ListRegistriesAutoPaging(ctx context.Context, orgID string, query *SdksListRegistriesQuery, opts ...RequestOption) *Iter[RegistryTokenStatus] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RegistryTokenStatus, string, error) {
+func (s *SdksService) ListRegistriesAutoPaging(ctx context.Context, orgID string, query *SdksListRegistriesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *SdksService) ListRegistriesAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RegistryTokenStatus](raw, "registries")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -151,7 +151,7 @@ func (s *SdksService) ListPackagesAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "packages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -211,6 +211,6 @@ func (s *SdksService) ListPublishesAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "publishes")
+		return decodePage[any](raw, "")
 	})
 }

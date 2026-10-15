@@ -62,8 +62,8 @@ func (s *SpacesService) List(ctx context.Context, orgID string, query *SpacesLis
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpacesService) ListAutoPaging(ctx context.Context, orgID string, query *SpacesListQuery, opts ...RequestOption) *Iter[SpaceSummaryDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SpaceSummaryDto, string, error) {
+func (s *SpacesService) ListAutoPaging(ctx context.Context, orgID string, query *SpacesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -72,7 +72,7 @@ func (s *SpacesService) ListAutoPaging(ctx context.Context, orgID string, query 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SpaceSummaryDto](raw, "spaces")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -133,8 +133,8 @@ func (s *SpacesService) Overview(ctx context.Context, orgID string, query *Space
 }
 
 // OverviewAutoPaging walks every item of Overview across all pages.
-func (s *SpacesService) OverviewAutoPaging(ctx context.Context, orgID string, query *SpacesOverviewQuery, opts ...RequestOption) *Iter[SpaceOverview] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SpaceOverview, string, error) {
+func (s *SpacesService) OverviewAutoPaging(ctx context.Context, orgID string, query *SpacesOverviewQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -143,7 +143,7 @@ func (s *SpacesService) OverviewAutoPaging(ctx context.Context, orgID string, qu
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SpaceOverview](raw, "overview")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -247,7 +247,7 @@ func (s *SpacesService) SlugHistoryAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "slugs")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -373,8 +373,8 @@ func (s *SpacesAssetsService) List(ctx context.Context, orgID string, spaceID st
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpacesAssetsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesAssetsListQuery, opts ...RequestOption) *Iter[UploadedAsset] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]UploadedAsset, string, error) {
+func (s *SpacesAssetsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesAssetsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -383,7 +383,7 @@ func (s *SpacesAssetsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[UploadedAsset](raw, "assets")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -454,8 +454,8 @@ func (s *SpacesAssetsService) Catalog(ctx context.Context, orgID string, query *
 }
 
 // CatalogAutoPaging walks every item of Catalog across all pages.
-func (s *SpacesAssetsService) CatalogAutoPaging(ctx context.Context, orgID string, query *SpacesAssetsCatalogQuery, opts ...RequestOption) *Iter[CatalogedAsset] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CatalogedAsset, string, error) {
+func (s *SpacesAssetsService) CatalogAutoPaging(ctx context.Context, orgID string, query *SpacesAssetsCatalogQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -464,7 +464,7 @@ func (s *SpacesAssetsService) CatalogAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CatalogedAsset](raw, "assets")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -551,8 +551,8 @@ func (s *SpacesDomainsService) List(ctx context.Context, orgID string, spaceID s
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpacesDomainsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesDomainsListQuery, opts ...RequestOption) *Iter[DomainSummaryDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DomainSummaryDto, string, error) {
+func (s *SpacesDomainsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesDomainsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -561,7 +561,7 @@ func (s *SpacesDomainsService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DomainSummaryDto](raw, "domains")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -653,6 +653,17 @@ func (s *SpacesDomainsService) Setup(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// SetWww replace the www in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/www
+func (s *SpacesDomainsService) SetWww(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetWwwParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/www", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SetIPAllowList replace the IP allow list in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/ip-allow-list
@@ -683,8 +694,8 @@ type SpacesHubIntrosService struct {
 // Get get the intro in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/hubs/{kind}/{key}/intro
-func (s *SpacesHubIntrosService) Get(ctx context.Context, orgID string, spaceID string, kind string, key string, opts ...RequestOption) (*SpacesHubIntrosGetResponse, error) {
-	var out SpacesHubIntrosGetResponse
+func (s *SpacesHubIntrosService) Get(ctx context.Context, orgID string, spaceID string, kind string, key string, opts ...RequestOption) (*HubIntro, error) {
+	var out HubIntro
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/hubs/"+pathEscape(kind)+"/"+pathEscape(key)+"/intro", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -694,12 +705,12 @@ func (s *SpacesHubIntrosService) Get(ctx context.Context, orgID string, spaceID 
 // Set replace the intro in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/hubs/{kind}/{key}/intro
-func (s *SpacesHubIntrosService) Set(ctx context.Context, orgID string, spaceID string, kind string, key string, body SpacesHubIntrosSetParams, opts ...RequestOption) (*SpacesHubIntrosSetResponse, error) {
-	var out SpacesHubIntrosSetResponse
+func (s *SpacesHubIntrosService) Set(ctx context.Context, orgID string, spaceID string, kind string, key string, body SpacesHubIntrosSetParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/hubs/"+pathEscape(kind)+"/"+pathEscape(key)+"/intro", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // RenameSeries update the series
@@ -857,8 +868,8 @@ func (s *SpacesSettingsService) GetReaderThemes(ctx context.Context, orgID strin
 }
 
 // GetReaderThemesAutoPaging walks every item of GetReaderThemes across all pages.
-func (s *SpacesSettingsService) GetReaderThemesAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetReaderThemesQuery, opts ...RequestOption) *Iter[ReaderThemeOption] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ReaderThemeOption, string, error) {
+func (s *SpacesSettingsService) GetReaderThemesAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetReaderThemesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -867,7 +878,7 @@ func (s *SpacesSettingsService) GetReaderThemesAutoPaging(ctx context.Context, o
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ReaderThemeOption](raw, "themes")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -928,8 +939,8 @@ func (s *SpacesSettingsService) GetRedirects(ctx context.Context, orgID string, 
 }
 
 // GetRedirectsAutoPaging walks every item of GetRedirects across all pages.
-func (s *SpacesSettingsService) GetRedirectsAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetRedirectsQuery, opts ...RequestOption) *Iter[RedirectRule] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RedirectRule, string, error) {
+func (s *SpacesSettingsService) GetRedirectsAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetRedirectsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -938,7 +949,7 @@ func (s *SpacesSettingsService) GetRedirectsAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RedirectRule](raw, "redirects")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1054,8 +1065,8 @@ func (s *SpacesSettingsService) GetGlossary(ctx context.Context, orgID string, s
 }
 
 // GetGlossaryAutoPaging walks every item of GetGlossary across all pages.
-func (s *SpacesSettingsService) GetGlossaryAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetGlossaryQuery, opts ...RequestOption) *Iter[SpacesSettingsGetGlossaryResponseGlossaryItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SpacesSettingsGetGlossaryResponseGlossaryItem, string, error) {
+func (s *SpacesSettingsService) GetGlossaryAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetGlossaryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1064,7 +1075,7 @@ func (s *SpacesSettingsService) GetGlossaryAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SpacesSettingsGetGlossaryResponseGlossaryItem](raw, "glossary")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1082,8 +1093,8 @@ func (s *SpacesSettingsService) SetGlossary(ctx context.Context, orgID string, s
 // GetRoadmapSettings list roadmap settings in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/roadmap-settings
-func (s *SpacesSettingsService) GetRoadmapSettings(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesSettingsGetRoadmapSettingsResponse, error) {
-	var out SpacesSettingsGetRoadmapSettingsResponse
+func (s *SpacesSettingsService) GetRoadmapSettings(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*RoadmapSettingsView, error) {
+	var out RoadmapSettingsView
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap-settings", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -1093,23 +1104,23 @@ func (s *SpacesSettingsService) GetRoadmapSettings(ctx context.Context, orgID st
 // SetRoadmapSettings replace roadmap settings in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/roadmap-settings
-func (s *SpacesSettingsService) SetRoadmapSettings(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetRoadmapSettingsParams, opts ...RequestOption) (*SpacesSettingsSetRoadmapSettingsResponse, error) {
-	var out SpacesSettingsSetRoadmapSettingsResponse
+func (s *SpacesSettingsService) SetRoadmapSettings(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetRoadmapSettingsParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap-settings", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // RenameRoadmapLane update the lane
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/roadmap-settings/lanes/{laneKey}
-func (s *SpacesSettingsService) RenameRoadmapLane(ctx context.Context, orgID string, spaceID string, laneKey string, body SpacesSettingsRenameRoadmapLaneParams, opts ...RequestOption) (*SpacesSettingsRenameRoadmapLaneResponse, error) {
-	var out SpacesSettingsRenameRoadmapLaneResponse
+func (s *SpacesSettingsService) RenameRoadmapLane(ctx context.Context, orgID string, spaceID string, laneKey string, body SpacesSettingsRenameRoadmapLaneParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap-settings/lanes/"+pathEscape(laneKey), nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // GetHomePage get the home page in a space
@@ -1383,8 +1394,8 @@ func (s *SpacesShareLinksService) List(ctx context.Context, orgID string, spaceI
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpacesShareLinksService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesShareLinksListQuery, opts ...RequestOption) *Iter[ShareLinkSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ShareLinkSummary, string, error) {
+func (s *SpacesShareLinksService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesShareLinksListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1393,7 +1404,7 @@ func (s *SpacesShareLinksService) ListAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ShareLinkSummary](raw, "links")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1470,8 +1481,8 @@ func (s *SpacesSnapshotsService) List(ctx context.Context, orgID string, spaceID
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *SpacesSnapshotsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSnapshotsListQuery, opts ...RequestOption) *Iter[SnapshotSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SnapshotSummary, string, error) {
+func (s *SpacesSnapshotsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *SpacesSnapshotsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1480,7 +1491,7 @@ func (s *SpacesSnapshotsService) ListAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SnapshotSummary](raw, "snapshots")
+		return decodePage[any](raw, "")
 	})
 }
 

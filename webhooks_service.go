@@ -58,8 +58,8 @@ func (s *WebhooksService) List(ctx context.Context, orgID string, query *Webhook
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *WebhooksService) ListAutoPaging(ctx context.Context, orgID string, query *WebhooksListQuery, opts ...RequestOption) *Iter[WebhookSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]WebhookSummary, string, error) {
+func (s *WebhooksService) ListAutoPaging(ctx context.Context, orgID string, query *WebhooksListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -68,7 +68,7 @@ func (s *WebhooksService) ListAutoPaging(ctx context.Context, orgID string, quer
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[WebhookSummary](raw, "webhooks")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -140,8 +140,8 @@ func (s *WebhooksService) Deliveries(ctx context.Context, orgID string, webhookI
 }
 
 // DeliveriesAutoPaging walks every item of Deliveries across all pages.
-func (s *WebhooksService) DeliveriesAutoPaging(ctx context.Context, orgID string, webhookID string, query *WebhooksDeliveriesQuery, opts ...RequestOption) *Iter[WebhooksDeliveriesResponseDelivery] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]WebhooksDeliveriesResponseDelivery, string, error) {
+func (s *WebhooksService) DeliveriesAutoPaging(ctx context.Context, orgID string, webhookID string, query *WebhooksDeliveriesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -150,7 +150,7 @@ func (s *WebhooksService) DeliveriesAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[WebhooksDeliveriesResponseDelivery](raw, "deliveries")
+		return decodePage[any](raw, "")
 	})
 }
 

@@ -48,8 +48,8 @@ func (s *DraftsService) List(ctx context.Context, orgID string, query *DraftsLis
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DraftsService) ListAutoPaging(ctx context.Context, orgID string, query *DraftsListQuery, opts ...RequestOption) *Iter[DraftSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DraftSummary, string, error) {
+func (s *DraftsService) ListAutoPaging(ctx context.Context, orgID string, query *DraftsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *DraftsService) ListAutoPaging(ctx context.Context, orgID string, query 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DraftSummary](raw, "drafts")
+		return decodePage[any](raw, "")
 	})
 }
 

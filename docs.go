@@ -168,6 +168,102 @@ func (s *DocsAnalyticsService) AnalyticsSummary(ctx context.Context, orgID strin
 	return &out, nil
 }
 
+// DocsAnalyticsFeedbackCommentsQuery are the optional query parameters of DocsAnalyticsService.FeedbackComments.
+type DocsAnalyticsFeedbackCommentsQuery struct {
+	// Comments per page.
+	Limit     *int64
+	PageID    *string
+	Rating    *string
+	SinceDays *float64
+	Cursor    *string
+}
+
+func (p *DocsAnalyticsFeedbackCommentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.PageID != nil {
+		v.Set("pageId", *p.PageID)
+	}
+	if p.Rating != nil {
+		v.Set("rating", *p.Rating)
+	}
+	if p.SinceDays != nil {
+		v.Set("sinceDays", strconv.FormatFloat(*p.SinceDays, 'f', -1, 64))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// FeedbackComments get the feedback in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/docs/feedback
+func (s *DocsAnalyticsService) FeedbackComments(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsFeedbackCommentsQuery, opts ...RequestOption) (*DocsAnalyticsFeedbackCommentsResponse, error) {
+	v, opts := query.encode(opts)
+	var out DocsAnalyticsFeedbackCommentsResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/feedback", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// FeedbackCommentsAutoPaging walks every item of FeedbackComments across all pages.
+func (s *DocsAnalyticsService) FeedbackCommentsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsFeedbackCommentsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/feedback", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// DocsAnalyticsFeedbackCSVQuery are the optional query parameters of DocsAnalyticsService.FeedbackCSV.
+type DocsAnalyticsFeedbackCSVQuery struct {
+	PageID    *string
+	Rating    *string
+	SinceDays *float64
+}
+
+func (p *DocsAnalyticsFeedbackCSVQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.PageID != nil {
+		v.Set("pageId", *p.PageID)
+	}
+	if p.Rating != nil {
+		v.Set("rating", *p.Rating)
+	}
+	if p.SinceDays != nil {
+		v.Set("sinceDays", strconv.FormatFloat(*p.SinceDays, 'f', -1, 64))
+	}
+	return v, opts
+}
+
+// FeedbackCSV file of feedback
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/docs/feedback.csv
+func (s *DocsAnalyticsService) FeedbackCSV(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsFeedbackCSVQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/feedback.csv", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LlmsFull file of llms full (docs)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/docs/llms-full.txt
@@ -214,8 +310,8 @@ func (s *DocsAnalyticsService) Tags(ctx context.Context, orgID string, spaceID s
 }
 
 // TagsAutoPaging walks every item of Tags across all pages.
-func (s *DocsAnalyticsService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsTagsQuery, opts ...RequestOption) *Iter[DocsAnalyticsTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsAnalyticsTagsResponseTag, string, error) {
+func (s *DocsAnalyticsService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsTagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -224,7 +320,7 @@ func (s *DocsAnalyticsService) TagsAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsAnalyticsTagsResponseTag](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -263,8 +359,8 @@ func (s *DocsAnalyticsService) TagPages(ctx context.Context, orgID string, space
 }
 
 // TagPagesAutoPaging walks every item of TagPages across all pages.
-func (s *DocsAnalyticsService) TagPagesAutoPaging(ctx context.Context, orgID string, spaceID string, tag string, query *DocsAnalyticsTagPagesQuery, opts ...RequestOption) *Iter[DocsAnalyticsTagPagesResponsePage] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsAnalyticsTagPagesResponsePage, string, error) {
+func (s *DocsAnalyticsService) TagPagesAutoPaging(ctx context.Context, orgID string, spaceID string, tag string, query *DocsAnalyticsTagPagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -273,7 +369,7 @@ func (s *DocsAnalyticsService) TagPagesAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsAnalyticsTagPagesResponsePage](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -322,6 +418,34 @@ func (s *DocsAnalyticsService) PageMarkdown(ctx context.Context, orgID string, s
 	v, opts := query.encode(opts)
 	var out any
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/markdown", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// DocsAnalyticsDraftMarkdownQuery are the optional query parameters of DocsAnalyticsService.DraftMarkdown.
+type DocsAnalyticsDraftMarkdownQuery struct {
+	Form *string
+}
+
+func (p *DocsAnalyticsDraftMarkdownQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Form != nil {
+		v.Set("form", *p.Form)
+	}
+	return v, opts
+}
+
+// DraftMarkdown get the markdown in a space (draft)
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/pages/{pageId}/draft/markdown
+func (s *DocsAnalyticsService) DraftMarkdown(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsAnalyticsDraftMarkdownQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/draft/markdown", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -391,8 +515,8 @@ func (s *DocsAnalyticsService) EmptySections(ctx context.Context, orgID string, 
 }
 
 // EmptySectionsAutoPaging walks every item of EmptySections across all pages.
-func (s *DocsAnalyticsService) EmptySectionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsEmptySectionsQuery, opts ...RequestOption) *Iter[DocsAnalyticsEmptySectionsResponseSection] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsAnalyticsEmptySectionsResponseSection, string, error) {
+func (s *DocsAnalyticsService) EmptySectionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsEmptySectionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -401,7 +525,7 @@ func (s *DocsAnalyticsService) EmptySectionsAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsAnalyticsEmptySectionsResponseSection](raw, "sections")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -468,8 +592,8 @@ func (s *DocsAnalyticsService) Backlinks(ctx context.Context, orgID string, spac
 }
 
 // BacklinksAutoPaging walks every item of Backlinks across all pages.
-func (s *DocsAnalyticsService) BacklinksAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsAnalyticsBacklinksQuery, opts ...RequestOption) *Iter[Backlink] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]Backlink, string, error) {
+func (s *DocsAnalyticsService) BacklinksAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsAnalyticsBacklinksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -478,7 +602,7 @@ func (s *DocsAnalyticsService) BacklinksAutoPaging(ctx context.Context, orgID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[Backlink](raw, "backlinks")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -522,8 +646,8 @@ func (s *DocsAnalyticsService) Stale(ctx context.Context, orgID string, spaceID 
 }
 
 // StaleAutoPaging walks every item of Stale across all pages.
-func (s *DocsAnalyticsService) StaleAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsStaleQuery, opts ...RequestOption) *Iter[DocsAnalyticsStaleResponseStaleItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsAnalyticsStaleResponseStaleItem, string, error) {
+func (s *DocsAnalyticsService) StaleAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsAnalyticsStaleQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -532,7 +656,7 @@ func (s *DocsAnalyticsService) StaleAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsAnalyticsStaleResponseStaleItem](raw, "stale")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -598,8 +722,8 @@ func (s *DocsChangeRequestsService) List(ctx context.Context, orgID string, spac
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsChangeRequestsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsChangeRequestsListQuery, opts ...RequestOption) *Iter[ChangeRequestSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChangeRequestSummary, string, error) {
+func (s *DocsChangeRequestsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsChangeRequestsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -608,7 +732,7 @@ func (s *DocsChangeRequestsService) ListAutoPaging(ctx context.Context, orgID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChangeRequestSummary](raw, "changeRequests")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -690,7 +814,7 @@ func (s *DocsChangeRequestsService) MergeBlockersAutoPaging(ctx context.Context,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "blockers")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -729,8 +853,8 @@ func (s *DocsChangeRequestsService) Conflicts(ctx context.Context, orgID string,
 }
 
 // ConflictsAutoPaging walks every item of Conflicts across all pages.
-func (s *DocsChangeRequestsService) ConflictsAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsConflictsQuery, opts ...RequestOption) *Iter[ConflictDetail] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ConflictDetail, string, error) {
+func (s *DocsChangeRequestsService) ConflictsAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsConflictsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -739,7 +863,7 @@ func (s *DocsChangeRequestsService) ConflictsAutoPaging(ctx context.Context, org
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ConflictDetail](raw, "conflicts")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -800,8 +924,8 @@ func (s *DocsChangeRequestsService) Pages(ctx context.Context, orgID string, spa
 }
 
 // PagesAutoPaging walks every item of Pages across all pages.
-func (s *DocsChangeRequestsService) PagesAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsPagesQuery, opts ...RequestOption) *Iter[DocsChangeRequestsPagesResponsePage] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsChangeRequestsPagesResponsePage, string, error) {
+func (s *DocsChangeRequestsService) PagesAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsPagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -810,7 +934,7 @@ func (s *DocsChangeRequestsService) PagesAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsChangeRequestsPagesResponsePage](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -893,8 +1017,8 @@ func (s *DocsChangeRequestsService) ListReviewers(ctx context.Context, orgID str
 }
 
 // ListReviewersAutoPaging walks every item of ListReviewers across all pages.
-func (s *DocsChangeRequestsService) ListReviewersAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsListReviewersQuery, opts ...RequestOption) *Iter[DocsChangeRequestsListReviewersResponseReviewer] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsChangeRequestsListReviewersResponseReviewer, string, error) {
+func (s *DocsChangeRequestsService) ListReviewersAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsListReviewersQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -903,7 +1027,7 @@ func (s *DocsChangeRequestsService) ListReviewersAutoPaging(ctx context.Context,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsChangeRequestsListReviewersResponseReviewer](raw, "reviewers")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -986,8 +1110,8 @@ func (s *DocsChangeRequestsService) Comments(ctx context.Context, orgID string, 
 }
 
 // CommentsAutoPaging walks every item of Comments across all pages.
-func (s *DocsChangeRequestsService) CommentsAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsCommentsQuery, opts ...RequestOption) *Iter[ChangeRequestCommentRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ChangeRequestCommentRow, string, error) {
+func (s *DocsChangeRequestsService) CommentsAutoPaging(ctx context.Context, orgID string, spaceID string, crID string, query *DocsChangeRequestsCommentsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -996,7 +1120,7 @@ func (s *DocsChangeRequestsService) CommentsAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ChangeRequestCommentRow](raw, "comments")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1051,8 +1175,8 @@ func (s *DocsCollectionsService) List(ctx context.Context, orgID string, spaceID
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsCollectionsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsCollectionsListQuery, opts ...RequestOption) *Iter[CollectionSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CollectionSummary, string, error) {
+func (s *DocsCollectionsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsCollectionsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1061,7 +1185,7 @@ func (s *DocsCollectionsService) ListAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CollectionSummary](raw, "collections")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1163,8 +1287,8 @@ func (s *DocsCollectionsService) Pages(ctx context.Context, orgID string, spaceI
 }
 
 // PagesAutoPaging walks every item of Pages across all pages.
-func (s *DocsCollectionsService) PagesAutoPaging(ctx context.Context, orgID string, spaceID string, collectionID string, query *DocsCollectionsPagesQuery, opts ...RequestOption) *Iter[PageNode] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PageNode, string, error) {
+func (s *DocsCollectionsService) PagesAutoPaging(ctx context.Context, orgID string, spaceID string, collectionID string, query *DocsCollectionsPagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1173,8 +1297,19 @@ func (s *DocsCollectionsService) PagesAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PageNode](raw, "pages")
+		return decodePage[any](raw, "")
 	})
+}
+
+// Order create the order in a space
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/collections/{collectionId}/order
+func (s *DocsCollectionsService) Order(ctx context.Context, orgID string, spaceID string, collectionID string, body DocsCollectionsOrderParams, opts ...RequestOption) (*DocsCollectionsOrderResponse, error) {
+	var out DocsCollectionsOrderResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/collections/"+pathEscape(collectionID)+"/order", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // DocsCommentsService holds the operations under client.Docs.Comments.
@@ -1217,8 +1352,8 @@ func (s *DocsCommentsService) List(ctx context.Context, orgID string, spaceID st
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsCommentsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsCommentsListQuery, opts ...RequestOption) *Iter[CommentSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CommentSummary, string, error) {
+func (s *DocsCommentsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsCommentsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1227,7 +1362,7 @@ func (s *DocsCommentsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CommentSummary](raw, "comments")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1375,8 +1510,8 @@ func (s *DocsOpenapiService) ListSpecs(ctx context.Context, orgID string, spaceI
 }
 
 // ListSpecsAutoPaging walks every item of ListSpecs across all pages.
-func (s *DocsOpenapiService) ListSpecsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsOpenapiListSpecsQuery, opts ...RequestOption) *Iter[StoredSpecSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]StoredSpecSummary, string, error) {
+func (s *DocsOpenapiService) ListSpecsAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsOpenapiListSpecsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1385,7 +1520,7 @@ func (s *DocsOpenapiService) ListSpecsAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[StoredSpecSummary](raw, "specs")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1479,8 +1614,8 @@ func (s *DocsOpenapiService) SDKLanguages(ctx context.Context, orgID string, spa
 }
 
 // SDKLanguagesAutoPaging walks every item of SDKLanguages across all pages.
-func (s *DocsOpenapiService) SDKLanguagesAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsOpenapiSDKLanguagesQuery, opts ...RequestOption) *Iter[DocsOpenapiSDKLanguagesResponseLanguage] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocsOpenapiSDKLanguagesResponseLanguage, string, error) {
+func (s *DocsOpenapiService) SDKLanguagesAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsOpenapiSDKLanguagesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1489,7 +1624,7 @@ func (s *DocsOpenapiService) SDKLanguagesAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocsOpenapiSDKLanguagesResponseLanguage](raw, "languages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1709,6 +1844,10 @@ type DocsPagesListQuery struct {
 	// Pages per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// Only this content version.
+	Version *string
+	// Only this language.
+	Locale *string
 }
 
 func (p *DocsPagesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1721,6 +1860,12 @@ func (p *DocsPagesListQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Version != nil {
+		v.Set("version", *p.Version)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -1738,8 +1883,8 @@ func (s *DocsPagesService) List(ctx context.Context, orgID string, spaceID strin
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsPagesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsPagesListQuery, opts ...RequestOption) *Iter[PageListRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PageListRow, string, error) {
+func (s *DocsPagesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsPagesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1748,7 +1893,7 @@ func (s *DocsPagesService) ListAutoPaging(ctx context.Context, orgID string, spa
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PageListRow](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1757,6 +1902,10 @@ type DocsPagesInventoryQuery struct {
 	// Pages per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// Only this content version.
+	Version *string
+	// Only this language.
+	Locale *string
 }
 
 func (p *DocsPagesInventoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1769,6 +1918,12 @@ func (p *DocsPagesInventoryQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Version != nil {
+		v.Set("version", *p.Version)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	return v, opts
 }
@@ -1786,8 +1941,8 @@ func (s *DocsPagesService) Inventory(ctx context.Context, orgID string, spaceID 
 }
 
 // InventoryAutoPaging walks every item of Inventory across all pages.
-func (s *DocsPagesService) InventoryAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsPagesInventoryQuery, opts ...RequestOption) *Iter[PageInventoryRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PageInventoryRow, string, error) {
+func (s *DocsPagesService) InventoryAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsPagesInventoryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1796,7 +1951,7 @@ func (s *DocsPagesService) InventoryAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PageInventoryRow](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1867,8 +2022,8 @@ func (s *DocsPagesService) Trash(ctx context.Context, orgID string, spaceID stri
 }
 
 // TrashAutoPaging walks every item of Trash across all pages.
-func (s *DocsPagesService) TrashAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsPagesTrashQuery, opts ...RequestOption) *Iter[PageTrashRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PageTrashRow, string, error) {
+func (s *DocsPagesService) TrashAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsPagesTrashQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1877,7 +2032,7 @@ func (s *DocsPagesService) TrashAutoPaging(ctx context.Context, orgID string, sp
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PageTrashRow](raw, "pages")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2075,8 +2230,8 @@ func (s *DocsPagesRevisionsService) History(ctx context.Context, orgID string, s
 }
 
 // HistoryAutoPaging walks every item of History across all pages.
-func (s *DocsPagesRevisionsService) HistoryAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsPagesRevisionsHistoryQuery, opts ...RequestOption) *Iter[RevisionSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RevisionSummary, string, error) {
+func (s *DocsPagesRevisionsService) HistoryAutoPaging(ctx context.Context, orgID string, spaceID string, pageID string, query *DocsPagesRevisionsHistoryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2085,7 +2240,7 @@ func (s *DocsPagesRevisionsService) HistoryAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RevisionSummary](raw, "revisions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2212,8 +2367,8 @@ func (s *DocsReusablesService) ListReusable(ctx context.Context, orgID string, s
 }
 
 // ListReusableAutoPaging walks every item of ListReusable across all pages.
-func (s *DocsReusablesService) ListReusableAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsReusablesListReusableQuery, opts ...RequestOption) *Iter[ReusableSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ReusableSummary, string, error) {
+func (s *DocsReusablesService) ListReusableAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsReusablesListReusableQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2222,7 +2377,7 @@ func (s *DocsReusablesService) ListReusableAutoPaging(ctx context.Context, orgID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ReusableSummary](raw, "reusables")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2294,8 +2449,8 @@ func (s *DocsReusablesService) ListVariables(ctx context.Context, orgID string, 
 }
 
 // ListVariablesAutoPaging walks every item of ListVariables across all pages.
-func (s *DocsReusablesService) ListVariablesAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsReusablesListVariablesQuery, opts ...RequestOption) *Iter[VariableRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]VariableRow, string, error) {
+func (s *DocsReusablesService) ListVariablesAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsReusablesListVariablesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2304,7 +2459,7 @@ func (s *DocsReusablesService) ListVariablesAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[VariableRow](raw, "variables")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2370,8 +2525,8 @@ func (s *DocsTemplatesService) List(ctx context.Context, orgID string, spaceID s
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsTemplatesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsTemplatesListQuery, opts ...RequestOption) *Iter[TemplateSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]TemplateSummary, string, error) {
+func (s *DocsTemplatesService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsTemplatesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2380,7 +2535,7 @@ func (s *DocsTemplatesService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[TemplateSummary](raw, "templates")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2457,8 +2612,8 @@ func (s *DocsTranslationsService) List(ctx context.Context, orgID string, spaceI
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsTranslationsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsTranslationsListQuery, opts ...RequestOption) *Iter[DocLocale] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocLocale, string, error) {
+func (s *DocsTranslationsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsTranslationsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2467,7 +2622,7 @@ func (s *DocsTranslationsService) ListAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocLocale](raw, "locales")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2477,6 +2632,17 @@ func (s *DocsTranslationsService) ListAutoPaging(ctx context.Context, orgID stri
 func (s *DocsTranslationsService) Create(ctx context.Context, orgID string, spaceID string, body DocsTranslationsCreateParams, opts ...RequestOption) (*DocsTranslationsCreateResponse, error) {
 	var out DocsTranslationsCreateResponse
 	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/locales", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Update update the locale
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/docs/locales/{code}
+func (s *DocsTranslationsService) Update(ctx context.Context, orgID string, spaceID string, code string, body DocsTranslationsUpdateParams, opts ...RequestOption) (*DocsTranslationsUpdateResponse, error) {
+	var out DocsTranslationsUpdateResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/locales/"+pathEscape(code), nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -2533,8 +2699,8 @@ func (s *DocsVersionsService) List(ctx context.Context, orgID string, spaceID st
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DocsVersionsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsVersionsListQuery, opts ...RequestOption) *Iter[DocVersion] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DocVersion, string, error) {
+func (s *DocsVersionsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *DocsVersionsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -2543,7 +2709,7 @@ func (s *DocsVersionsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DocVersion](raw, "versions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -2558,12 +2724,34 @@ func (s *DocsVersionsService) Create(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// Update update the version
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/docs/versions/{key}
+func (s *DocsVersionsService) Update(ctx context.Context, orgID string, spaceID string, key string, body DocsVersionsUpdateParams, opts ...RequestOption) (*DocsVersionsUpdateResponse, error) {
+	var out DocsVersionsUpdateResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/versions/"+pathEscape(key), nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Remove delete the version
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/docs/versions/{key}
 func (s *DocsVersionsService) Remove(ctx context.Context, orgID string, spaceID string, key string, opts ...RequestOption) (*DocsVersionsRemoveResponse, error) {
 	var out DocsVersionsRemoveResponse
 	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/versions/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// MakeDefault create the make default in a space
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/docs/versions/{key}/make-default
+func (s *DocsVersionsService) MakeDefault(ctx context.Context, orgID string, spaceID string, key string, body DocsVersionsMakeDefaultParams, opts ...RequestOption) (*DocsVersionsMakeDefaultResponse, error) {
+	var out DocsVersionsMakeDefaultResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/versions/"+pathEscape(key)+"/make-default", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -48,8 +48,8 @@ func (s *CustomFieldsService) ListDefs(ctx context.Context, orgID string, entity
 }
 
 // ListDefsAutoPaging walks every item of ListDefs across all pages.
-func (s *CustomFieldsService) ListDefsAutoPaging(ctx context.Context, orgID string, entityType string, query *CustomFieldsListDefsQuery, opts ...RequestOption) *Iter[FieldDef] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FieldDef, string, error) {
+func (s *CustomFieldsService) ListDefsAutoPaging(ctx context.Context, orgID string, entityType string, query *CustomFieldsListDefsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *CustomFieldsService) ListDefsAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FieldDef](raw, "fields")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -119,8 +119,8 @@ func (s *CustomFieldsService) GetValues(ctx context.Context, orgID string, entit
 }
 
 // GetValuesAutoPaging walks every item of GetValues across all pages.
-func (s *CustomFieldsService) GetValuesAutoPaging(ctx context.Context, orgID string, entityType string, entityID string, query *CustomFieldsGetValuesQuery, opts ...RequestOption) *Iter[FieldValue] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FieldValue, string, error) {
+func (s *CustomFieldsService) GetValuesAutoPaging(ctx context.Context, orgID string, entityType string, entityID string, query *CustomFieldsGetValuesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -129,7 +129,7 @@ func (s *CustomFieldsService) GetValuesAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FieldValue](raw, "values")
+		return decodePage[any](raw, "")
 	})
 }
 

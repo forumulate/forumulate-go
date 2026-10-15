@@ -13,12 +13,78 @@ type CareersService struct {
 	c *Client
 }
 
+// GetPipeline get the pipeline in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/careers/pipeline
+func (s *CareersService) GetPipeline(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CareersGetPipelineResponse, error) {
+	var out CareersGetPipelineResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/pipeline", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetPipeline replace the pipeline in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/careers/pipeline
+func (s *CareersService) SetPipeline(ctx context.Context, orgID string, spaceID string, body CareersSetPipelineParams, opts ...RequestOption) (*CareersSetPipelineResponse, error) {
+	var out CareersSetPipelineResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/pipeline", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Form get the form in a space (careers)
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/careers/form
+func (s *CareersService) Form(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CareersFormResponse, error) {
+	var out CareersFormResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/form", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetForm update the form in a space (careers)
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/careers/form
+func (s *CareersService) SetForm(ctx context.Context, orgID string, spaceID string, body CareersSetFormParams, opts ...RequestOption) (*CareersSetFormResponse, error) {
+	var out CareersSetFormResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/form", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ExportCSV file of applications
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/careers/applications.csv
+func (s *CareersService) ExportCSV(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications.csv", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// EeoSummary get the eeo summary in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/careers/eeo-summary
+func (s *CareersService) EeoSummary(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CareersEeoSummaryResponse, error) {
+	var out CareersEeoSummaryResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/eeo-summary", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // CareersListQuery are the optional query parameters of CareersService.List.
 type CareersListQuery struct {
 	// Applications per page, once a version is stated.
 	Limit  *int64
-	Cursor *string
 	Status *string
+	Cursor *string
 }
 
 func (p *CareersListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -29,11 +95,11 @@ func (p *CareersListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
-	if p.Cursor != nil {
-		v.Set("cursor", *p.Cursor)
-	}
 	if p.Status != nil {
 		v.Set("status", *p.Status)
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
 	}
 	return v, opts
 }
@@ -51,8 +117,8 @@ func (s *CareersService) List(ctx context.Context, orgID string, spaceID string,
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *CareersService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *CareersListQuery, opts ...RequestOption) *Iter[ApplicationRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ApplicationRow, string, error) {
+func (s *CareersService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *CareersListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -61,7 +127,7 @@ func (s *CareersService) ListAutoPaging(ctx context.Context, orgID string, space
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ApplicationRow](raw, "applications")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -110,8 +176,8 @@ func (s *CareersService) Replies(ctx context.Context, orgID string, spaceID stri
 }
 
 // RepliesAutoPaging walks every item of Replies across all pages.
-func (s *CareersService) RepliesAutoPaging(ctx context.Context, orgID string, spaceID string, id string, query *CareersRepliesQuery, opts ...RequestOption) *Iter[InboxReply] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]InboxReply, string, error) {
+func (s *CareersService) RepliesAutoPaging(ctx context.Context, orgID string, spaceID string, id string, query *CareersRepliesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -120,7 +186,7 @@ func (s *CareersService) RepliesAutoPaging(ctx context.Context, orgID string, sp
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[InboxReply](raw, "replies")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -141,6 +207,137 @@ func (s *CareersService) Reply(ctx context.Context, orgID string, spaceID string
 func (s *CareersService) Assign(ctx context.Context, orgID string, spaceID string, id string, body CareersAssignParams, opts ...RequestOption) (*CareersAssignResponse, error) {
 	var out CareersAssignResponse
 	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/assign", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CareersNotesQuery are the optional query parameters of CareersService.Notes.
+type CareersNotesQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *CareersNotesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Notes list notes in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/notes
+func (s *CareersService) Notes(ctx context.Context, orgID string, spaceID string, id string, query *CareersNotesQuery, opts ...RequestOption) (*CareersNotesResponse, error) {
+	v, opts := query.encode(opts)
+	var out CareersNotesResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// NotesAutoPaging walks every item of Notes across all pages.
+func (s *CareersService) NotesAutoPaging(ctx context.Context, orgID string, spaceID string, id string, query *CareersNotesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// AddNote create a note in a space
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/notes
+func (s *CareersService) AddNote(ctx context.Context, orgID string, spaceID string, id string, body CareersAddNoteParams, opts ...RequestOption) (*CareersAddNoteResponse, error) {
+	var out CareersAddNoteResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteNote delete the note (spaces careers applications)
+//
+// DELETE /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/notes/{noteId}
+func (s *CareersService) DeleteNote(ctx context.Context, orgID string, spaceID string, id string, noteID string, opts ...RequestOption) (*CareersDeleteNoteResponse, error) {
+	var out CareersDeleteNoteResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes/"+pathEscape(noteID), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CareersRatingsQuery are the optional query parameters of CareersService.Ratings.
+type CareersRatingsQuery struct {
+	// Rows per page.
+	Limit *int64
+	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
+	Cursor *string
+}
+
+func (p *CareersRatingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	return v, opts
+}
+
+// Ratings list ratings in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/ratings
+func (s *CareersService) Ratings(ctx context.Context, orgID string, spaceID string, id string, query *CareersRatingsQuery, opts ...RequestOption) (*CareersRatingsResponse, error) {
+	v, opts := query.encode(opts)
+	var out CareersRatingsResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/ratings", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// RatingsAutoPaging walks every item of Ratings across all pages.
+func (s *CareersService) RatingsAutoPaging(ctx context.Context, orgID string, spaceID string, id string, query *CareersRatingsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/ratings", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// Rate replace the rating in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/rating
+func (s *CareersService) Rate(ctx context.Context, orgID string, spaceID string, id string, body CareersRateParams, opts ...RequestOption) (*CareersRateResponse, error) {
+	var out CareersRateResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/rating", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

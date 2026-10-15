@@ -60,8 +60,8 @@ func (s *AIService) ListSources(ctx context.Context, orgID string, query *AIList
 }
 
 // ListSourcesAutoPaging walks every item of ListSources across all pages.
-func (s *AIService) ListSourcesAutoPaging(ctx context.Context, orgID string, query *AIListSourcesQuery, opts ...RequestOption) *Iter[AISourceSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]AISourceSummary, string, error) {
+func (s *AIService) ListSourcesAutoPaging(ctx context.Context, orgID string, query *AIListSourcesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -70,7 +70,7 @@ func (s *AIService) ListSourcesAutoPaging(ctx context.Context, orgID string, que
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[AISourceSummary](raw, "sources")
+		return decodePage[any](raw, "")
 	})
 }
 

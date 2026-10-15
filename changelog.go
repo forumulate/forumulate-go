@@ -20,6 +20,7 @@ type ChangelogListQuery struct {
 	// Where in the archive to start.
 	Offset *int64
 	Cursor *string
+	Review *string
 }
 
 func (p *ChangelogListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +36,9 @@ func (p *ChangelogListQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Review != nil {
+		v.Set("review", *p.Review)
 	}
 	return v, opts
 }
@@ -52,8 +56,8 @@ func (s *ChangelogService) List(ctx context.Context, orgID string, spaceID strin
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ChangelogService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ChangelogListQuery, opts ...RequestOption) *Iter[ArticleDetail] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleDetail, string, error) {
+func (s *ChangelogService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ChangelogListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +66,7 @@ func (s *ChangelogService) ListAutoPaging(ctx context.Context, orgID string, spa
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleDetail](raw, "releases")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -101,6 +105,34 @@ func (s *ChangelogService) Compile(ctx context.Context, orgID string, spaceID st
 	v, opts := query.encode(opts)
 	var out CompiledRelease
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/compile", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ChangelogWidgetStatsQuery are the optional query parameters of ChangelogService.WidgetStats.
+type ChangelogWidgetStatsQuery struct {
+	Days *float64
+}
+
+func (p *ChangelogWidgetStatsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Days != nil {
+		v.Set("days", strconv.FormatFloat(*p.Days, 'f', -1, 64))
+	}
+	return v, opts
+}
+
+// WidgetStats list widget stats in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/changelog/widget-stats
+func (s *ChangelogService) WidgetStats(ctx context.Context, orgID string, spaceID string, query *ChangelogWidgetStatsQuery, opts ...RequestOption) (*ChangelogWidgetStatsResponse, error) {
+	v, opts := query.encode(opts)
+	var out ChangelogWidgetStatsResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/widget-stats", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

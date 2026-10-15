@@ -165,6 +165,17 @@ func (s *OrgsService) LegalEditionDiff(ctx context.Context, orgID string, kind s
 	return &out, nil
 }
 
+// SetLegalEditionNote replace the edition
+//
+// PUT /orgs/{orgId}/legal/{kind}/editions/{version}
+func (s *OrgsService) SetLegalEditionNote(ctx context.Context, orgID string, kind string, version string, body OrgsSetLegalEditionNoteParams, opts ...RequestOption) (*OrgsSetLegalEditionNoteResponse, error) {
+	var out OrgsSetLegalEditionNoteResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind)+"/editions/"+pathEscape(version), nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // LegalEmbedAcceptancesCSV file of acceptances
 //
 // GET /orgs/{orgId}/legal/{kind}/acceptances.csv
@@ -233,8 +244,8 @@ func (s *OrgsService) SuggestedLegal(ctx context.Context, orgID string, query *O
 }
 
 // SuggestedLegalAutoPaging walks every item of SuggestedLegal across all pages.
-func (s *OrgsService) SuggestedLegalAutoPaging(ctx context.Context, orgID string, query *OrgsSuggestedLegalQuery, opts ...RequestOption) *Iter[OrgsSuggestedLegalResponseSuggestedItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]OrgsSuggestedLegalResponseSuggestedItem, string, error) {
+func (s *OrgsService) SuggestedLegalAutoPaging(ctx context.Context, orgID string, query *OrgsSuggestedLegalQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -243,7 +254,7 @@ func (s *OrgsService) SuggestedLegalAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[OrgsSuggestedLegalResponseSuggestedItem](raw, "suggested")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -358,8 +369,8 @@ func (s *OrgsService) List(ctx context.Context, query *OrgsListQuery, opts ...Re
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *OrgsService) ListAutoPaging(ctx context.Context, query *OrgsListQuery, opts ...RequestOption) *Iter[OrgSummaryDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]OrgSummaryDto, string, error) {
+func (s *OrgsService) ListAutoPaging(ctx context.Context, query *OrgsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -368,7 +379,7 @@ func (s *OrgsService) ListAutoPaging(ctx context.Context, query *OrgsListQuery, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[OrgSummaryDto](raw, "orgs")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -550,8 +561,8 @@ func (s *OrgsSettingsService) List(ctx context.Context, orgID string, query *Org
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *OrgsSettingsService) ListAutoPaging(ctx context.Context, orgID string, query *OrgsSettingsListQuery, opts ...RequestOption) *Iter[SettingView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SettingView, string, error) {
+func (s *OrgsSettingsService) ListAutoPaging(ctx context.Context, orgID string, query *OrgsSettingsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -560,8 +571,19 @@ func (s *OrgsSettingsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SettingView](raw, "settings")
+		return decodePage[any](raw, "")
 	})
+}
+
+// One read one org setting
+//
+// GET /orgs/{orgId}/settings/{key}
+func (s *OrgsSettingsService) One(ctx context.Context, orgID string, key string, opts ...RequestOption) (*OrgsSettingsOneResponse, error) {
+	var out OrgsSettingsOneResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/settings/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // Set set one org setting

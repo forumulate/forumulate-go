@@ -108,8 +108,8 @@ func (s *ForumService) TagSubscriptions(ctx context.Context, orgID string, space
 }
 
 // TagSubscriptionsAutoPaging walks every item of TagSubscriptions across all pages.
-func (s *ForumService) TagSubscriptionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTagSubscriptionsQuery, opts ...RequestOption) *Iter[ForumTagSubscriptionsResponseSubscription] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ForumTagSubscriptionsResponseSubscription, string, error) {
+func (s *ForumService) TagSubscriptionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTagSubscriptionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -118,7 +118,7 @@ func (s *ForumService) TagSubscriptionsAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ForumTagSubscriptionsResponseSubscription](raw, "subscriptions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -168,8 +168,8 @@ func (s *ForumService) CategorySubscriptions(ctx context.Context, orgID string, 
 }
 
 // CategorySubscriptionsAutoPaging walks every item of CategorySubscriptions across all pages.
-func (s *ForumService) CategorySubscriptionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumCategorySubscriptionsQuery, opts ...RequestOption) *Iter[ForumCategorySubscriptionsResponseSubscription] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ForumCategorySubscriptionsResponseSubscription, string, error) {
+func (s *ForumService) CategorySubscriptionsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumCategorySubscriptionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -178,7 +178,7 @@ func (s *ForumService) CategorySubscriptionsAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ForumCategorySubscriptionsResponseSubscription](raw, "subscriptions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -228,8 +228,8 @@ func (s *ForumService) Tags(ctx context.Context, orgID string, spaceID string, q
 }
 
 // TagsAutoPaging walks every item of Tags across all pages.
-func (s *ForumService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTagsQuery, opts ...RequestOption) *Iter[ForumTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ForumTagsResponseTag, string, error) {
+func (s *ForumService) TagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -238,7 +238,7 @@ func (s *ForumService) TagsAutoPaging(ctx context.Context, orgID string, spaceID
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ForumTagsResponseTag](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -299,8 +299,8 @@ func (s *ForumService) Flags(ctx context.Context, orgID string, spaceID string, 
 }
 
 // FlagsAutoPaging walks every item of Flags across all pages.
-func (s *ForumService) FlagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumFlagsQuery, opts ...RequestOption) *Iter[FlagRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]FlagRow, string, error) {
+func (s *ForumService) FlagsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumFlagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -309,7 +309,7 @@ func (s *ForumService) FlagsAutoPaging(ctx context.Context, orgID string, spaceI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[FlagRow](raw, "flags")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -390,8 +390,8 @@ func (s *ForumAutomationsService) List(ctx context.Context, orgID string, query 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ForumAutomationsService) ListAutoPaging(ctx context.Context, orgID string, query *ForumAutomationsListQuery, opts ...RequestOption) *Iter[AutomationSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]AutomationSummary, string, error) {
+func (s *ForumAutomationsService) ListAutoPaging(ctx context.Context, orgID string, query *ForumAutomationsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -400,7 +400,7 @@ func (s *ForumAutomationsService) ListAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[AutomationSummary](raw, "automations")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -482,8 +482,8 @@ func (s *ForumAutomationsService) Runs(ctx context.Context, orgID string, id str
 }
 
 // RunsAutoPaging walks every item of Runs across all pages.
-func (s *ForumAutomationsService) RunsAutoPaging(ctx context.Context, orgID string, id string, query *ForumAutomationsRunsQuery, opts ...RequestOption) *Iter[AutomationRunSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]AutomationRunSummary, string, error) {
+func (s *ForumAutomationsService) RunsAutoPaging(ctx context.Context, orgID string, id string, query *ForumAutomationsRunsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -492,7 +492,7 @@ func (s *ForumAutomationsService) RunsAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[AutomationRunSummary](raw, "runs")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -514,6 +514,8 @@ type ForumTaxonomyService struct {
 
 // ForumTaxonomyListCategoriesQuery are the optional query parameters of ForumTaxonomyService.ListCategories.
 type ForumTaxonomyListCategoriesQuery struct {
+	// Answer each category in this language: its `name` and `description` are replaced by the entry in its `translations` map for this code (exact, then by language: `pt-BR` → `pt`).
+	Locale *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
@@ -524,6 +526,9 @@ func (p *ForumTaxonomyListCategoriesQuery) encode(opts []RequestOption) (url.Val
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
@@ -547,8 +552,8 @@ func (s *ForumTaxonomyService) ListCategories(ctx context.Context, orgID string,
 }
 
 // ListCategoriesAutoPaging walks every item of ListCategories across all pages.
-func (s *ForumTaxonomyService) ListCategoriesAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListCategoriesQuery, opts ...RequestOption) *Iter[CategorySummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CategorySummary, string, error) {
+func (s *ForumTaxonomyService) ListCategoriesAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListCategoriesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -557,7 +562,7 @@ func (s *ForumTaxonomyService) ListCategoriesAutoPaging(ctx context.Context, org
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CategorySummary](raw, "categories")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -691,8 +696,8 @@ func (s *ForumTaxonomyService) ListSharedDrafts(ctx context.Context, orgID strin
 }
 
 // ListSharedDraftsAutoPaging walks every item of ListSharedDrafts across all pages.
-func (s *ForumTaxonomyService) ListSharedDraftsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListSharedDraftsQuery, opts ...RequestOption) *Iter[SharedDraftSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SharedDraftSummary, string, error) {
+func (s *ForumTaxonomyService) ListSharedDraftsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListSharedDraftsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -701,7 +706,7 @@ func (s *ForumTaxonomyService) ListSharedDraftsAutoPaging(ctx context.Context, o
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SharedDraftSummary](raw, "drafts")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -784,8 +789,8 @@ func (s *ForumTaxonomyService) ListPermalinks(ctx context.Context, orgID string,
 }
 
 // ListPermalinksAutoPaging walks every item of ListPermalinks across all pages.
-func (s *ForumTaxonomyService) ListPermalinksAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListPermalinksQuery, opts ...RequestOption) *Iter[PermalinkRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PermalinkRow, string, error) {
+func (s *ForumTaxonomyService) ListPermalinksAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListPermalinksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -794,7 +799,7 @@ func (s *ForumTaxonomyService) ListPermalinksAutoPaging(ctx context.Context, org
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PermalinkRow](raw, "permalinks")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -866,8 +871,8 @@ func (s *ForumTaxonomyService) ListCategoryPerms(ctx context.Context, orgID stri
 }
 
 // ListCategoryPermsAutoPaging walks every item of ListCategoryPerms across all pages.
-func (s *ForumTaxonomyService) ListCategoryPermsAutoPaging(ctx context.Context, orgID string, spaceID string, categoryID string, query *ForumTaxonomyListCategoryPermsQuery, opts ...RequestOption) *Iter[CategoryPermissionRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CategoryPermissionRow, string, error) {
+func (s *ForumTaxonomyService) ListCategoryPermsAutoPaging(ctx context.Context, orgID string, spaceID string, categoryID string, query *ForumTaxonomyListCategoryPermsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -876,7 +881,7 @@ func (s *ForumTaxonomyService) ListCategoryPermsAutoPaging(ctx context.Context, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CategoryPermissionRow](raw, "permissions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -926,8 +931,8 @@ func (s *ForumTaxonomyService) ListCategoryMods(ctx context.Context, orgID strin
 }
 
 // ListCategoryModsAutoPaging walks every item of ListCategoryMods across all pages.
-func (s *ForumTaxonomyService) ListCategoryModsAutoPaging(ctx context.Context, orgID string, spaceID string, categoryID string, query *ForumTaxonomyListCategoryModsQuery, opts ...RequestOption) *Iter[CategoryModeratorRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CategoryModeratorRow, string, error) {
+func (s *ForumTaxonomyService) ListCategoryModsAutoPaging(ctx context.Context, orgID string, spaceID string, categoryID string, query *ForumTaxonomyListCategoryModsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -936,7 +941,7 @@ func (s *ForumTaxonomyService) ListCategoryModsAutoPaging(ctx context.Context, o
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CategoryModeratorRow](raw, "moderators")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -997,8 +1002,8 @@ func (s *ForumTaxonomyService) ListTagGroups(ctx context.Context, orgID string, 
 }
 
 // ListTagGroupsAutoPaging walks every item of ListTagGroups across all pages.
-func (s *ForumTaxonomyService) ListTagGroupsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListTagGroupsQuery, opts ...RequestOption) *Iter[TagGroupSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]TagGroupSummary, string, error) {
+func (s *ForumTaxonomyService) ListTagGroupsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListTagGroupsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1007,7 +1012,7 @@ func (s *ForumTaxonomyService) ListTagGroupsAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[TagGroupSummary](raw, "tagGroups")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1066,7 +1071,7 @@ func (p *ForumTaxonomyListTagInfoQuery) encode(opts []RequestOption) (url.Values
 	return v, opts
 }
 
-// ListTagInfo get the tag info in a space
+// ListTagInfo get the tag info in a space (forum)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/forum/tag-info
 func (s *ForumTaxonomyService) ListTagInfo(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListTagInfoQuery, opts ...RequestOption) (*ForumTaxonomyListTagInfoResponse, error) {
@@ -1079,8 +1084,8 @@ func (s *ForumTaxonomyService) ListTagInfo(ctx context.Context, orgID string, sp
 }
 
 // ListTagInfoAutoPaging walks every item of ListTagInfo across all pages.
-func (s *ForumTaxonomyService) ListTagInfoAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListTagInfoQuery, opts ...RequestOption) *Iter[TagInfoRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]TagInfoRow, string, error) {
+func (s *ForumTaxonomyService) ListTagInfoAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTaxonomyListTagInfoQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1089,7 +1094,7 @@ func (s *ForumTaxonomyService) ListTagInfoAutoPaging(ctx context.Context, orgID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[TagInfoRow](raw, "tagInfo")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1177,8 +1182,8 @@ func (s *ForumToolsService) UnansweredExperts(ctx context.Context, orgID string,
 }
 
 // UnansweredExpertsAutoPaging walks every item of UnansweredExperts across all pages.
-func (s *ForumToolsService) UnansweredExpertsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumToolsUnansweredExpertsQuery, opts ...RequestOption) *Iter[ForumToolsUnansweredExpertsResponseItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ForumToolsUnansweredExpertsResponseItem, string, error) {
+func (s *ForumToolsService) UnansweredExpertsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumToolsUnansweredExpertsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1187,7 +1192,7 @@ func (s *ForumToolsService) UnansweredExpertsAutoPaging(ctx context.Context, org
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ForumToolsUnansweredExpertsResponseItem](raw, "items")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1226,8 +1231,8 @@ func (s *ForumToolsService) Experts(ctx context.Context, orgID string, spaceID s
 }
 
 // ExpertsAutoPaging walks every item of Experts across all pages.
-func (s *ForumToolsService) ExpertsAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsExpertsQuery, opts ...RequestOption) *Iter[ExpertSuggestion] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ExpertSuggestion, string, error) {
+func (s *ForumToolsService) ExpertsAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsExpertsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1236,7 +1241,7 @@ func (s *ForumToolsService) ExpertsAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ExpertSuggestion](raw, "experts")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1418,8 +1423,8 @@ func (s *ForumToolsService) Revisions(ctx context.Context, orgID string, spaceID
 }
 
 // RevisionsAutoPaging walks every item of Revisions across all pages.
-func (s *ForumToolsService) RevisionsAutoPaging(ctx context.Context, orgID string, spaceID string, postID string, query *ForumToolsRevisionsQuery, opts ...RequestOption) *Iter[PostRevisionMeta] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PostRevisionMeta, string, error) {
+func (s *ForumToolsService) RevisionsAutoPaging(ctx context.Context, orgID string, spaceID string, postID string, query *ForumToolsRevisionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1428,7 +1433,7 @@ func (s *ForumToolsService) RevisionsAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PostRevisionMeta](raw, "revisions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1449,6 +1454,17 @@ func (s *ForumToolsService) RevisionDiff(ctx context.Context, orgID string, spac
 func (s *ForumToolsService) Vote(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*ForumToolsVoteResponse, error) {
 	var out ForumToolsVoteResponse
 	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/vote", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetVote replace the vote in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/vote
+func (s *ForumToolsService) SetVote(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsSetVoteParams, opts ...RequestOption) (*ForumToolsSetVoteResponse, error) {
+	var out ForumToolsSetVoteResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/vote", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1577,8 +1593,8 @@ func (s *ForumToolsService) BountyHistory(ctx context.Context, orgID string, spa
 }
 
 // BountyHistoryAutoPaging walks every item of BountyHistory across all pages.
-func (s *ForumToolsService) BountyHistoryAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsBountyHistoryQuery, opts ...RequestOption) *Iter[BountyView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]BountyView, string, error) {
+func (s *ForumToolsService) BountyHistoryAutoPaging(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsBountyHistoryQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1587,7 +1603,7 @@ func (s *ForumToolsService) BountyHistoryAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[BountyView](raw, "bounties")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1691,6 +1707,8 @@ type ForumTopicsListQuery struct {
 	Tag      *string
 	Q        *string
 	Category *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	IncludeSubcategories *string
 	// Which page of results to return, 1-based.
 	Page     *int64
 	Assigned *string
@@ -1715,6 +1733,9 @@ func (p *ForumTopicsListQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Category != nil {
 		v.Set("category", *p.Category)
+	}
+	if p.IncludeSubcategories != nil {
+		v.Set("includeSubcategories", *p.IncludeSubcategories)
 	}
 	if p.Page != nil {
 		v.Set("page", strconv.FormatInt(*p.Page, 10))
@@ -1747,8 +1768,8 @@ func (s *ForumTopicsService) List(ctx context.Context, orgID string, spaceID str
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ForumTopicsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTopicsListQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *ForumTopicsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ForumTopicsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1757,7 +1778,7 @@ func (s *ForumTopicsService) ListAutoPaging(ctx context.Context, orgID string, s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "topics")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1849,7 +1870,7 @@ func (s *ForumTopicsService) VotePoll(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
-// PollVoters list voters in a space
+// PollVoters list voters in a space (forum polls)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/forum/polls/{pollId}/voters
 func (s *ForumTopicsService) PollVoters(ctx context.Context, orgID string, spaceID string, pollID string, opts ...RequestOption) (*PollVoterBreakdown, error) {
@@ -1921,6 +1942,17 @@ func (s *ForumTopicsService) SetWiki(ctx context.Context, orgID string, spaceID 
 func (s *ForumTopicsService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsUpdateParams, opts ...RequestOption) (*ForumTopicsUpdateResponse, error) {
 	var out ForumTopicsUpdateResponse
 	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID), nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Remove delete the forum
+//
+// DELETE /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}
+func (s *ForumTopicsService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumTopicsRemoveResponse, error) {
+	var out ForumTopicsRemoveResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID), nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

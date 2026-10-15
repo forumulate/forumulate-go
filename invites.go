@@ -48,8 +48,8 @@ func (s *InvitesService) Pending(ctx context.Context, query *InvitesPendingQuery
 }
 
 // PendingAutoPaging walks every item of Pending across all pages.
-func (s *InvitesService) PendingAutoPaging(ctx context.Context, query *InvitesPendingQuery, opts ...RequestOption) *Iter[PendingInvite] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PendingInvite, string, error) {
+func (s *InvitesService) PendingAutoPaging(ctx context.Context, query *InvitesPendingQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *InvitesService) PendingAutoPaging(ctx context.Context, query *InvitesPe
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PendingInvite](raw, "invites")
+		return decodePage[any](raw, "")
 	})
 }
 

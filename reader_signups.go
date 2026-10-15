@@ -52,8 +52,8 @@ func (s *ReaderSignupsService) List(ctx context.Context, orgID string, spaceID s
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *ReaderSignupsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ReaderSignupsListQuery, opts ...RequestOption) *Iter[ReaderSignupRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ReaderSignupRow, string, error) {
+func (s *ReaderSignupsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *ReaderSignupsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,7 +62,7 @@ func (s *ReaderSignupsService) ListAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ReaderSignupRow](raw, "signups")
+		return decodePage[any](raw, "")
 	})
 }
 

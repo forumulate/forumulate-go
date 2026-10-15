@@ -53,8 +53,8 @@ func (s *IntegrationsService) Catalog(ctx context.Context, orgID string, query *
 }
 
 // CatalogAutoPaging walks every item of Catalog across all pages.
-func (s *IntegrationsService) CatalogAutoPaging(ctx context.Context, orgID string, query *IntegrationsCatalogQuery, opts ...RequestOption) *Iter[IntegrationDef] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]IntegrationDef, string, error) {
+func (s *IntegrationsService) CatalogAutoPaging(ctx context.Context, orgID string, query *IntegrationsCatalogQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -63,7 +63,7 @@ func (s *IntegrationsService) CatalogAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[IntegrationDef](raw, "catalog")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -102,8 +102,8 @@ func (s *IntegrationsService) List(ctx context.Context, orgID string, query *Int
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *IntegrationsService) ListAutoPaging(ctx context.Context, orgID string, query *IntegrationsListQuery, opts ...RequestOption) *Iter[InstalledSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]InstalledSummary, string, error) {
+func (s *IntegrationsService) ListAutoPaging(ctx context.Context, orgID string, query *IntegrationsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -112,7 +112,7 @@ func (s *IntegrationsService) ListAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[InstalledSummary](raw, "installed")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -319,7 +319,7 @@ func (s *IntegrationsGithubService) EgressIpsAutoPaging(ctx context.Context, org
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "ips")
+		return decodePage[any](raw, "")
 	})
 }
 

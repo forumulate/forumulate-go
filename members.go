@@ -53,8 +53,8 @@ func (s *MembersService) List(ctx context.Context, orgID string, query *MembersL
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *MembersService) ListAutoPaging(ctx context.Context, orgID string, query *MembersListQuery, opts ...RequestOption) *Iter[MemberRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]MemberRow, string, error) {
+func (s *MembersService) ListAutoPaging(ctx context.Context, orgID string, query *MembersListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -63,7 +63,7 @@ func (s *MembersService) ListAutoPaging(ctx context.Context, orgID string, query
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[MemberRow](raw, "members")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -113,8 +113,8 @@ func (s *MembersService) Invites(ctx context.Context, orgID string, query *Membe
 }
 
 // InvitesAutoPaging walks every item of Invites across all pages.
-func (s *MembersService) InvitesAutoPaging(ctx context.Context, orgID string, query *MembersInvitesQuery, opts ...RequestOption) *Iter[InviteRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]InviteRow, string, error) {
+func (s *MembersService) InvitesAutoPaging(ctx context.Context, orgID string, query *MembersInvitesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -123,7 +123,7 @@ func (s *MembersService) InvitesAutoPaging(ctx context.Context, orgID string, qu
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[InviteRow](raw, "invites")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -184,8 +184,8 @@ func (s *MembersService) ListInviteLinks(ctx context.Context, orgID string, quer
 }
 
 // ListInviteLinksAutoPaging walks every item of ListInviteLinks across all pages.
-func (s *MembersService) ListInviteLinksAutoPaging(ctx context.Context, orgID string, query *MembersListInviteLinksQuery, opts ...RequestOption) *Iter[InviteLinkRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]InviteLinkRow, string, error) {
+func (s *MembersService) ListInviteLinksAutoPaging(ctx context.Context, orgID string, query *MembersListInviteLinksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -194,7 +194,7 @@ func (s *MembersService) ListInviteLinksAutoPaging(ctx context.Context, orgID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[InviteLinkRow](raw, "links")
+		return decodePage[any](raw, "")
 	})
 }
 

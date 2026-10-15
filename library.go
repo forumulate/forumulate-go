@@ -48,8 +48,8 @@ func (s *LibraryService) List(ctx context.Context, orgID string, query *LibraryL
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *LibraryService) ListAutoPaging(ctx context.Context, orgID string, query *LibraryListQuery, opts ...RequestOption) *Iter[ReusableSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ReusableSummary, string, error) {
+func (s *LibraryService) ListAutoPaging(ctx context.Context, orgID string, query *LibraryListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *LibraryService) ListAutoPaging(ctx context.Context, orgID string, query
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ReusableSummary](raw, "reusables")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -119,8 +119,8 @@ func (s *LibraryService) ListVariables(ctx context.Context, orgID string, query 
 }
 
 // ListVariablesAutoPaging walks every item of ListVariables across all pages.
-func (s *LibraryService) ListVariablesAutoPaging(ctx context.Context, orgID string, query *LibraryListVariablesQuery, opts ...RequestOption) *Iter[VariableRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]VariableRow, string, error) {
+func (s *LibraryService) ListVariablesAutoPaging(ctx context.Context, orgID string, query *LibraryListVariablesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -129,7 +129,7 @@ func (s *LibraryService) ListVariablesAutoPaging(ctx context.Context, orgID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[VariableRow](raw, "variables")
+		return decodePage[any](raw, "")
 	})
 }
 

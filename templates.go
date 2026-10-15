@@ -48,8 +48,8 @@ func (s *TemplatesService) List(ctx context.Context, orgID string, query *Templa
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *TemplatesService) ListAutoPaging(ctx context.Context, orgID string, query *TemplatesListQuery, opts ...RequestOption) *Iter[TemplatesListResponseTemplate] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]TemplatesListResponseTemplate, string, error) {
+func (s *TemplatesService) ListAutoPaging(ctx context.Context, orgID string, query *TemplatesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,6 +58,6 @@ func (s *TemplatesService) ListAutoPaging(ctx context.Context, orgID string, que
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[TemplatesListResponseTemplate](raw, "templates")
+		return decodePage[any](raw, "")
 	})
 }

@@ -183,8 +183,8 @@ func (s *SearchService) Tags(ctx context.Context, orgID string, query *SearchTag
 }
 
 // TagsAutoPaging walks every item of Tags across all pages.
-func (s *SearchService) TagsAutoPaging(ctx context.Context, orgID string, query *SearchTagsQuery, opts ...RequestOption) *Iter[SearchTagsResponseTag] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SearchTagsResponseTag, string, error) {
+func (s *SearchService) TagsAutoPaging(ctx context.Context, orgID string, query *SearchTagsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -193,7 +193,7 @@ func (s *SearchService) TagsAutoPaging(ctx context.Context, orgID string, query 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SearchTagsResponseTag](raw, "tags")
+		return decodePage[any](raw, "")
 	})
 }
 

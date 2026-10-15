@@ -48,8 +48,8 @@ func (s *OnboardingService) Surfaces(ctx context.Context, query *OnboardingSurfa
 }
 
 // SurfacesAutoPaging walks every item of Surfaces across all pages.
-func (s *OnboardingService) SurfacesAutoPaging(ctx context.Context, query *OnboardingSurfacesQuery, opts ...RequestOption) *Iter[OnboardingSurfacesResponseSurface] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]OnboardingSurfacesResponseSurface, string, error) {
+func (s *OnboardingService) SurfacesAutoPaging(ctx context.Context, query *OnboardingSurfacesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *OnboardingService) SurfacesAutoPaging(ctx context.Context, query *Onboa
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[OnboardingSurfacesResponseSurface](raw, "surfaces")
+		return decodePage[any](raw, "")
 	})
 }
 

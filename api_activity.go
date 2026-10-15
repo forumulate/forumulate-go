@@ -52,8 +52,8 @@ func (s *APIActivityService) Mine(ctx context.Context, orgID string, query *APIA
 }
 
 // MineAutoPaging walks every item of Mine across all pages.
-func (s *APIActivityService) MineAutoPaging(ctx context.Context, orgID string, query *APIActivityMineQuery, opts ...RequestOption) *Iter[APICall] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]APICall, string, error) {
+func (s *APIActivityService) MineAutoPaging(ctx context.Context, orgID string, query *APIActivityMineQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -62,6 +62,6 @@ func (s *APIActivityService) MineAutoPaging(ctx context.Context, orgID string, q
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[APICall](raw, "calls")
+		return decodePage[any](raw, "")
 	})
 }

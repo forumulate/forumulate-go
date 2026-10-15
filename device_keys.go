@@ -47,8 +47,8 @@ func (s *DeviceKeysService) List(ctx context.Context, query *DeviceKeysListQuery
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *DeviceKeysService) ListAutoPaging(ctx context.Context, query *DeviceKeysListQuery, opts ...RequestOption) *Iter[PATSummaryDto] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]PATSummaryDto, string, error) {
+func (s *DeviceKeysService) ListAutoPaging(ctx context.Context, query *DeviceKeysListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -57,7 +57,7 @@ func (s *DeviceKeysService) ListAutoPaging(ctx context.Context, query *DeviceKey
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[PATSummaryDto](raw, "pats")
+		return decodePage[any](raw, "")
 	})
 }
 

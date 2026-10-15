@@ -14,6 +14,28 @@ type AnalyticsService struct {
 	Growth *AnalyticsGrowthService
 }
 
+// Get list analytics tags in an organization
+//
+// GET /orgs/{orgId}/analytics-tags
+func (s *AnalyticsService) Get(ctx context.Context, orgID string, opts ...RequestOption) (*OrgAnalytics, error) {
+	var out OrgAnalytics
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/analytics-tags", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Set replace analytics tags in an organization
+//
+// PUT /orgs/{orgId}/analytics-tags
+func (s *AnalyticsService) Set(ctx context.Context, orgID string, body AnalyticsSetParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/analytics-tags", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AnalyticsEventsQuery are the optional query parameters of AnalyticsService.Events.
 type AnalyticsEventsQuery struct {
 	// Window length.

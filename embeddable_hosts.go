@@ -48,8 +48,8 @@ func (s *EmbeddableHostsService) List(ctx context.Context, orgID string, query *
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *EmbeddableHostsService) ListAutoPaging(ctx context.Context, orgID string, query *EmbeddableHostsListQuery, opts ...RequestOption) *Iter[EmbeddableHostsListResponseHost] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]EmbeddableHostsListResponseHost, string, error) {
+func (s *EmbeddableHostsService) ListAutoPaging(ctx context.Context, orgID string, query *EmbeddableHostsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -58,7 +58,7 @@ func (s *EmbeddableHostsService) ListAutoPaging(ctx context.Context, orgID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[EmbeddableHostsListResponseHost](raw, "hosts")
+		return decodePage[any](raw, "")
 	})
 }
 

@@ -47,8 +47,8 @@ func (s *QuestionsService) List(ctx context.Context, orgID string, spaceID strin
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *QuestionsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *QuestionsListQuery, opts ...RequestOption) *Iter[IngestedQuestion] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]IngestedQuestion, string, error) {
+func (s *QuestionsService) ListAutoPaging(ctx context.Context, orgID string, spaceID string, query *QuestionsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -57,7 +57,7 @@ func (s *QuestionsService) ListAutoPaging(ctx context.Context, orgID string, spa
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[IngestedQuestion](raw, "questions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -112,8 +112,8 @@ func (s *QuestionsService) Clusters(ctx context.Context, orgID string, spaceID s
 }
 
 // ClustersAutoPaging walks every item of Clusters across all pages.
-func (s *QuestionsService) ClustersAutoPaging(ctx context.Context, orgID string, spaceID string, query *QuestionsClustersQuery, opts ...RequestOption) *Iter[QuestionCluster] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]QuestionCluster, string, error) {
+func (s *QuestionsService) ClustersAutoPaging(ctx context.Context, orgID string, spaceID string, query *QuestionsClustersQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -122,7 +122,7 @@ func (s *QuestionsService) ClustersAutoPaging(ctx context.Context, orgID string,
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[QuestionCluster](raw, "clusters")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -194,8 +194,8 @@ func (s *QuestionsService) ListAssertions(ctx context.Context, orgID string, spa
 }
 
 // ListAssertionsAutoPaging walks every item of ListAssertions across all pages.
-func (s *QuestionsService) ListAssertionsAutoPaging(ctx context.Context, orgID string, spaceID string, itemID string, query *QuestionsListAssertionsQuery, opts ...RequestOption) *Iter[AssertionView] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]AssertionView, string, error) {
+func (s *QuestionsService) ListAssertionsAutoPaging(ctx context.Context, orgID string, spaceID string, itemID string, query *QuestionsListAssertionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -204,7 +204,7 @@ func (s *QuestionsService) ListAssertionsAutoPaging(ctx context.Context, orgID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[AssertionView](raw, "assertions")
+		return decodePage[any](raw, "")
 	})
 }
 

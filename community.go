@@ -58,6 +58,8 @@ func (s *CommunityService) AnalyticsSummary(ctx context.Context, orgID string, q
 
 // CommunityReactionsQuery are the optional query parameters of CommunityService.Reactions.
 type CommunityReactionsQuery struct {
+	// A space whose own palette (`reactionEmojis`) to resolve; omitted = the organization's.
+	SpaceID *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
@@ -68,6 +70,9 @@ func (p *CommunityReactionsQuery) encode(opts []RequestOption) (url.Values, []Re
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.SpaceID != nil {
+		v.Set("spaceId", *p.SpaceID)
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
@@ -101,7 +106,7 @@ func (s *CommunityService) ReactionsAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "emojis")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -151,8 +156,8 @@ func (s *CommunityService) ListCustomReactions(ctx context.Context, orgID string
 }
 
 // ListCustomReactionsAutoPaging walks every item of ListCustomReactions across all pages.
-func (s *CommunityService) ListCustomReactionsAutoPaging(ctx context.Context, orgID string, query *CommunityListCustomReactionsQuery, opts ...RequestOption) *Iter[CustomReaction] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CustomReaction, string, error) {
+func (s *CommunityService) ListCustomReactionsAutoPaging(ctx context.Context, orgID string, query *CommunityListCustomReactionsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -161,7 +166,7 @@ func (s *CommunityService) ListCustomReactionsAutoPaging(ctx context.Context, or
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CustomReaction](raw, "reactions")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -231,8 +236,8 @@ func (s *CommunityService) TagFeed(ctx context.Context, orgID string, tag string
 }
 
 // TagFeedAutoPaging walks every item of TagFeed across all pages.
-func (s *CommunityService) TagFeedAutoPaging(ctx context.Context, orgID string, tag string, query *CommunityTagFeedQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *CommunityService) TagFeedAutoPaging(ctx context.Context, orgID string, tag string, query *CommunityTagFeedQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -241,7 +246,7 @@ func (s *CommunityService) TagFeedAutoPaging(ctx context.Context, orgID string, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "items")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -308,8 +313,8 @@ func (s *CommunityService) Bookmarks(ctx context.Context, orgID string, query *C
 }
 
 // BookmarksAutoPaging walks every item of Bookmarks across all pages.
-func (s *CommunityService) BookmarksAutoPaging(ctx context.Context, orgID string, query *CommunityBookmarksQuery, opts ...RequestOption) *Iter[ArticleSummary] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]ArticleSummary, string, error) {
+func (s *CommunityService) BookmarksAutoPaging(ctx context.Context, orgID string, query *CommunityBookmarksQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -318,7 +323,7 @@ func (s *CommunityService) BookmarksAutoPaging(ctx context.Context, orgID string
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[ArticleSummary](raw, "articles")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -362,8 +367,8 @@ func (s *CommunityBadgeQueryGrantsService) List(ctx context.Context, orgID strin
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *CommunityBadgeQueryGrantsService) ListAutoPaging(ctx context.Context, orgID string, query *CommunityBadgeQueryGrantsListQuery, opts ...RequestOption) *Iter[CommunityBadgeQueryGrantsListResponseRule] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CommunityBadgeQueryGrantsListResponseRule, string, error) {
+func (s *CommunityBadgeQueryGrantsService) ListAutoPaging(ctx context.Context, orgID string, query *CommunityBadgeQueryGrantsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -372,7 +377,7 @@ func (s *CommunityBadgeQueryGrantsService) ListAutoPaging(ctx context.Context, o
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CommunityBadgeQueryGrantsListResponseRule](raw, "rules")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -475,8 +480,8 @@ func (s *CommunityCannedRepliesService) List(ctx context.Context, orgID string, 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *CommunityCannedRepliesService) ListAutoPaging(ctx context.Context, orgID string, query *CommunityCannedRepliesListQuery, opts ...RequestOption) *Iter[CannedReplyRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CannedReplyRow, string, error) {
+func (s *CommunityCannedRepliesService) ListAutoPaging(ctx context.Context, orgID string, query *CommunityCannedRepliesListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -485,7 +490,7 @@ func (s *CommunityCannedRepliesService) ListAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CannedReplyRow](raw, "cannedReplies")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -573,8 +578,8 @@ func (s *CommunityExtrasService) ListSaved(ctx context.Context, orgID string, qu
 }
 
 // ListSavedAutoPaging walks every item of ListSaved across all pages.
-func (s *CommunityExtrasService) ListSavedAutoPaging(ctx context.Context, orgID string, query *CommunityExtrasListSavedQuery, opts ...RequestOption) *Iter[SavedSearchRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]SavedSearchRow, string, error) {
+func (s *CommunityExtrasService) ListSavedAutoPaging(ctx context.Context, orgID string, query *CommunityExtrasListSavedQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -583,7 +588,7 @@ func (s *CommunityExtrasService) ListSavedAutoPaging(ctx context.Context, orgID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[SavedSearchRow](raw, "searches")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -660,8 +665,8 @@ func (s *CommunityExtrasService) Cakeday(ctx context.Context, orgID string, quer
 }
 
 // CakedayAutoPaging walks every item of Cakeday across all pages.
-func (s *CommunityExtrasService) CakedayAutoPaging(ctx context.Context, orgID string, query *CommunityExtrasCakedayQuery, opts ...RequestOption) *Iter[CakedayRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CakedayRow, string, error) {
+func (s *CommunityExtrasService) CakedayAutoPaging(ctx context.Context, orgID string, query *CommunityExtrasCakedayQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -670,7 +675,7 @@ func (s *CommunityExtrasService) CakedayAutoPaging(ctx context.Context, orgID st
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CakedayRow](raw, "cakedays")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -709,8 +714,8 @@ func (s *CommunityExtrasService) ListNotes(ctx context.Context, orgID string, us
 }
 
 // ListNotesAutoPaging walks every item of ListNotes across all pages.
-func (s *CommunityExtrasService) ListNotesAutoPaging(ctx context.Context, orgID string, userID string, query *CommunityExtrasListNotesQuery, opts ...RequestOption) *Iter[UserNoteRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]UserNoteRow, string, error) {
+func (s *CommunityExtrasService) ListNotesAutoPaging(ctx context.Context, orgID string, userID string, query *CommunityExtrasListNotesQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -719,7 +724,7 @@ func (s *CommunityExtrasService) ListNotesAutoPaging(ctx context.Context, orgID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[UserNoteRow](raw, "notes")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -734,7 +739,7 @@ func (s *CommunityExtrasService) AddNote(ctx context.Context, orgID string, user
 	return &out, nil
 }
 
-// RemoveNote delete the note
+// RemoveNote delete the note (community)
 //
 // DELETE /orgs/{orgId}/community/notes/{id}
 func (s *CommunityExtrasService) RemoveNote(ctx context.Context, orgID string, id string, opts ...RequestOption) (*CommunityExtrasRemoveNoteResponse, error) {
@@ -835,8 +840,8 @@ func (s *CommunityExtrasService) Events(ctx context.Context, orgID string, space
 }
 
 // EventsAutoPaging walks every item of Events across all pages.
-func (s *CommunityExtrasService) EventsAutoPaging(ctx context.Context, orgID string, spaceID string, query *CommunityExtrasEventsQuery, opts ...RequestOption) *Iter[CommunityExtrasEventsResponseEvent] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CommunityExtrasEventsResponseEvent, string, error) {
+func (s *CommunityExtrasService) EventsAutoPaging(ctx context.Context, orgID string, spaceID string, query *CommunityExtrasEventsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -845,7 +850,7 @@ func (s *CommunityExtrasService) EventsAutoPaging(ctx context.Context, orgID str
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CommunityExtrasEventsResponseEvent](raw, "events")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -972,8 +977,8 @@ func (s *CommunityRelationshipsService) List(ctx context.Context, orgID string, 
 }
 
 // ListAutoPaging walks every item of List across all pages.
-func (s *CommunityRelationshipsService) ListAutoPaging(ctx context.Context, orgID string, query *CommunityRelationshipsListQuery, opts ...RequestOption) *Iter[RelationshipRow] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]RelationshipRow, string, error) {
+func (s *CommunityRelationshipsService) ListAutoPaging(ctx context.Context, orgID string, query *CommunityRelationshipsListQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -982,7 +987,7 @@ func (s *CommunityRelationshipsService) ListAutoPaging(ctx context.Context, orgI
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[RelationshipRow](raw, "relationships")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1275,8 +1280,8 @@ func (s *CommunityReputationService) Leaderboard(ctx context.Context, orgID stri
 }
 
 // LeaderboardAutoPaging walks every item of Leaderboard across all pages.
-func (s *CommunityReputationService) LeaderboardAutoPaging(ctx context.Context, orgID string, query *CommunityReputationLeaderboardQuery, opts ...RequestOption) *Iter[CommunityReputationLeaderboardResponseLeader] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]CommunityReputationLeaderboardResponseLeader, string, error) {
+func (s *CommunityReputationService) LeaderboardAutoPaging(ctx context.Context, orgID string, query *CommunityReputationLeaderboardQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -1285,7 +1290,7 @@ func (s *CommunityReputationService) LeaderboardAutoPaging(ctx context.Context, 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[CommunityReputationLeaderboardResponseLeader](raw, "leaders")
+		return decodePage[any](raw, "")
 	})
 }
 
@@ -1388,7 +1393,7 @@ func (s *CommunityReputationService) DirectoryAutoPaging(ctx context.Context, or
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[any](raw, "members")
+		return decodePage[any](raw, "")
 	})
 }
 

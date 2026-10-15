@@ -15,8 +15,8 @@ type CoursesService struct {
 // Outline get the outline in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/course/outline
-func (s *CoursesService) Outline(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CourseOutline, error) {
-	var out CourseOutline
+func (s *CoursesService) Outline(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*GatedOutline, error) {
+	var out GatedOutline
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/outline", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -29,6 +29,28 @@ func (s *CoursesService) Outline(ctx context.Context, orgID string, spaceID stri
 func (s *CoursesService) Complete(ctx context.Context, orgID string, spaceID string, slug string, body CoursesCompleteParams, opts ...RequestOption) (*CoursesCompleteResponse, error) {
 	var out CoursesCompleteResponse
 	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/lessons/"+pathEscape(slug)+"/complete", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Enrol replace the enrolment in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/course/enrolment
+func (s *CoursesService) Enrol(ctx context.Context, orgID string, spaceID string, body CoursesEnrolParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/enrolment", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Merge merge the progress
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/course/progress/merge
+func (s *CoursesService) Merge(ctx context.Context, orgID string, spaceID string, body CoursesMergeParams, opts ...RequestOption) (*CoursesMergeResponse, error) {
+	var out CoursesMergeResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/progress/merge", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -114,6 +136,28 @@ func (s *CoursesQuizzesService) SetQuizPolicy(ctx context.Context, orgID string,
 		return nil, err
 	}
 	return out, nil
+}
+
+// Details list details in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/course/authoring/details
+func (s *CoursesQuizzesService) Details(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CoursesQuizzesDetailsResponse, error) {
+	var out CoursesQuizzesDetailsResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/details", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetDetails replace details in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/details
+func (s *CoursesQuizzesService) SetDetails(ctx context.Context, orgID string, spaceID string, body CoursesQuizzesSetDetailsParams, opts ...RequestOption) (*CoursesQuizzesSetDetailsResponse, error) {
+	var out CoursesQuizzesSetDetailsResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/details", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // LessonQuiz get the quiz in a space (lessons)
