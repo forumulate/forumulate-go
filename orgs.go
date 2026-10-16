@@ -283,8 +283,8 @@ func (s *OrgsService) AcceptLegal(ctx context.Context, orgID string, documentID 
 // Plan get the plan in an organization
 //
 // GET /orgs/{orgId}/plan
-func (s *OrgsService) Plan(ctx context.Context, orgID string, opts ...RequestOption) (*OrgsPlanResponse, error) {
-	var out OrgsPlanResponse
+func (s *OrgsService) Plan(ctx context.Context, orgID string, opts ...RequestOption) (*PlanSummary, error) {
+	var out PlanSummary
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/plan", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -294,23 +294,23 @@ func (s *OrgsService) Plan(ctx context.Context, orgID string, opts ...RequestOpt
 // SetPlan update the plan in an organization
 //
 // PATCH /orgs/{orgId}/plan
-func (s *OrgsService) SetPlan(ctx context.Context, orgID string, body OrgsSetPlanParams, opts ...RequestOption) (*OrgsSetPlanResponse, error) {
-	var out OrgsSetPlanResponse
+func (s *OrgsService) SetPlan(ctx context.Context, orgID string, body OrgsSetPlanParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/plan", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // SetOverride update overrides in an organization
 //
 // PATCH /orgs/{orgId}/plan/overrides
-func (s *OrgsService) SetOverride(ctx context.Context, orgID string, body OrgsSetOverrideParams, opts ...RequestOption) (*OrgsSetOverrideResponse, error) {
-	var out OrgsSetOverrideResponse
+func (s *OrgsService) SetOverride(ctx context.Context, orgID string, body OrgsSetOverrideParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/plan/overrides", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // Export export the whole organization as one document

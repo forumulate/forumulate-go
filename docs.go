@@ -878,7 +878,7 @@ func (s *DocsChangeRequestsService) Eligibility(ctx context.Context, orgID strin
 	return &out, nil
 }
 
-// Get get the change request
+// Get get the change request (spaces)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/change-requests/{crId}
 func (s *DocsChangeRequestsService) Get(ctx context.Context, orgID string, spaceID string, crID string, opts ...RequestOption) (*ChangeRequestDetail, error) {
@@ -2637,7 +2637,7 @@ func (s *DocsTranslationsService) Create(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
-// Update update the locale
+// Update update the locale (spaces docs)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/docs/locales/{code}
 func (s *DocsTranslationsService) Update(ctx context.Context, orgID string, spaceID string, code string, body DocsTranslationsUpdateParams, opts ...RequestOption) (*DocsTranslationsUpdateResponse, error) {
@@ -2648,7 +2648,7 @@ func (s *DocsTranslationsService) Update(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
-// Remove delete the locale
+// Remove delete the locale (spaces docs)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/docs/locales/{code}
 func (s *DocsTranslationsService) Remove(ctx context.Context, orgID string, spaceID string, code string, opts ...RequestOption) (*DocsTranslationsRemoveResponse, error) {

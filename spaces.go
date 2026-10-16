@@ -405,6 +405,8 @@ type SpacesAssetsCatalogQuery struct {
 	SpaceID  *string
 	Type     *string
 	Search   *string
+	FolderID *string
+	Tag      *string
 	// Which page of results to return, 1-based.
 	Page   *int64
 	Cursor *string
@@ -428,6 +430,12 @@ func (p *SpacesAssetsCatalogQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Search != nil {
 		v.Set("search", *p.Search)
+	}
+	if p.FolderID != nil {
+		v.Set("folderId", *p.FolderID)
+	}
+	if p.Tag != nil {
+		v.Set("tag", *p.Tag)
 	}
 	if p.Page != nil {
 		v.Set("page", strconv.FormatInt(*p.Page, 10))
@@ -483,6 +491,8 @@ func (s *SpacesAssetsService) Remove(ctx context.Context, orgID string, spaceID 
 type SpacesAssetsServeQuery struct {
 	Share *string
 	W     *string
+	Ar    *string
+	Fit   *string
 }
 
 func (p *SpacesAssetsServeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -495,6 +505,12 @@ func (p *SpacesAssetsServeQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.W != nil {
 		v.Set("w", *p.W)
+	}
+	if p.Ar != nil {
+		v.Set("ar", *p.Ar)
+	}
+	if p.Fit != nil {
+		v.Set("fit", *p.Fit)
 	}
 	return v, opts
 }
@@ -541,9 +557,9 @@ func (p *SpacesDomainsListQuery) encode(opts []RequestOption) (url.Values, []Req
 // List list domains in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/domains
-func (s *SpacesDomainsService) List(ctx context.Context, orgID string, spaceID string, query *SpacesDomainsListQuery, opts ...RequestOption) (*DomainListDto, error) {
+func (s *SpacesDomainsService) List(ctx context.Context, orgID string, spaceID string, query *SpacesDomainsListQuery, opts ...RequestOption) (*DomainListDtoPaged, error) {
 	v, opts := query.encode(opts)
-	var out DomainListDto
+	var out DomainListDtoPaged
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains", v, nil, &out, opts); err != nil {
 		return nil, err
 	}

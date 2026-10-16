@@ -93,7 +93,7 @@ func (s *ItemsService) Create(ctx context.Context, orgID string, spaceID string,
 	return &out, nil
 }
 
-// Read get the item
+// Read get the item (spaces)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/items/{itemId}
 func (s *ItemsService) Read(ctx context.Context, orgID string, spaceID string, itemID string, opts ...RequestOption) (any, error) {
@@ -104,7 +104,7 @@ func (s *ItemsService) Read(ctx context.Context, orgID string, spaceID string, i
 	return out, nil
 }
 
-// Patch update the item
+// Patch update the item (spaces)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/items/{itemId}
 func (s *ItemsService) Patch(ctx context.Context, orgID string, spaceID string, itemID string, body ItemsPatchParams, opts ...RequestOption) (*ItemsPatchResponse, error) {
@@ -115,7 +115,7 @@ func (s *ItemsService) Patch(ctx context.Context, orgID string, spaceID string, 
 	return &out, nil
 }
 
-// Remove delete the item
+// Remove delete the item (spaces)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/items/{itemId}
 func (s *ItemsService) Remove(ctx context.Context, orgID string, spaceID string, itemID string, opts ...RequestOption) (*ItemsRemoveResponse, error) {
@@ -170,7 +170,7 @@ func (s *ItemsService) Verify(ctx context.Context, orgID string, spaceID string,
 	return &out, nil
 }
 
-// Publish publish the item
+// Publish publish the item (spaces)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/items/{itemId}/publish
 func (s *ItemsService) Publish(ctx context.Context, orgID string, spaceID string, itemID string, opts ...RequestOption) (*ItemsPublishResponse, error) {

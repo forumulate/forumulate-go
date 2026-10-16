@@ -48,7 +48,7 @@ func (s *NotificationsService) SnoozeDnd(ctx context.Context, orgID string, body
 	return &out, nil
 }
 
-// GetSchedule get the schedule in an organization
+// GetSchedule get the schedule in an organization (notifications)
 //
 // GET /orgs/{orgId}/notifications/schedule
 func (s *NotificationsService) GetSchedule(ctx context.Context, orgID string, opts ...RequestOption) (*NotificationsGetScheduleResponse, error) {

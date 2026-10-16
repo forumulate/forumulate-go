@@ -1,6 +1,6 @@
 # Forumulate Go SDK
 
-The official Go client for the [Forumulate](https://forumulate.com) API: docs, forum, blog and every other space type, plus the organization around them. Every operation of the API (v1.0.0) is a typed method on a service, grouped the way the product is: `client.Spaces`, `client.Docs.Pages`, `client.Forum.Topics`, `client.Blog.Articles`, …
+The official Go client for the [Forumulate](https://forumulate.com) API: docs, forum, blog and every other space type, plus the organization around them. Every operation of the API (v1.1.0) is a typed method on a service, grouped the way the product is: `client.Spaces`, `client.Docs.Pages`, `client.Forum.Topics`, `client.Blog.Articles`, …
 
 - Go 1.21+, standard library only.
 - Typed request bodies, query parameters and responses; `context.Context` on every call.

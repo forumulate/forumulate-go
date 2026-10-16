@@ -20,12 +20,12 @@ import (
 )
 
 // Version is the version of the API this package was generated from.
-const Version = "1.0.0"
+const Version = "1.1.0"
 
 // DefaultUserAgent is sent on every request unless WithUserAgent replaces it.
 // A library's default User-Agent (Go-http-client/1.1) is what edge firewalls
 // challenge, with an HTML page instead of JSON; an identifying UA passes.
-const DefaultUserAgent = "forumulate-sdk-go/1.0.0"
+const DefaultUserAgent = "forumulate-sdk-go/1.1.0"
 
 // Client is a Forumulate client. Create one with NewClient; it is safe for
 // concurrent use. Its fields are the API's resource namespaces.
@@ -40,6 +40,7 @@ type Client struct {
 	AI                    *AIService
 	Analytics             *AnalyticsService
 	APIActivity           *APIActivityService
+	AssetLibrary          *AssetLibraryService
 	Audit                 *AuditService
 	Auth                  *AuthService
 	Billing               *BillingService
@@ -59,6 +60,13 @@ type Client struct {
 	Contact               *ContactService
 	ContactBlock          *ContactBlockService
 	ContactPrivacy        *ContactPrivacyService
+	ContentAI             *ContentAIService
+	ContentEntryLocales   *ContentEntryLocalesService
+	ContentLibrary        *ContentLibraryService
+	ContentLocales        *ContentLocalesService
+	ContentModel          *ContentModelService
+	ContentStudio         *ContentStudioService
+	ContentWorkflow       *ContentWorkflowService
 	CourseAccess          *CourseAccessService
 	CourseCommerce        *CourseCommerceService
 	CourseLearnerExtras   *CourseLearnerExtrasService
@@ -67,11 +75,21 @@ type Client struct {
 	Courses               *CoursesService
 	CustomEmoji           *CustomEmojiService
 	CustomFields          *CustomFieldsService
+	DeliveryEntries       *DeliveryEntriesService
+	DeliveryKey           *DeliveryKeyService
+	DeliveryKeys          *DeliveryKeysService
+	DeliverySite          *DeliverySiteService
+	DeployStatus          *DeployStatusService
 	DeviceKeys            *DeviceKeysService
 	Docs                  *DocsService
 	Drafts                *DraftsService
 	EmbeddableHosts       *EmbeddableHostsService
 	EmbedFeeds            *EmbedFeedsService
+	EntryCard             *EntryCardService
+	EntryDeliveryPreview  *EntryDeliveryPreviewService
+	EntryFields           *EntryFieldsService
+	EntryUsage            *EntryUsageService
+	Environments          *EnvironmentsService
 	EventAgendaPublic     *EventAgendaPublicService
 	EventAttendees        *EventAttendeesService
 	EventAttendeesPublic  *EventAttendeesPublicService
@@ -93,17 +111,26 @@ type Client struct {
 	GoogleIndexing        *GoogleIndexingService
 	Groups                *GroupsService
 	Growth                *GrowthService
+	HostedOutput          *HostedOutputService
 	Icons                 *IconsService
 	Integrations          *IntegrationsService
 	Invites               *InvitesService
 	Items                 *ItemsService
 	LegalUpdates          *LegalUpdatesService
 	Library               *LibraryService
+	LibraryAsset          *LibraryAssetService
+	LibraryDomain         *LibraryDomainService
+	LibraryItem           *LibraryItemService
+	LibraryMedia          *LibraryMediaService
+	LibrarySDK            *LibrarySDKService
+	LibrarySite           *LibrarySiteService
+	LibraryUsage          *LibraryUsageService
 	Mail                  *MailService
 	MarkdownDialect       *MarkdownDialectService
 	MCP                   *MCPService
 	Members               *MembersService
 	Messages              *MessagesService
+	ModelIo               *ModelIoService
 	Moderation            *ModerationService
 	MyActivity            *MyActivityService
 	MyCoursePaths         *MyCoursePathsService
@@ -115,6 +142,9 @@ type Client struct {
 	OrgPayments           *OrgPaymentsService
 	Orgs                  *OrgsService
 	OrgSms                *OrgSmsService
+	PreviewExchange       *PreviewExchangeService
+	PreviewSessions       *PreviewSessionsService
+	PreviewStatus         *PreviewStatusService
 	Public                *PublicService
 	Questions             *QuestionsService
 	ReaderAuth            *ReaderAuthService
@@ -123,13 +153,16 @@ type Client struct {
 	ReaderPolicy          *ReaderPolicyService
 	ReaderSignOut         *ReaderSignOutService
 	ReaderSignups         *ReaderSignupsService
+	ReferenceCandidates   *ReferenceCandidatesService
 	ReleaseReview         *ReleaseReviewService
+	Releases              *ReleasesService
 	ReleaseTranslation    *ReleaseTranslationService
 	Roadmap               *RoadmapService
 	Roles                 *RolesService
 	SCIM                  *SCIMService
 	Sdks                  *SdksService
 	Search                *SearchService
+	SecretScanning        *SecretScanningService
 	SectionLibrary        *SectionLibraryService
 	ServiceAccounts       *ServiceAccountsService
 	Sessions              *SessionsService
@@ -225,6 +258,7 @@ func NewClient(opts ...Option) *Client {
 	c.Analytics = &AnalyticsService{c: c}
 	c.Analytics.Growth = &AnalyticsGrowthService{c: c}
 	c.APIActivity = &APIActivityService{c: c}
+	c.AssetLibrary = &AssetLibraryService{c: c}
 	c.Audit = &AuditService{c: c}
 	c.Auth = &AuthService{c: c}
 	c.Billing = &BillingService{c: c}
@@ -257,6 +291,13 @@ func NewClient(opts ...Option) *Client {
 	c.Contact = &ContactService{c: c}
 	c.ContactBlock = &ContactBlockService{c: c}
 	c.ContactPrivacy = &ContactPrivacyService{c: c}
+	c.ContentAI = &ContentAIService{c: c}
+	c.ContentEntryLocales = &ContentEntryLocalesService{c: c}
+	c.ContentLibrary = &ContentLibraryService{c: c}
+	c.ContentLocales = &ContentLocalesService{c: c}
+	c.ContentModel = &ContentModelService{c: c}
+	c.ContentStudio = &ContentStudioService{c: c}
+	c.ContentWorkflow = &ContentWorkflowService{c: c}
 	c.CourseAccess = &CourseAccessService{c: c}
 	c.CourseCommerce = &CourseCommerceService{c: c}
 	c.CourseLearnerExtras = &CourseLearnerExtrasService{c: c}
@@ -266,6 +307,11 @@ func NewClient(opts ...Option) *Client {
 	c.Courses.Quizzes = &CoursesQuizzesService{c: c}
 	c.CustomEmoji = &CustomEmojiService{c: c}
 	c.CustomFields = &CustomFieldsService{c: c}
+	c.DeliveryEntries = &DeliveryEntriesService{c: c}
+	c.DeliveryKey = &DeliveryKeyService{c: c}
+	c.DeliveryKeys = &DeliveryKeysService{c: c}
+	c.DeliverySite = &DeliverySiteService{c: c}
+	c.DeployStatus = &DeployStatusService{c: c}
 	c.DeviceKeys = &DeviceKeysService{c: c}
 	c.Docs = &DocsService{c: c}
 	c.Docs.AI = &DocsAIService{c: c}
@@ -284,6 +330,11 @@ func NewClient(opts ...Option) *Client {
 	c.Drafts = &DraftsService{c: c}
 	c.EmbeddableHosts = &EmbeddableHostsService{c: c}
 	c.EmbedFeeds = &EmbedFeedsService{c: c}
+	c.EntryCard = &EntryCardService{c: c}
+	c.EntryDeliveryPreview = &EntryDeliveryPreviewService{c: c}
+	c.EntryFields = &EntryFieldsService{c: c}
+	c.EntryUsage = &EntryUsageService{c: c}
+	c.Environments = &EnvironmentsService{c: c}
 	c.EventAgendaPublic = &EventAgendaPublicService{c: c}
 	c.EventAttendees = &EventAttendeesService{c: c}
 	c.EventAttendeesPublic = &EventAttendeesPublicService{c: c}
@@ -319,6 +370,7 @@ func NewClient(opts ...Option) *Client {
 	c.Groups.Mailbox = &GroupsMailboxService{c: c}
 	c.Groups.Messages = &GroupsMessagesService{c: c}
 	c.Growth = &GrowthService{c: c}
+	c.HostedOutput = &HostedOutputService{c: c}
 	c.Icons = &IconsService{c: c}
 	c.Integrations = &IntegrationsService{c: c}
 	c.Integrations.Cloudflare = &IntegrationsCloudflareService{c: c}
@@ -330,6 +382,13 @@ func NewClient(opts ...Option) *Client {
 	c.Items = &ItemsService{c: c}
 	c.LegalUpdates = &LegalUpdatesService{c: c}
 	c.Library = &LibraryService{c: c}
+	c.LibraryAsset = &LibraryAssetService{c: c}
+	c.LibraryDomain = &LibraryDomainService{c: c}
+	c.LibraryItem = &LibraryItemService{c: c}
+	c.LibraryMedia = &LibraryMediaService{c: c}
+	c.LibrarySDK = &LibrarySDKService{c: c}
+	c.LibrarySite = &LibrarySiteService{c: c}
+	c.LibraryUsage = &LibraryUsageService{c: c}
 	c.Mail = &MailService{c: c}
 	c.Mail.Provider = &MailProviderService{c: c}
 	c.Mail.Templates = &MailTemplatesService{c: c}
@@ -338,6 +397,7 @@ func NewClient(opts ...Option) *Client {
 	c.MCP = &MCPService{c: c}
 	c.Members = &MembersService{c: c}
 	c.Messages = &MessagesService{c: c}
+	c.ModelIo = &ModelIoService{c: c}
 	c.Moderation = &ModerationService{c: c}
 	c.Moderation.ContentRules = &ModerationContentRulesService{c: c}
 	c.Moderation.FlagTypes = &ModerationFlagTypesService{c: c}
@@ -356,6 +416,9 @@ func NewClient(opts ...Option) *Client {
 	c.Orgs.Health = &OrgsHealthService{c: c}
 	c.Orgs.Settings = &OrgsSettingsService{c: c}
 	c.OrgSms = &OrgSmsService{c: c}
+	c.PreviewExchange = &PreviewExchangeService{c: c}
+	c.PreviewSessions = &PreviewSessionsService{c: c}
+	c.PreviewStatus = &PreviewStatusService{c: c}
 	c.Public = &PublicService{c: c}
 	c.Public.Blog = &PublicBlogService{c: c}
 	c.Public.BlogMedia = &PublicBlogMediaService{c: c}
@@ -429,7 +492,9 @@ func NewClient(opts ...Option) *Client {
 	c.ReaderPolicy = &ReaderPolicyService{c: c}
 	c.ReaderSignOut = &ReaderSignOutService{c: c}
 	c.ReaderSignups = &ReaderSignupsService{c: c}
+	c.ReferenceCandidates = &ReferenceCandidatesService{c: c}
 	c.ReleaseReview = &ReleaseReviewService{c: c}
+	c.Releases = &ReleasesService{c: c}
 	c.ReleaseTranslation = &ReleaseTranslationService{c: c}
 	c.Roadmap = &RoadmapService{c: c}
 	c.Roles = &RolesService{c: c}
@@ -440,6 +505,7 @@ func NewClient(opts ...Option) *Client {
 	c.Sdks = &SdksService{c: c}
 	c.Search = &SearchService{c: c}
 	c.Search.EmbeddingProvider = &SearchEmbeddingProviderService{c: c}
+	c.SecretScanning = &SecretScanningService{c: c}
 	c.SectionLibrary = &SectionLibraryService{c: c}
 	c.ServiceAccounts = &ServiceAccountsService{c: c}
 	c.Sessions = &SessionsService{c: c}

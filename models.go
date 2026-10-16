@@ -182,8 +182,6 @@ type DomainSummaryDto struct {
 
 type DomainListDto struct {
 	Domains []DomainSummaryDto `json:"domains"`
-	Page    *PageInfo          `json:"page,omitempty"`
-	Data    []DomainSummaryDto `json:"data,omitempty"`
 }
 
 type DomainResponseDto struct {
@@ -1240,6 +1238,16 @@ type AgentRunResult struct {
 	Turns     float64     `json:"turns"`
 }
 
+type AIContentStatus struct {
+	Configured bool `json:"configured"`
+	Enabled    bool `json:"enabled"`
+}
+
+type AIDraft struct {
+	FieldKey string           `json:"fieldKey"`
+	Rows     []map[string]any `json:"rows"`
+}
+
 type AIInsights struct {
 	Answered         float64         `json:"answered"`
 	Helpful          float64         `json:"helpful"`
@@ -1259,12 +1267,37 @@ type AIProviderStatus struct {
 	VerifiedAt any                        `json:"verifiedAt"`
 }
 
+type AISeoSuggestion struct {
+	Description string `json:"description"`
+	Title       string `json:"title"`
+}
+
 type AISourceSummary struct {
 	ID      string `json:"id"`
 	Kind    string `json:"kind"`
 	SpaceID any    `json:"spaceId"`
 	Title   string `json:"title"`
 	URL     any    `json:"url"`
+}
+
+type AITranslateEntryResult struct {
+	EntryID            string  `json:"entryId"`
+	Error              any     `json:"error"`
+	Ok                 bool    `json:"ok"`
+	Skipped            float64 `json:"skipped"`
+	Translated         float64 `json:"translated"`
+	TranslationEntryID any     `json:"translationEntryId"`
+}
+
+type AITranslateResult struct {
+	Locale  string                   `json:"locale"`
+	Results []AITranslateEntryResult `json:"results"`
+}
+
+type AltTextSuggestion struct {
+	Alt     any    `json:"alt"`
+	AssetID string `json:"assetId"`
+	Error   any    `json:"error"`
 }
 
 type AnalyticsSummary struct {
@@ -1521,6 +1554,15 @@ type AssetCopyNotice struct {
 	URL    string `json:"url"`
 }
 
+type AssetFolderDto struct {
+	AssetCount float64 `json:"assetCount"`
+	CreatedAt  string  `json:"createdAt"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	ParentID   any     `json:"parentId"`
+	UpdatedAt  string  `json:"updatedAt"`
+}
+
 type AtlasSyncResult struct {
 	Errors      []string                    `json:"errors,omitempty"`
 	Import      *AtlasSyncResultImport      `json:"import,omitempty"`
@@ -1726,6 +1768,37 @@ type BlockNodeSpec struct {
 	Type            string          `json:"type"`
 }
 
+type BlockTemplateRow struct {
+	BlockType string         `json:"blockType"`
+	Values    map[string]any `json:"values,omitempty"`
+	Variant   *string        `json:"variant,omitempty"`
+}
+
+type BlockType struct {
+	Description *string          `json:"description,omitempty"`
+	Fields      []SpaceTypeField `json:"fields"`
+	Group       *string          `json:"group,omitempty"`
+	Icon        *string          `json:"icon,omitempty"`
+	Key         string           `json:"key"`
+	Label       string           `json:"label"`
+	Variants    []BlockVariant   `json:"variants,omitempty"`
+}
+
+type BlockTypeSet struct {
+	Description *string               `json:"description,omitempty"`
+	Fields      *BlockTypeSetFields   `json:"fields,omitempty"`
+	Group       *string               `json:"group,omitempty"`
+	Icon        *string               `json:"icon,omitempty"`
+	Label       *string               `json:"label,omitempty"`
+	Variants    *BlockTypeSetVariants `json:"variants,omitempty"`
+}
+
+type BlockVariant struct {
+	Fields *BlockVariantFields `json:"fields,omitempty"`
+	Key    string              `json:"key"`
+	Label  string              `json:"label"`
+}
+
 type BlogAuthorProfile struct {
 	AvatarURL any                     `json:"avatarUrl"`
 	Bio       any                     `json:"bio"`
@@ -1765,6 +1838,24 @@ type BrokenLink struct {
 	PageSlug string `json:"pageSlug"`
 	Reason   string `json:"reason"`
 	URL      string `json:"url"`
+}
+
+type BulkEntriesResult struct {
+	Action    string            `json:"action"`
+	Failed    float64           `json:"failed"`
+	Results   []BulkEntryResult `json:"results"`
+	Succeeded float64           `json:"succeeded"`
+}
+
+type BulkEntryResult struct {
+	Code    *string `json:"code,omitempty"`
+	EntryID string  `json:"entryId"`
+	Message *string `json:"message,omitempty"`
+	Ok      bool    `json:"ok"`
+	Reason  *string `json:"reason,omitempty"`
+	Skipped *bool   `json:"skipped,omitempty"`
+	Status  float64 `json:"status"`
+	TwinID  *string `json:"twinId,omitempty"`
 }
 
 type BulkInviteResult struct {
@@ -1859,14 +1950,22 @@ type CareersPipeline struct {
 }
 
 type CatalogedAsset struct {
-	ContentType string  `json:"contentType"`
-	CreatedAt   string  `json:"createdAt"`
-	Filename    string  `json:"filename"`
-	ID          string  `json:"id"`
-	Size        float64 `json:"size"`
-	SpaceID     any     `json:"spaceId"`
-	UploaderID  any     `json:"uploaderId"`
-	URL         string  `json:"url"`
+	Alt         any      `json:"alt"`
+	Caption     any      `json:"caption"`
+	ContentType string   `json:"contentType"`
+	CreatedAt   string   `json:"createdAt"`
+	Filename    string   `json:"filename"`
+	Focal       any      `json:"focal"`
+	FolderID    any      `json:"folderId"`
+	Height      any      `json:"height"`
+	ID          string   `json:"id"`
+	Placeholder any      `json:"placeholder"`
+	Size        float64  `json:"size"`
+	SpaceID     any      `json:"spaceId"`
+	Tags        []string `json:"tags"`
+	UploaderID  any      `json:"uploaderId"`
+	URL         string   `json:"url"`
+	Width       any      `json:"width"`
 }
 
 type CategoryDetail struct {
@@ -2785,10 +2884,155 @@ type ContactSubjectMessage struct {
 	Subject     any                               `json:"subject"`
 }
 
+type ContentBlockTemplate struct {
+	Description *string            `json:"description,omitempty"`
+	ID          string             `json:"id"`
+	Label       string             `json:"label"`
+	Rows        []BlockTemplateRow `json:"rows"`
+	Source      string             `json:"source"`
+}
+
+type ContentChangeRequest struct {
+	Actions              []string `json:"actions"`
+	ApprovedAt           any      `json:"approvedAt"`
+	ApprovedBy           any      `json:"approvedBy"`
+	AssigneeIds          []string `json:"assigneeIds"`
+	AuthorID             any      `json:"authorId"`
+	ChangedSinceApproval bool     `json:"changedSinceApproval"`
+	ContentType          string   `json:"contentType"`
+	CreatedAt            string   `json:"createdAt"`
+	EntryID              string   `json:"entryId"`
+	EntryTitle           string   `json:"entryTitle"`
+	Gated                bool     `json:"gated"`
+	ID                   string   `json:"id"`
+	LibraryID            string   `json:"libraryId"`
+	Locale               string   `json:"locale"`
+	Note                 any      `json:"note"`
+	ScheduledFor         any      `json:"scheduledFor"`
+	Stage                string   `json:"stage"`
+	Title                string   `json:"title"`
+	UpdatedAt            string   `json:"updatedAt"`
+}
+
+type ContentEnvironment struct {
+	ForkedAt        any    `json:"forkedAt"`
+	LibraryID       string `json:"libraryId"`
+	Name            string `json:"name"`
+	PromotedAt      any    `json:"promotedAt"`
+	Role            string `json:"role"`
+	Slug            string `json:"slug"`
+	SourceLibraryID any    `json:"sourceLibraryId"`
+	SourceName      any    `json:"sourceName"`
+}
+
+type ContentEnvironments struct {
+	Sandboxes []ContentEnvironment `json:"sandboxes"`
+	Self      *ContentEnvironment  `json:"self"`
+}
+
+type ContentLibrary struct {
+	CreatedAt string         `json:"createdAt"`
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Settings  map[string]any `json:"settings"`
+	SiteID    any            `json:"siteId"`
+	Slug      string         `json:"slug"`
+	SpaceID   string         `json:"spaceId"`
+	UpdatedAt string         `json:"updatedAt"`
+}
+
+type ContentModel struct {
+	Shape   map[string]any `json:"shape"`
+	Types   map[string]any `json:"types"`
+	Version float64        `json:"version"`
+}
+
+type ContentModelExport struct {
+	Content  string           `json:"content"`
+	Filename string           `json:"filename"`
+	Format   string           `json:"format"`
+	Issues   []ModelFileIssue `json:"issues"`
+	Version  float64          `json:"version"`
+}
+
+type ContentModelImportResult struct {
+	Applied     bool                         `json:"applied"`
+	Changed     bool                         `json:"changed"`
+	Diff        []ModelChangeLine            `json:"diff"`
+	Issues      []ModelFileIssue             `json:"issues"`
+	Ops         []ContentModelImportResultOp `json:"ops"`
+	StorageOnly bool                         `json:"storageOnly"`
+	Version     float64                      `json:"version"`
+}
+
+type ContentModelVersion struct {
+	CreatedAt  string                  `json:"createdAt"`
+	CreatedBy  any                     `json:"createdBy"`
+	MigratedAt any                     `json:"migratedAt"`
+	Ops        []ContentModelVersionOp `json:"ops"`
+	Version    float64                 `json:"version"`
+}
+
 type ContentPoint struct {
 	Period string  `json:"period"`
 	Posts  float64 `json:"posts"`
 	Topics float64 `json:"topics"`
+}
+
+type ContentRelease struct {
+	CreatedAt    string               `json:"createdAt"`
+	CreatedBy    any                  `json:"createdBy"`
+	Description  string               `json:"description"`
+	Failure      any                  `json:"failure"`
+	ID           string               `json:"id"`
+	ItemCount    float64              `json:"itemCount"`
+	Items        []ContentReleaseItem `json:"items"`
+	Name         string               `json:"name"`
+	PublishAt    any                  `json:"publishAt"`
+	PublishedAt  any                  `json:"publishedAt"`
+	PublishedBy  any                  `json:"publishedBy"`
+	RolledBackAt any                  `json:"rolledBackAt"`
+	RolledBackBy any                  `json:"rolledBackBy"`
+	ScheduledBy  any                  `json:"scheduledBy"`
+	Status       string               `json:"status"`
+	UpdatedAt    string               `json:"updatedAt"`
+}
+
+type ContentReleaseItem struct {
+	AddedAt       string `json:"addedAt"`
+	ContainerName any    `json:"containerName"`
+	ContentType   any    `json:"contentType"`
+	ID            string `json:"id"`
+	Kind          string `json:"kind"`
+	LibraryID     any    `json:"libraryId"`
+	Locale        string `json:"locale"`
+	Problem       any    `json:"problem"`
+	RevisionID    any    `json:"revisionId"`
+	Slug          any    `json:"slug"`
+	SpaceID       any    `json:"spaceId"`
+	State         string `json:"state"`
+	Surface       string `json:"surface"`
+	TargetID      string `json:"targetId"`
+	Title         any    `json:"title"`
+}
+
+type ContentReleaseSummary struct {
+	CreatedAt    string  `json:"createdAt"`
+	Description  string  `json:"description"`
+	Failure      any     `json:"failure"`
+	ID           string  `json:"id"`
+	ItemCount    float64 `json:"itemCount"`
+	Name         string  `json:"name"`
+	PublishAt    any     `json:"publishAt"`
+	PublishedAt  any     `json:"publishedAt"`
+	RolledBackAt any     `json:"rolledBackAt"`
+	Status       string  `json:"status"`
+	UpdatedAt    string  `json:"updatedAt"`
+}
+
+type ContentReviewGate struct {
+	Required     bool `json:"required"`
+	SelfApproval bool `json:"selfApproval"`
 }
 
 type ContentRule struct {
@@ -2798,6 +3042,70 @@ type ContentRule struct {
 	Message  string `json:"message"`
 	Pattern  string `json:"pattern"`
 	Severity string `json:"severity"`
+}
+
+type ContentSDKLanguageStatus struct {
+	Language      string              `json:"language"`
+	LatestVersion any                 `json:"latestVersion"`
+	PackageID     any                 `json:"packageId"`
+	PackageName   string              `json:"packageName"`
+	Publishes     []ContentSDKPublish `json:"publishes"`
+	Targets       []string            `json:"targets"`
+}
+
+type ContentSDKPublish struct {
+	CreatedAt string `json:"createdAt"`
+	Error     any    `json:"error"`
+	ID        string `json:"id"`
+	ResultURL any    `json:"resultUrl"`
+	Status    string `json:"status"`
+	Target    string `json:"target"`
+	Version   string `json:"version"`
+}
+
+type ContentSDKStatus struct {
+	Languages []ContentSDKLanguageStatus `json:"languages"`
+	LibraryID string                     `json:"libraryId"`
+}
+
+type ContentTypeSettings struct {
+	BlockLibrary      *bool                        `json:"blockLibrary,omitempty"`
+	DefaultSort       *string                      `json:"defaultSort,omitempty"`
+	DefaultVisibility *string                      `json:"defaultVisibility,omitempty"`
+	Group             *string                      `json:"group,omitempty"`
+	Icon              *string                      `json:"icon,omitempty"`
+	ListColumns       []string                     `json:"listColumns,omitempty"`
+	Orderable         *bool                        `json:"orderable,omitempty"`
+	PreviewURL        *string                      `json:"previewUrl,omitempty"`
+	Routable          *bool                        `json:"routable,omitempty"`
+	SearchableFields  []string                     `json:"searchableFields,omitempty"`
+	Singleton         *bool                        `json:"singleton,omitempty"`
+	SlugField         *string                      `json:"slugField,omitempty"`
+	Strict            *bool                        `json:"strict,omitempty"`
+	TitleField        *string                      `json:"titleField,omitempty"`
+	Versions          *ContentTypeSettingsVersions `json:"versions,omitempty"`
+}
+
+type ContentTypeSettingsPatch struct {
+	BlockLibrary      *bool                             `json:"blockLibrary,omitempty"`
+	DefaultSort       *string                           `json:"defaultSort,omitempty"`
+	DefaultVisibility *string                           `json:"defaultVisibility,omitempty"`
+	Group             *string                           `json:"group,omitempty"`
+	Icon              *string                           `json:"icon,omitempty"`
+	ListColumns       []string                          `json:"listColumns,omitempty"`
+	Orderable         *bool                             `json:"orderable,omitempty"`
+	PreviewURL        *string                           `json:"previewUrl,omitempty"`
+	Routable          *bool                             `json:"routable,omitempty"`
+	SearchableFields  []string                          `json:"searchableFields,omitempty"`
+	Singleton         *bool                             `json:"singleton,omitempty"`
+	SlugField         *string                           `json:"slugField,omitempty"`
+	Strict            *bool                             `json:"strict,omitempty"`
+	TitleField        *string                           `json:"titleField,omitempty"`
+	Versions          *ContentTypeSettingsPatchVersions `json:"versions,omitempty"`
+}
+
+type ContentWorkflowSettings struct {
+	Gates map[string]any `json:"gates"`
 }
 
 type ConversationDetail struct {
@@ -3047,6 +3355,51 @@ type DayThresholds struct {
 	Partial     float64 `json:"partial"`
 }
 
+type DeliveryKeyInfo struct {
+	ContentTypes   any    `json:"contentTypes"`
+	ID             string `json:"id"`
+	Kind           string `json:"kind"`
+	LibraryID      string `json:"libraryId"`
+	Locales        any    `json:"locales"`
+	OrganizationID string `json:"organizationId"`
+	Stage          string `json:"stage"`
+}
+
+type DeliveryKeySummary struct {
+	ContentTypes any                         `json:"contentTypes"`
+	CreatedAt    string                      `json:"createdAt"`
+	ExpiresAt    any                         `json:"expiresAt"`
+	ID           string                      `json:"id"`
+	Kind         string                      `json:"kind"`
+	LastUsedAt   any                         `json:"lastUsedAt"`
+	LibraryID    string                      `json:"libraryId"`
+	Locales      any                         `json:"locales"`
+	Name         string                      `json:"name"`
+	Origins      any                         `json:"origins"`
+	Prefix       string                      `json:"prefix"`
+	Requests     *DeliveryKeySummaryRequests `json:"requests"`
+	RetiresAt    any                         `json:"retiresAt"`
+	Stage        string                      `json:"stage"`
+}
+
+type DeployHookBuildStatus struct {
+	Active          bool   `json:"active"`
+	ID              string `json:"id"`
+	LastError       any    `json:"lastError"`
+	LastStatusCode  any    `json:"lastStatusCode"`
+	LastTriggeredAt any    `json:"lastTriggeredAt"`
+	LibraryID       any    `json:"libraryId"`
+	PendingUntil    any    `json:"pendingUntil"`
+	Provider        string `json:"provider"`
+}
+
+type DeployHookStatus struct {
+	LastError       any    `json:"lastError"`
+	LastStatusCode  any    `json:"lastStatusCode"`
+	LastTriggeredAt any    `json:"lastTriggeredAt"`
+	Provider        string `json:"provider"`
+}
+
 type DerivedCounters struct {
 	LikesGiven    float64 `json:"likesGiven"`
 	LikesReceived float64 `json:"likesReceived"`
@@ -3230,10 +3583,12 @@ type EeoSummary struct {
 }
 
 type EffectiveShape struct {
-	Params   []SpaceTypeField   `json:"params"`
-	Sections []SpaceTypeSection `json:"sections"`
-	Space    *SpaceShape        `json:"space"`
-	Unknown  []string           `json:"unknown"`
+	BlockTypes []BlockType          `json:"blockTypes"`
+	Params     []SpaceTypeField     `json:"params"`
+	Sections   []SpaceTypeSection   `json:"sections"`
+	Settings   *ContentTypeSettings `json:"settings,omitempty"`
+	Space      *SpaceShape          `json:"space"`
+	Unknown    []string             `json:"unknown"`
 }
 
 type EffectiveSlotRole struct {
@@ -3311,6 +3666,163 @@ type EmbedSpec struct {
 	Src            *string                  `json:"src,omitempty"`
 	ThemeInit      *EmbedSpecThemeInit      `json:"themeInit,omitempty"`
 	ThemeSupport   []string                 `json:"themeSupport,omitempty"`
+}
+
+type EntryAllLocaleFields struct {
+	ContentType  any            `json:"contentType"`
+	EntryID      string         `json:"entryId"`
+	Locales      map[string]any `json:"locales"`
+	SourceLocale string         `json:"sourceLocale"`
+}
+
+type EntryDeliveryPreview struct {
+	Body   any     `json:"body"`
+	Reason *string `json:"reason,omitempty"`
+	Stage  string  `json:"stage"`
+	URL    string  `json:"url"`
+}
+
+type EntryFields struct {
+	Draft     bool           `json:"draft"`
+	EntryID   string         `json:"entryId"`
+	Etag      string         `json:"etag"`
+	Fields    map[string]any `json:"fields"`
+	LibraryID string         `json:"libraryId"`
+}
+
+type EntryFieldsWrite struct {
+	Draft     bool                 `json:"draft"`
+	EntryID   string               `json:"entryId"`
+	Etag      string               `json:"etag"`
+	Fields    map[string]any       `json:"fields"`
+	LibraryID string               `json:"libraryId"`
+	Ops       []EntryFieldsWriteOp `json:"ops"`
+}
+
+type EntryLocaleFields struct {
+	ContentType  any            `json:"contentType"`
+	EntryID      string         `json:"entryId"`
+	Fields       map[string]any `json:"fields"`
+	Locale       string         `json:"locale"`
+	SourceLocale string         `json:"sourceLocale"`
+}
+
+type EntryLocaleTwin struct {
+	Code    string `json:"code"`
+	EntryID any    `json:"entryId"`
+	Label   string `json:"label"`
+	Source  bool   `json:"source"`
+	Status  any    `json:"status"`
+}
+
+type EntryLock struct {
+	ExpiresAt    string  `json:"expiresAt"`
+	LockedAt     string  `json:"lockedAt"`
+	LockedBy     string  `json:"lockedBy"`
+	LockedByName *string `json:"lockedByName,omitempty"`
+}
+
+type EntryLockState struct {
+	Held bool       `json:"held"`
+	Lock *EntryLock `json:"lock"`
+}
+
+type EntryOverview struct {
+	ContentType     any               `json:"contentType"`
+	DraftRevisionID any               `json:"draftRevisionId"`
+	EntryID         string            `json:"entryId"`
+	LibraryID       string            `json:"libraryId"`
+	LiveRevisionID  any               `json:"liveRevisionId"`
+	Locale          string            `json:"locale"`
+	Locales         []EntryLocaleTwin `json:"locales"`
+	ModelVersion    float64           `json:"modelVersion"`
+	Schedule        *EntrySchedule    `json:"schedule"`
+	Slug            string            `json:"slug"`
+	Source          bool              `json:"source"`
+	SourceEntryID   string            `json:"sourceEntryId"`
+	Status          string            `json:"status"`
+	Title           string            `json:"title"`
+	UpdatedAt       string            `json:"updatedAt"`
+}
+
+type EntryReferrer struct {
+	ContentType any    `json:"contentType"`
+	EntryID     string `json:"entryId"`
+	FieldPath   string `json:"fieldPath"`
+	LibraryID   string `json:"libraryId"`
+	Stage       string `json:"stage"`
+	Title       string `json:"title"`
+}
+
+type EntryRevision struct {
+	AuthorID     any    `json:"authorId"`
+	AuthorName   any    `json:"authorName"`
+	CreatedAt    string `json:"createdAt"`
+	Draft        bool   `json:"draft"`
+	ID           string `json:"id"`
+	Live         bool   `json:"live"`
+	ModelVersion any    `json:"modelVersion"`
+	Status       string `json:"status"`
+	Title        string `json:"title"`
+}
+
+type EntryRevisionFields struct {
+	Fields       map[string]any `json:"fields"`
+	ModelVersion float64        `json:"modelVersion"`
+	Revision     *EntryRevision `json:"revision"`
+}
+
+type EntrySchedule struct {
+	PublishAt   string `json:"publishAt"`
+	ScheduledBy any    `json:"scheduledBy"`
+}
+
+type EntryTranslationWrite struct {
+	Created       bool           `json:"created"`
+	Draft         bool           `json:"draft"`
+	EntryID       string         `json:"entryId"`
+	Etag          string         `json:"etag"`
+	Fields        map[string]any `json:"fields"`
+	LibraryID     string         `json:"libraryId"`
+	Locale        string         `json:"locale"`
+	SourceEntryID string         `json:"sourceEntryId"`
+}
+
+type EntryUsage struct {
+	Hidden float64         `json:"hidden"`
+	UsedIn []EntryReferrer `json:"usedIn"`
+}
+
+type EnvironmentCompare struct {
+	CanPromote             bool                    `json:"canPromote"`
+	Changes                []EnvironmentTypeChange `json:"changes"`
+	Conflicts              []EnvironmentConflict   `json:"conflicts"`
+	Ops                    []EnvironmentCompareOp  `json:"ops"`
+	SandboxLibraryID       string                  `json:"sandboxLibraryId"`
+	SourceChangedSinceFork bool                    `json:"sourceChangedSinceFork"`
+	SourceLibraryID        string                  `json:"sourceLibraryId"`
+}
+
+type EnvironmentConflict struct {
+	Message string `json:"message"`
+	Unit    string `json:"unit"`
+}
+
+type EnvironmentFieldChange struct {
+	Change string `json:"change"`
+	Key    string `json:"key"`
+}
+
+type EnvironmentPromoteResult struct {
+	Changes []EnvironmentTypeChange `json:"changes"`
+	Library *ContentLibrary         `json:"library"`
+	Version float64                 `json:"version"`
+}
+
+type EnvironmentTypeChange struct {
+	Change string                   `json:"change"`
+	Fields []EnvironmentFieldChange `json:"fields"`
+	Type   any                      `json:"type"`
 }
 
 type EventAgenda struct {
@@ -3805,6 +4317,13 @@ type FeedbackComment struct {
 	Score     any    `json:"score"`
 }
 
+type FieldAdminLayout struct {
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Tab         *string `json:"tab,omitempty"`
+}
+
 type FieldDef struct {
 	EditableByUser   bool     `json:"editableByUser"`
 	EntityType       string   `json:"entityType"`
@@ -3817,6 +4336,46 @@ type FieldDef struct {
 	SortOrder        float64  `json:"sortOrder"`
 	Type             string   `json:"type"`
 	Visibility       string   `json:"visibility"`
+}
+
+type FieldSet struct {
+	Accept          []string          `json:"accept,omitempty"`
+	Admin           *FieldAdminLayout `json:"admin,omitempty"`
+	Allowed         []string          `json:"allowed,omitempty"`
+	AllowedBlocks   []string          `json:"allowedBlocks,omitempty"`
+	AllowedGroups   []string          `json:"allowedGroups,omitempty"`
+	Column          *bool             `json:"column,omitempty"`
+	Condition       any               `json:"condition,omitempty"`
+	Default         map[string]any    `json:"default,omitempty"`
+	Expr            any               `json:"expr,omitempty"`
+	Facet           *bool             `json:"facet,omitempty"`
+	Fields          *FieldSetFields   `json:"fields,omitempty"`
+	From            *string           `json:"from,omitempty"`
+	HasMany         *bool             `json:"hasMany,omitempty"`
+	Hint            *string           `json:"hint,omitempty"`
+	Indexed         *bool             `json:"indexed,omitempty"`
+	Internal        *bool             `json:"internal,omitempty"`
+	Label           *string           `json:"label,omitempty"`
+	Language        *string           `json:"language,omitempty"`
+	Localized       *bool             `json:"localized,omitempty"`
+	Max             *float64          `json:"max,omitempty"`
+	MaxLength       *float64          `json:"maxLength,omitempty"`
+	Meta            *bool             `json:"meta,omitempty"`
+	Min             *float64          `json:"min,omitempty"`
+	MinLength       *float64          `json:"minLength,omitempty"`
+	Options         []string          `json:"options,omitempty"`
+	Pattern         *string           `json:"pattern,omitempty"`
+	Placeholder     *string           `json:"placeholder,omitempty"`
+	RelationSpaceID *string           `json:"relationSpaceId,omitempty"`
+	Required        *bool             `json:"required,omitempty"`
+	RowLabelField   *string           `json:"rowLabelField,omitempty"`
+	Schema          map[string]any    `json:"schema,omitempty"`
+	SchemaProperty  *string           `json:"schemaProperty,omitempty"`
+	Sortable        *bool             `json:"sortable,omitempty"`
+	To              []ReferenceTarget `json:"to,omitempty"`
+	Type            *string           `json:"type,omitempty"`
+	Unique          *bool             `json:"unique,omitempty"`
+	Visibility      *string           `json:"visibility,omitempty"`
 }
 
 type FieldValue struct {
@@ -4241,6 +4800,17 @@ type HealthReport struct {
 	Usage     *StorageUsage `json:"usage"`
 }
 
+type HostedSitemap struct {
+	Entries []HostedSitemapEntry `json:"entries"`
+	Locales *PathLocales         `json:"locales"`
+}
+
+type HostedType struct {
+	Fields []SpaceTypeField `json:"fields"`
+	Key    string           `json:"key"`
+	Label  string           `json:"label"`
+}
+
 type HostOriginPolicy struct {
 	Contributes *HostOriginPolicyContributes `json:"contributes"`
 	Host        string                       `json:"host"`
@@ -4513,6 +5083,11 @@ type InviteRow struct {
 	SpaceID   any    `json:"spaceId"`
 }
 
+type IssuedDeliveryKey struct {
+	Key    *DeliveryKeySummary `json:"key"`
+	Secret string              `json:"secret"`
+}
+
 type ItemMovementResult struct {
 	Delta    float64 `json:"delta"`
 	ItemKey  string  `json:"itemKey"`
@@ -4674,12 +5249,97 @@ type LevelProgress struct {
 	XpIntoLevel    float64 `json:"xpIntoLevel"`
 }
 
+type LibraryAsset struct {
+	Alt         any     `json:"alt"`
+	Caption     any     `json:"caption"`
+	ContentType string  `json:"contentType"`
+	Filename    string  `json:"filename"`
+	Focal       any     `json:"focal"`
+	Height      any     `json:"height"`
+	ID          string  `json:"id"`
+	Placeholder any     `json:"placeholder"`
+	Size        float64 `json:"size"`
+	URL         string  `json:"url"`
+	Width       any     `json:"width"`
+}
+
+type LibraryAssetPage struct {
+	AltTextAI  bool                    `json:"altTextAi"`
+	Assets     []LibraryAssetPageAsset `json:"assets"`
+	Page       *PageInfo               `json:"page"`
+	Tags       []string                `json:"tags"`
+	TotalBytes float64                 `json:"totalBytes"`
+}
+
 type LibraryBlock struct {
 	Attrs   map[string]any     `json:"attrs,omitempty"`
 	Content []LibraryBlock     `json:"content,omitempty"`
 	Marks   []LibraryBlockMark `json:"marks,omitempty"`
 	Text    *string            `json:"text,omitempty"`
 	Type    string             `json:"type"`
+}
+
+type LibraryLocale struct {
+	Code      string   `json:"code"`
+	Fallbacks []string `json:"fallbacks"`
+	Label     string   `json:"label"`
+	Source    bool     `json:"source"`
+}
+
+type LibraryLocales struct {
+	LocaleFallbacks map[string]any  `json:"localeFallbacks"`
+	Locales         []LibraryLocale `json:"locales"`
+	SourceLocale    string          `json:"sourceLocale"`
+}
+
+type LibraryMember struct {
+	CustomRoleID any                 `json:"customRoleId"`
+	Effect       string              `json:"effect"`
+	Email        string              `json:"email"`
+	Name         string              `json:"name"`
+	Role         any                 `json:"role"`
+	Scope        *LibraryMemberScope `json:"scope"`
+	UserID       string              `json:"userId"`
+}
+
+type LibraryMenu struct {
+	ContentType      string  `json:"contentType"`
+	ContentTypeLabel string  `json:"contentTypeLabel"`
+	Depth            float64 `json:"depth"`
+	EntryID          string  `json:"entryId"`
+	Field            string  `json:"field"`
+	Slug             string  `json:"slug"`
+	Status           string  `json:"status"`
+	Title            string  `json:"title"`
+	UpdatedAt        string  `json:"updatedAt"`
+}
+
+type LibraryMenuType struct {
+	Depth float64 `json:"depth"`
+	Field string  `json:"field"`
+	Key   string  `json:"key"`
+	Label string  `json:"label"`
+}
+
+type LibraryPlanFeature struct {
+	Enabled bool   `json:"enabled"`
+	From    string `json:"from"`
+	Key     string `json:"key"`
+}
+
+type LibraryUsage struct {
+	Features  []LibraryPlanFeature `json:"features"`
+	LibraryID string               `json:"libraryId"`
+	Metrics   []LibraryUsageMetric `json:"metrics"`
+	Plan      string               `json:"plan"`
+}
+
+type LibraryUsageMetric struct {
+	Limit     any    `json:"limit"`
+	Metric    string `json:"metric"`
+	NearLimit bool   `json:"nearLimit"`
+	Scope     string `json:"scope"`
+	Used      any    `json:"used"`
 }
 
 type LinkedTopic struct {
@@ -4819,6 +5479,23 @@ type MessageView struct {
 type MintedPAT struct {
 	PAT   *MintedPATPAT `json:"pat"`
 	Token string        `json:"token"`
+}
+
+type ModelChangeLine struct {
+	After     map[string]any `json:"after,omitempty"`
+	Before    map[string]any `json:"before,omitempty"`
+	BlockType *string        `json:"blockType,omitempty"`
+	Op        string         `json:"op"`
+	Path      *string        `json:"path,omitempty"`
+	Property  *string        `json:"property,omitempty"`
+	Target    string         `json:"target"`
+	Type      *string        `json:"type,omitempty"`
+}
+
+type ModelFileIssue struct {
+	Kind    string `json:"kind"`
+	Message string `json:"message"`
+	Path    string `json:"path"`
 }
 
 type ModeratorActivityPoint struct {
@@ -5443,6 +6120,11 @@ type ParticipantView struct {
 	UserID    string `json:"userId"`
 }
 
+type PathLocales struct {
+	Source string   `json:"source"`
+	Twins  []string `json:"twins"`
+}
+
 type PATScopeDefinition struct {
 	Capabilities []string `json:"capabilities"`
 	Description  string   `json:"description"`
@@ -5533,6 +6215,12 @@ type PlanEntry struct {
 	Collision bool   `json:"collision"`
 	Slug      string `json:"slug"`
 	Title     string `json:"title"`
+}
+
+type PlanSummary struct {
+	Limits  map[string]any `json:"limits"`
+	Metrics []QuotaStatus  `json:"metrics"`
+	Plan    string         `json:"plan"`
 }
 
 type PointsLeader struct {
@@ -5651,6 +6339,12 @@ type PrefsSummary struct {
 	Timezone         string   `json:"timezone"`
 }
 
+type PreviewExchange struct {
+	Credential string `json:"credential"`
+	ExpiresAt  string `json:"expiresAt"`
+	LibraryID  string `json:"libraryId"`
+}
+
 type PreviewLink struct {
 	ExpiresAt     string   `json:"expiresAt"`
 	Token         string   `json:"token"`
@@ -5665,6 +6359,22 @@ type PreviewPage struct {
 	Status      string         `json:"status"`
 	Title       string         `json:"title"`
 	Unpublished bool           `json:"unpublished"`
+}
+
+type PreviewSession struct {
+	EntryID   string  `json:"entryId"`
+	ExpiresAt string  `json:"expiresAt"`
+	LibraryID string  `json:"libraryId"`
+	Path      string  `json:"path"`
+	ReleaseID *string `json:"releaseId,omitempty"`
+	Token     string  `json:"token"`
+}
+
+type PreviewStatus struct {
+	AllowLoopback bool     `json:"allowLoopback"`
+	Origins       []string `json:"origins"`
+	PreviewKey    bool     `json:"previewKey"`
+	Route         *string  `json:"route,omitempty"`
 }
 
 type Problem struct {
@@ -6438,6 +7148,22 @@ type RedirectRule struct {
 	Type      *string            `json:"type,omitempty"`
 }
 
+type ReferenceCandidate struct {
+	ContentType *string `json:"contentType,omitempty"`
+	ID          string  `json:"id"`
+	Kind        string  `json:"kind"`
+	Locale      *string `json:"locale,omitempty"`
+	Published   bool    `json:"published"`
+	Resolvable  bool    `json:"resolvable"`
+	SpaceName   *string `json:"spaceName,omitempty"`
+	Title       string  `json:"title"`
+}
+
+type ReferenceTarget struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
 type ReferredPage struct {
 	Count     float64 `json:"count"`
 	PageID    string  `json:"pageId"`
@@ -6510,6 +7236,20 @@ type RelationshipRow struct {
 	TargetUserID string `json:"targetUserId"`
 }
 
+type ReleaseCandidate struct {
+	ContainerName any    `json:"containerName"`
+	ContentType   any    `json:"contentType"`
+	Kind          string `json:"kind"`
+	LibraryID     any    `json:"libraryId"`
+	Locale        string `json:"locale"`
+	Slug          string `json:"slug"`
+	SpaceID       any    `json:"spaceId"`
+	Surface       string `json:"surface"`
+	TargetID      string `json:"targetId"`
+	Title         string `json:"title"`
+	UpdatedAt     string `json:"updatedAt"`
+}
+
 type ReleaseLocaleLink struct {
 	Available bool   `json:"available"`
 	Code      string `json:"code"`
@@ -6528,6 +7268,25 @@ type ReleaseNeighbours struct {
 	More     []ReleaseNeighbour `json:"more"`
 	Next     *ReleaseNeighbour  `json:"next"`
 	Previous *ReleaseNeighbour  `json:"previous"`
+}
+
+type ReleasePreview struct {
+	ExpiresAt string                  `json:"expiresAt"`
+	Libraries []ReleasePreviewLibrary `json:"libraries"`
+	Surfaces  []ReleasePreviewSurface `json:"surfaces"`
+	Token     string                  `json:"token"`
+}
+
+type ReleasePublishResult struct {
+	Published float64         `json:"published"`
+	Release   *ContentRelease `json:"release"`
+}
+
+type ReleaseRollbackResult struct {
+	Release     *ContentRelease `json:"release"`
+	Restored    float64         `json:"restored"`
+	Skipped     float64         `json:"skipped"`
+	Unpublished float64         `json:"unpublished"`
 }
 
 type ReleaseTranslation struct {
@@ -6868,9 +7627,10 @@ type ShadowSnapshot struct {
 }
 
 type ShapeOverride struct {
-	Params   *ShapeOverrideParams   `json:"params,omitempty"`
-	Sections *ShapeOverrideSections `json:"sections,omitempty"`
-	Space    *ShapeOverrideSpace    `json:"space,omitempty"`
+	BlockTypes *ShapeOverrideBlockTypes `json:"blockTypes,omitempty"`
+	Params     *ShapeOverrideParams     `json:"params,omitempty"`
+	Sections   *ShapeOverrideSections   `json:"sections,omitempty"`
+	Space      *ShapeOverrideSpace      `json:"space,omitempty"`
 }
 
 type SharedDraftSummary struct {
@@ -7186,22 +7946,44 @@ type SpaceSummary struct {
 }
 
 type SpaceTypeField struct {
-	Column          *bool          `json:"column,omitempty"`
-	Default         map[string]any `json:"default,omitempty"`
-	Facet           *bool          `json:"facet,omitempty"`
-	Hint            *string        `json:"hint,omitempty"`
-	Internal        *bool          `json:"internal,omitempty"`
-	Key             string         `json:"key"`
-	Label           string         `json:"label"`
-	Max             *float64       `json:"max,omitempty"`
-	Meta            *bool          `json:"meta,omitempty"`
-	Min             *float64       `json:"min,omitempty"`
-	Options         []string       `json:"options,omitempty"`
-	Placeholder     *string        `json:"placeholder,omitempty"`
-	RelationSpaceID *string        `json:"relationSpaceId,omitempty"`
-	Required        *bool          `json:"required,omitempty"`
-	SchemaProperty  *string        `json:"schemaProperty,omitempty"`
-	Type            string         `json:"type"`
+	Accept          []string          `json:"accept,omitempty"`
+	Admin           *FieldAdminLayout `json:"admin,omitempty"`
+	Allowed         []string          `json:"allowed,omitempty"`
+	AllowedBlocks   []string          `json:"allowedBlocks,omitempty"`
+	AllowedGroups   []string          `json:"allowedGroups,omitempty"`
+	Column          *bool             `json:"column,omitempty"`
+	Condition       any               `json:"condition,omitempty"`
+	Default         map[string]any    `json:"default,omitempty"`
+	Expr            any               `json:"expr,omitempty"`
+	Facet           *bool             `json:"facet,omitempty"`
+	Fields          []SpaceTypeField  `json:"fields,omitempty"`
+	From            *string           `json:"from,omitempty"`
+	HasMany         *bool             `json:"hasMany,omitempty"`
+	Hint            *string           `json:"hint,omitempty"`
+	Indexed         *bool             `json:"indexed,omitempty"`
+	Internal        *bool             `json:"internal,omitempty"`
+	Key             string            `json:"key"`
+	Label           string            `json:"label"`
+	Language        *string           `json:"language,omitempty"`
+	Localized       *bool             `json:"localized,omitempty"`
+	Max             *float64          `json:"max,omitempty"`
+	MaxLength       *float64          `json:"maxLength,omitempty"`
+	Meta            *bool             `json:"meta,omitempty"`
+	Min             *float64          `json:"min,omitempty"`
+	MinLength       *float64          `json:"minLength,omitempty"`
+	Options         []string          `json:"options,omitempty"`
+	Pattern         *string           `json:"pattern,omitempty"`
+	Placeholder     *string           `json:"placeholder,omitempty"`
+	RelationSpaceID *string           `json:"relationSpaceId,omitempty"`
+	Required        *bool             `json:"required,omitempty"`
+	RowLabelField   *string           `json:"rowLabelField,omitempty"`
+	Schema          map[string]any    `json:"schema,omitempty"`
+	SchemaProperty  *string           `json:"schemaProperty,omitempty"`
+	Sortable        *bool             `json:"sortable,omitempty"`
+	To              []ReferenceTarget `json:"to,omitempty"`
+	Type            string            `json:"type"`
+	Unique          *bool             `json:"unique,omitempty"`
+	Visibility      *string           `json:"visibility,omitempty"`
 }
 
 type SpaceTypeSection struct {
@@ -7220,6 +8002,7 @@ type SpaceTypeSpec struct {
 	Backing              string                    `json:"backing"`
 	Description          string                    `json:"description"`
 	Fields               []SpaceTypeField          `json:"fields,omitempty"`
+	ForcedVisibility     *string                   `json:"forcedVisibility,omitempty"`
 	Icon                 string                    `json:"icon"`
 	Name                 string                    `json:"name"`
 	PageKinds            []SpacePageKind           `json:"pageKinds,omitempty"`
@@ -7537,12 +8320,90 @@ type StoredPiecePage struct {
 	Sidebar *StoredPiecePageSidebar `json:"sidebar,omitempty"`
 }
 
+type StoredRedirect struct {
+	Auto      *bool                `json:"auto,omitempty"`
+	From      string               `json:"from"`
+	Match     *StoredRedirectMatch `json:"match,omitempty"`
+	PassQuery *bool                `json:"passQuery,omitempty"`
+	Status    any                  `json:"status,omitempty"`
+	To        string               `json:"to"`
+	Type      *string              `json:"type,omitempty"`
+}
+
 type StoredSpecSummary struct {
 	CreatedAt    string `json:"createdAt"`
 	ID           string `json:"id"`
 	LastSyncedAt any    `json:"lastSyncedAt"`
 	Name         string `json:"name"`
 	SourceURL    string `json:"sourceUrl"`
+}
+
+type StudioCapabilities struct {
+	Members bool                     `json:"members"`
+	Model   bool                     `json:"model"`
+	Publish bool                     `json:"publish"`
+	Scope   *StudioCapabilitiesScope `json:"scope"`
+	Write   bool                     `json:"write"`
+}
+
+type StudioContentType struct {
+	Description   any                  `json:"description"`
+	EntryCount    float64              `json:"entryCount"`
+	Fields        []SpaceTypeField     `json:"fields"`
+	GlobalEntryID any                  `json:"globalEntryId"`
+	Group         any                  `json:"group"`
+	Icon          any                  `json:"icon"`
+	Key           string               `json:"key"`
+	Label         string               `json:"label"`
+	Routable      bool                 `json:"routable"`
+	Settings      *ContentTypeSettings `json:"settings"`
+	Singleton     bool                 `json:"singleton"`
+}
+
+type StudioEntryListBody struct {
+	Data             []StudioEntryRow `json:"data"`
+	LocksUnavailable *bool            `json:"locksUnavailable,omitempty"`
+	Page             *PageInfo        `json:"page"`
+}
+
+type StudioEntryLock struct {
+	ExpiresAt string `json:"expiresAt"`
+	Name      string `json:"name"`
+	UserID    string `json:"userId"`
+	You       bool   `json:"you"`
+}
+
+type StudioEntryRow struct {
+	Fields      map[string]any   `json:"fields"`
+	ID          string           `json:"id"`
+	Locale      string           `json:"locale"`
+	Locales     []string         `json:"locales"`
+	Lock        *StudioEntryLock `json:"lock"`
+	PublishedAt any              `json:"publishedAt"`
+	Route       any              `json:"route"`
+	ScheduledAt any              `json:"scheduledAt"`
+	Slug        any              `json:"slug"`
+	Status      string           `json:"status"`
+	Title       string           `json:"title"`
+	Type        string           `json:"type"`
+	UpdatedAt   string           `json:"updatedAt"`
+	UsedIn      float64          `json:"usedIn"`
+}
+
+type StudioLocale struct {
+	Code   string `json:"code"`
+	Label  string `json:"label"`
+	Source bool   `json:"source"`
+}
+
+type StudioModel struct {
+	BlockTemplates []ContentBlockTemplate `json:"blockTemplates"`
+	BlockTypes     []BlockType            `json:"blockTypes"`
+	Can            *StudioCapabilities    `json:"can"`
+	LibraryID      string                 `json:"libraryId"`
+	Locales        []StudioLocale         `json:"locales"`
+	SourceLocale   string                 `json:"sourceLocale"`
+	Types          []StudioContentType    `json:"types"`
 }
 
 type SubmissionRow struct {
@@ -8006,6 +8867,12 @@ type TitleDedupeResult struct {
 	Scanned float64                 `json:"scanned"`
 }
 
+type TokenFeedback struct {
+	Label     string `json:"label"`
+	TokenRaw  string `json:"token_raw"`
+	TokenType string `json:"token_type"`
+}
+
 type TopicMap struct {
 	CreatedAt        string                   `json:"createdAt"`
 	LastPostAt       string                   `json:"lastPostAt"`
@@ -8169,11 +9036,19 @@ type UnifiedSearchResult struct {
 }
 
 type UploadedAsset struct {
-	ContentType string  `json:"contentType"`
-	Filename    string  `json:"filename"`
-	ID          string  `json:"id"`
-	Size        float64 `json:"size"`
-	URL         string  `json:"url"`
+	Alt         any      `json:"alt"`
+	Caption     any      `json:"caption"`
+	ContentType string   `json:"contentType"`
+	Filename    string   `json:"filename"`
+	Focal       any      `json:"focal"`
+	FolderID    any      `json:"folderId"`
+	Height      any      `json:"height"`
+	ID          string   `json:"id"`
+	Placeholder any      `json:"placeholder"`
+	Size        float64  `json:"size"`
+	Tags        []string `json:"tags"`
+	URL         string   `json:"url"`
+	Width       any      `json:"width"`
 }
 
 type UptimeWindow struct {
@@ -8378,18 +9253,23 @@ type WebhookEventCatalogEntry struct {
 }
 
 type WebhookSummary struct {
-	Active           bool     `json:"active"`
-	BodyEncoding     string   `json:"bodyEncoding"`
-	CategoryIds      any      `json:"categoryIds"`
-	CreatedAt        string   `json:"createdAt"`
-	Events           []string `json:"events"`
-	Format           string   `json:"format"`
-	GroupIds         any      `json:"groupIds"`
-	ID               string   `json:"id"`
-	SignatureVersion string   `json:"signatureVersion"`
-	SpaceID          any      `json:"spaceId"`
-	TagIds           any      `json:"tagIds"`
-	URL              string   `json:"url"`
+	Active           bool              `json:"active"`
+	BodyEncoding     string            `json:"bodyEncoding"`
+	CategoryIds      any               `json:"categoryIds"`
+	ContentTypes     any               `json:"contentTypes"`
+	CreatedAt        string            `json:"createdAt"`
+	Deploy           *DeployHookStatus `json:"deploy"`
+	Events           []string          `json:"events"`
+	Format           string            `json:"format"`
+	GroupIds         any               `json:"groupIds"`
+	ID               string            `json:"id"`
+	Kind             string            `json:"kind"`
+	LibraryID        any               `json:"libraryId"`
+	Locales          any               `json:"locales"`
+	SignatureVersion string            `json:"signatureVersion"`
+	SpaceID          any               `json:"spaceId"`
+	TagIds           any               `json:"tagIds"`
+	URL              string            `json:"url"`
 }
 
 type WidgetDescriptor struct {
@@ -8421,6 +9301,12 @@ type PageInfo struct {
 	Total       *int64 `json:"total,omitempty"`
 }
 
+type DomainListDtoPaged struct {
+	Domains []DomainSummaryDto `json:"domains"`
+	Page    *PageInfo          `json:"page,omitempty"`
+	Data    []DomainSummaryDto `json:"data,omitempty"`
+}
+
 type EventMyAgendaPaged struct {
 	SessionIds []string  `json:"sessionIds"`
 	Page       *PageInfo `json:"page,omitempty"`
@@ -8439,13 +9325,19 @@ type SpaceListDtoLegacy struct {
 	Spaces []SpaceSummaryDto `json:"spaces"`
 }
 
+type ErrorEnvelopeErrorConflict struct {
+	Etag string `json:"etag"`
+	Ops  any    `json:"ops"`
+}
+
 type ErrorEnvelopeError struct {
-	Code    string         `json:"code"`
-	Message string         `json:"message"`
-	Details map[string]any `json:"details,omitempty"`
-	Docs    *string        `json:"docs,omitempty"`
-	Reason  *string        `json:"reason,omitempty"`
-	Slugs   []string       `json:"slugs,omitempty"`
+	Code     string                      `json:"code"`
+	Message  string                      `json:"message"`
+	Details  map[string]any              `json:"details,omitempty"`
+	Docs     *string                     `json:"docs,omitempty"`
+	Reason   *string                     `json:"reason,omitempty"`
+	Slugs    []string                    `json:"slugs,omitempty"`
+	Conflict *ErrorEnvelopeErrorConflict `json:"conflict,omitempty"`
 }
 
 type ConsentConfigCustom struct {
@@ -8589,6 +9481,30 @@ type AtsSourceLastCounts struct {
 	Skipped   *float64 `json:"skipped,omitempty"`
 	Unchanged *float64 `json:"unchanged,omitempty"`
 	Updated   *float64 `json:"updated,omitempty"`
+}
+
+type BlockTypeSetFields struct {
+	Add   []SpaceTypeField `json:"add,omitempty"`
+	Omit  []string         `json:"omit,omitempty"`
+	Order []string         `json:"order,omitempty"`
+	Set   map[string]any   `json:"set,omitempty"`
+	Unset map[string]any   `json:"unset,omitempty"`
+}
+
+type BlockTypeSetVariants struct {
+	Add   []BlockVariant `json:"add,omitempty"`
+	Omit  []string       `json:"omit,omitempty"`
+	Order []string       `json:"order,omitempty"`
+	Set   map[string]any `json:"set,omitempty"`
+	Unset map[string]any `json:"unset,omitempty"`
+}
+
+type BlockVariantFields struct {
+	Add   []SpaceTypeField `json:"add,omitempty"`
+	Omit  []string         `json:"omit,omitempty"`
+	Order []string         `json:"order,omitempty"`
+	Set   map[string]any   `json:"set,omitempty"`
+	Unset map[string]any   `json:"unset,omitempty"`
 }
 
 type BlogAuthorProfileLink struct {
@@ -9868,6 +10784,34 @@ type ContactSubjectMessageAttachment struct {
 	Size     float64 `json:"size"`
 }
 
+type ContentModelImportResultOp struct {
+	BlockType *string `json:"blockType,omitempty"`
+	From      *string `json:"from,omitempty"`
+	Op        string  `json:"op"`
+	To        *string `json:"to,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	Variant   *string `json:"variant,omitempty"`
+	Path      *string `json:"path,omitempty"`
+}
+
+type ContentModelVersionOp struct {
+	BlockType *string `json:"blockType,omitempty"`
+	From      *string `json:"from,omitempty"`
+	Op        string  `json:"op"`
+	To        *string `json:"to,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	Variant   *string `json:"variant,omitempty"`
+	Path      *string `json:"path,omitempty"`
+}
+
+type ContentTypeSettingsVersions struct {
+	Max *float64 `json:"max,omitempty"`
+}
+
+type ContentTypeSettingsPatchVersions struct {
+	Max *float64 `json:"max,omitempty"`
+}
+
 type CourseAccessViewDripItem struct {
 	AfterDays *float64 `json:"afterDays,omitempty"`
 	Module    string   `json:"module"`
@@ -9925,6 +10869,11 @@ type CourseViewTestimonial struct {
 	Name      string  `json:"name"`
 	Quote     string  `json:"quote"`
 	Role      *string `json:"role,omitempty"`
+}
+
+type DeliveryKeySummaryRequests struct {
+	Last30Days float64 `json:"last30Days"`
+	Today      float64 `json:"today"`
 }
 
 type DocsThemeAPIExamples struct {
@@ -10434,6 +11383,23 @@ type EmbedSpecThemeInit struct {
 	PrimaryColor any `json:"primaryColor,omitempty"`
 }
 
+type EntryFieldsWriteOp struct {
+	Op     string         `json:"op"`
+	Path   string         `json:"path"`
+	Value  map[string]any `json:"value,omitempty"`
+	Before *string        `json:"before,omitempty"`
+}
+
+type EnvironmentCompareOp struct {
+	BlockType *string `json:"blockType,omitempty"`
+	From      *string `json:"from,omitempty"`
+	Op        string  `json:"op"`
+	To        *string `json:"to,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	Variant   *string `json:"variant,omitempty"`
+	Path      *string `json:"path,omitempty"`
+}
+
 type EventAgendaEvent struct {
 	ID       string `json:"id"`
 	Slug     string `json:"slug"`
@@ -10538,6 +11504,14 @@ type ExportedTopicPost struct {
 	Wiki         bool                        `json:"wiki"`
 }
 
+type FieldSetFields struct {
+	Add   []SpaceTypeField `json:"add,omitempty"`
+	Omit  []string         `json:"omit,omitempty"`
+	Order []string         `json:"order,omitempty"`
+	Set   map[string]any   `json:"set,omitempty"`
+	Unset map[string]any   `json:"unset,omitempty"`
+}
+
 type FrontPageDocJSONContentItem struct {
 	Attrs   map[string]any `json:"attrs,omitempty"`
 	Content []any          `json:"content,omitempty"`
@@ -10628,6 +11602,12 @@ type GrowthReportWindow struct {
 	Days   float64 `json:"days"`
 	Months float64 `json:"months"`
 	Weeks  float64 `json:"weeks"`
+}
+
+type HostedSitemapEntry struct {
+	Alternates map[string]any `json:"alternates"`
+	Lastmod    string         `json:"lastmod"`
+	Path       string         `json:"path"`
 }
 
 type HostOriginPolicyContributes struct {
@@ -10737,9 +11717,36 @@ type LegalStatusDocument struct {
 	Version             float64             `json:"version"`
 }
 
+type LibraryAssetPageAsset struct {
+	Alt         any      `json:"alt"`
+	Caption     any      `json:"caption"`
+	ContentType string   `json:"contentType"`
+	CreatedAt   string   `json:"createdAt"`
+	Filename    string   `json:"filename"`
+	Focal       any      `json:"focal"`
+	FolderID    any      `json:"folderId"`
+	Height      any      `json:"height"`
+	ID          string   `json:"id"`
+	Placeholder any      `json:"placeholder"`
+	Size        float64  `json:"size"`
+	SpaceID     any      `json:"spaceId"`
+	Tags        []string `json:"tags"`
+	UploaderID  any      `json:"uploaderId"`
+	URL         string   `json:"url"`
+	Usage       float64  `json:"usage"`
+	Width       any      `json:"width"`
+}
+
 type LibraryBlockMark struct {
 	Attrs map[string]any `json:"attrs,omitempty"`
 	Type  string         `json:"type"`
+}
+
+type LibraryMemberScope struct {
+	ContentTypes     any      `json:"contentTypes"`
+	DenyContentTypes []string `json:"denyContentTypes"`
+	DenyLocales      []string `json:"denyLocales"`
+	Locales          any      `json:"locales"`
 }
 
 type LintReportCounts struct {
@@ -11455,8 +12462,8 @@ type PublishedPageContributor struct {
 }
 
 type PublishedShapePresetLayoutItemColumn struct {
-	Content []map[string]any `json:"content"`
-	Width   *float64         `json:"width,omitempty"`
+	Content []any    `json:"content"`
+	Width   *float64 `json:"width,omitempty"`
 }
 
 type PublishedShapePresetLayoutItem struct {
@@ -12169,6 +13176,20 @@ type RegistryListingVersion struct {
 	Version     string `json:"version"`
 }
 
+type ReleasePreviewLibrary struct {
+	EntryIds  []string `json:"entryIds"`
+	LibraryID string   `json:"libraryId"`
+	Name      string   `json:"name"`
+}
+
+type ReleasePreviewSurface struct {
+	Kind    string `json:"kind"`
+	SpaceID string `json:"spaceId"`
+	Surface string `json:"surface"`
+	Title   any    `json:"title"`
+	URL     string `json:"url"`
+}
+
 type RoadmapSettingsViewStatuseTone struct {
 	Color     *string `json:"color,omitempty"`
 	ColorDark *string `json:"colorDark,omitempty"`
@@ -12208,11 +13229,20 @@ type SearchHitHeading struct {
 	Text   string  `json:"text"`
 }
 
+type ShapeOverrideBlockTypes struct {
+	Add   []BlockType    `json:"add,omitempty"`
+	Omit  []string       `json:"omit,omitempty"`
+	Order []string       `json:"order,omitempty"`
+	Set   map[string]any `json:"set,omitempty"`
+	Unset map[string]any `json:"unset,omitempty"`
+}
+
 type ShapeOverrideParams struct {
 	Add   []SpaceTypeField `json:"add,omitempty"`
 	Omit  []string         `json:"omit,omitempty"`
 	Order []string         `json:"order,omitempty"`
 	Set   map[string]any   `json:"set,omitempty"`
+	Unset map[string]any   `json:"unset,omitempty"`
 }
 
 type ShapeOverrideSections struct {
@@ -12220,6 +13250,7 @@ type ShapeOverrideSections struct {
 	Omit  []string           `json:"omit,omitempty"`
 	Order []string           `json:"order,omitempty"`
 	Set   map[string]any     `json:"set,omitempty"`
+	Unset map[string]any     `json:"unset,omitempty"`
 }
 
 type ShapeOverrideSpace struct {
@@ -12411,6 +13442,7 @@ type SpaceShapeViewPreset struct {
 	Name        string                           `json:"name"`
 	Own         bool                             `json:"own"`
 	Sections    []KindSlot                       `json:"sections"`
+	Settings    *ContentTypeSettingsPatch        `json:"settings,omitempty"`
 }
 
 type SpaceTypeSpecReaderTools struct {
@@ -12427,7 +13459,7 @@ type SpaceTypeSpecRoute struct {
 	Hubs                      []SpaceHubRoute `json:"hubs,omitempty"`
 	OrgIndexed                *bool           `json:"orgIndexed,omitempty"`
 	PieceAddressed            *bool           `json:"pieceAddressed,omitempty"`
-	PublicPrefix              string          `json:"publicPrefix"`
+	PublicPrefix              *string         `json:"publicPrefix,omitempty"`
 	RootRedirectsToFirstPiece *bool           `json:"rootRedirectsToFirstPiece,omitempty"`
 }
 
@@ -12525,6 +13557,17 @@ type StatusWidgetAnswerWidget struct {
 type StoredPiecePageSidebar struct {
 	Doc      *FrontPageDocJSON `json:"doc"`
 	Position string            `json:"position"`
+}
+
+type StoredRedirectMatch struct {
+	Query any `json:"query,omitempty"`
+}
+
+type StudioCapabilitiesScope struct {
+	ContentTypes     any      `json:"contentTypes"`
+	DenyContentTypes []string `json:"denyContentTypes"`
+	DenyLocales      []string `json:"denyLocales"`
+	Locales          any      `json:"locales"`
 }
 
 type SubmissionRowAttachment struct {
@@ -13509,7 +14552,82 @@ type SectionLibraryOneResponse struct {
 	Section *SectionLibraryEntry `json:"section"`
 }
 
-type SpacesShapePutParamsSpace struct {
+type ContentLibraryListResponse struct {
+	Libraries []ContentLibrary `json:"libraries"`
+	Page      *PageInfo        `json:"page,omitempty"`
+	Data      []ContentLibrary `json:"data,omitempty"`
+}
+
+type ContentLibraryCreateParams struct {
+	Name     string         `json:"name"`
+	Slug     *string        `json:"slug,omitempty"`
+	SiteID   *string        `json:"siteId,omitempty"`
+	Settings map[string]any `json:"settings,omitempty"`
+	Template *string        `json:"template,omitempty"`
+}
+
+type ContentLibraryCreateResponse struct {
+	Library  *ContentLibrary `json:"library"`
+	Data     *ContentLibrary `json:"data,omitempty"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type ContentLibraryGetResponse struct {
+	Library *ContentLibrary `json:"library"`
+}
+
+type ContentLibraryUpdateParams struct {
+	Name     *string        `json:"name,omitempty"`
+	Slug     *string        `json:"slug,omitempty"`
+	SiteID   *string        `json:"siteId,omitempty"`
+	Settings map[string]any `json:"settings,omitempty"`
+}
+
+type ContentLibraryUpdateResponse struct {
+	Library  *ContentLibrary `json:"library"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type ContentLibraryRemoveResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type ContentLibraryListMembersResponse struct {
+	Members []LibraryMember `json:"members"`
+	Page    *PageInfo       `json:"page,omitempty"`
+	Data    []LibraryMember `json:"data,omitempty"`
+}
+
+type ContentLibraryPutMemberParamsScope struct {
+	ContentTypes     []string `json:"contentTypes"`
+	Locales          []string `json:"locales"`
+	DenyContentTypes []string `json:"denyContentTypes,omitempty"`
+	DenyLocales      []string `json:"denyLocales,omitempty"`
+}
+
+type ContentLibraryPutMemberParams struct {
+	UserID       string                              `json:"userId"`
+	Role         *string                             `json:"role,omitempty"`
+	CustomRoleID *string                             `json:"customRoleId,omitempty"`
+	Effect       *string                             `json:"effect,omitempty"`
+	Scope        *ContentLibraryPutMemberParamsScope `json:"scope,omitempty"`
+}
+
+type ContentLibraryPutMemberResponse struct {
+	Member   *LibraryMember `json:"member"`
+	Data     *LibraryMember `json:"data,omitempty"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type ContentLibraryRemoveMemberResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type ContentModelGetResponse struct {
+	Model *ContentModel `json:"model"`
+}
+
+type ContentModelPutParamsShapeSpace struct {
 	Index      *string  `json:"index,omitempty"`
 	Order      *string  `json:"order,omitempty"`
 	Nav        *string  `json:"nav,omitempty"`
@@ -13517,7 +14635,7 @@ type SpacesShapePutParamsSpace struct {
 	Summary    []string `json:"summary,omitempty"`
 }
 
-type SpacesShapePutParamsSectionsAddItem struct {
+type ContentModelPutParamsShapeSectionsAddItem struct {
 	Key            string  `json:"key"`
 	Label          string  `json:"label"`
 	Kind           string  `json:"kind"`
@@ -13528,160 +14646,503 @@ type SpacesShapePutParamsSectionsAddItem struct {
 	Render         *string `json:"render,omitempty"`
 }
 
-type SpacesShapePutParamsSections struct {
-	Add   []SpacesShapePutParamsSectionsAddItem `json:"add,omitempty"`
-	Omit  []string                              `json:"omit,omitempty"`
-	Order []string                              `json:"order,omitempty"`
-	Set   map[string]any                        `json:"set,omitempty"`
+type ContentModelPutParamsShapeSections struct {
+	Add   []ContentModelPutParamsShapeSectionsAddItem `json:"add,omitempty"`
+	Omit  []string                                    `json:"omit,omitempty"`
+	Order []string                                    `json:"order,omitempty"`
+	Set   map[string]any                              `json:"set,omitempty"`
+	Unset map[string]any                              `json:"unset,omitempty"`
 }
 
-type SpacesShapePutParamsParamsAddItem struct {
-	Key             string   `json:"key"`
-	Label           string   `json:"label"`
-	Type            string   `json:"type"`
-	Options         []string `json:"options,omitempty"`
-	RelationSpaceID *string  `json:"relationSpaceId,omitempty"`
-	Hint            *string  `json:"hint,omitempty"`
-	Placeholder     *string  `json:"placeholder,omitempty"`
-	Internal        *bool    `json:"internal,omitempty"`
-	Facet           *bool    `json:"facet,omitempty"`
-	Meta            *bool    `json:"meta,omitempty"`
-	Required        *bool    `json:"required,omitempty"`
-	Default         any      `json:"default,omitempty"`
-	SchemaProperty  *string  `json:"schemaProperty,omitempty"`
+type ContentModelPutParamsShapeParamsAddItemToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
 }
 
-type SpacesShapePutParamsParams struct {
-	Add   []SpacesShapePutParamsParamsAddItem `json:"add,omitempty"`
-	Omit  []string                            `json:"omit,omitempty"`
-	Order []string                            `json:"order,omitempty"`
-	Set   map[string]any                      `json:"set,omitempty"`
+type ContentModelPutParamsShapeParamsAddItemAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
 }
 
-type SpacesShapePutParams struct {
-	Space    *SpacesShapePutParamsSpace    `json:"space,omitempty"`
-	Sections *SpacesShapePutParamsSections `json:"sections,omitempty"`
-	Params   *SpacesShapePutParamsParams   `json:"params,omitempty"`
+type ContentModelPutParamsShapeParamsAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
 }
 
-type SpacesShapePatchParamsSpace struct {
-	Index      *string  `json:"index,omitempty"`
-	Order      *string  `json:"order,omitempty"`
-	Nav        *string  `json:"nav,omitempty"`
-	WhoCreates *string  `json:"whoCreates,omitempty"`
-	Summary    []string `json:"summary,omitempty"`
+type ContentModelPutParamsShapeParamsAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
 }
 
-type SpacesShapePatchParamsSectionsAddItem struct {
-	Key            string  `json:"key"`
-	Label          string  `json:"label"`
-	Kind           string  `json:"kind"`
-	Required       *bool   `json:"required,omitempty"`
-	Hint           *string `json:"hint,omitempty"`
-	Example        *string `json:"example,omitempty"`
-	SchemaProperty *string `json:"schemaProperty,omitempty"`
-	Render         *string `json:"render,omitempty"`
+type ContentModelPutParamsShapeParamsAddItemFieldField struct {
+	Key             string           `json:"key"`
+	Label           string           `json:"label"`
+	Type            string           `json:"type"`
+	Options         []string         `json:"options,omitempty"`
+	RelationSpaceID *string          `json:"relationSpaceId,omitempty"`
+	Hint            *string          `json:"hint,omitempty"`
+	Placeholder     *string          `json:"placeholder,omitempty"`
+	Internal        *bool            `json:"internal,omitempty"`
+	Facet           *bool            `json:"facet,omitempty"`
+	Meta            *bool            `json:"meta,omitempty"`
+	Required        *bool            `json:"required,omitempty"`
+	Default         any              `json:"default,omitempty"`
+	SchemaProperty  *string          `json:"schemaProperty,omitempty"`
+	Min             *float64         `json:"min,omitempty"`
+	Max             *float64         `json:"max,omitempty"`
+	Visibility      *string          `json:"visibility,omitempty"`
+	Localized       *bool            `json:"localized,omitempty"`
+	Unique          *bool            `json:"unique,omitempty"`
+	Indexed         *bool            `json:"indexed,omitempty"`
+	Sortable        *bool            `json:"sortable,omitempty"`
+	MinLength       *int64           `json:"minLength,omitempty"`
+	MaxLength       *int64           `json:"maxLength,omitempty"`
+	Pattern         *string          `json:"pattern,omitempty"`
+	Condition       any              `json:"condition,omitempty"`
+	Expr            any              `json:"expr,omitempty"`
+	Schema          map[string]any   `json:"schema,omitempty"`
+	AllowedBlocks   []string         `json:"allowedBlocks,omitempty"`
+	Allowed         []string         `json:"allowed,omitempty"`
+	AllowedGroups   []string         `json:"allowedGroups,omitempty"`
+	To              []map[string]any `json:"to,omitempty"`
+	HasMany         *bool            `json:"hasMany,omitempty"`
+	RowLabelField   *string          `json:"rowLabelField,omitempty"`
+	Language        *string          `json:"language,omitempty"`
+	From            *string          `json:"from,omitempty"`
+	Accept          []string         `json:"accept,omitempty"`
+	Admin           map[string]any   `json:"admin,omitempty"`
+	Fields          []map[string]any `json:"fields,omitempty"`
 }
 
-type SpacesShapePatchParamsSections struct {
-	Add   []SpacesShapePatchParamsSectionsAddItem `json:"add,omitempty"`
-	Omit  []string                                `json:"omit,omitempty"`
-	Order []string                                `json:"order,omitempty"`
-	Set   map[string]any                          `json:"set,omitempty"`
+type ContentModelPutParamsShapeParamsAddItemField struct {
+	Key             string                                               `json:"key"`
+	Label           string                                               `json:"label"`
+	Type            string                                               `json:"type"`
+	Options         []string                                             `json:"options,omitempty"`
+	RelationSpaceID *string                                              `json:"relationSpaceId,omitempty"`
+	Hint            *string                                              `json:"hint,omitempty"`
+	Placeholder     *string                                              `json:"placeholder,omitempty"`
+	Internal        *bool                                                `json:"internal,omitempty"`
+	Facet           *bool                                                `json:"facet,omitempty"`
+	Meta            *bool                                                `json:"meta,omitempty"`
+	Required        *bool                                                `json:"required,omitempty"`
+	Default         any                                                  `json:"default,omitempty"`
+	SchemaProperty  *string                                              `json:"schemaProperty,omitempty"`
+	Min             *float64                                             `json:"min,omitempty"`
+	Max             *float64                                             `json:"max,omitempty"`
+	Visibility      *string                                              `json:"visibility,omitempty"`
+	Localized       *bool                                                `json:"localized,omitempty"`
+	Unique          *bool                                                `json:"unique,omitempty"`
+	Indexed         *bool                                                `json:"indexed,omitempty"`
+	Sortable        *bool                                                `json:"sortable,omitempty"`
+	MinLength       *int64                                               `json:"minLength,omitempty"`
+	MaxLength       *int64                                               `json:"maxLength,omitempty"`
+	Pattern         *string                                              `json:"pattern,omitempty"`
+	Condition       any                                                  `json:"condition,omitempty"`
+	Expr            any                                                  `json:"expr,omitempty"`
+	Schema          map[string]any                                       `json:"schema,omitempty"`
+	AllowedBlocks   []string                                             `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                             `json:"allowed,omitempty"`
+	AllowedGroups   []string                                             `json:"allowedGroups,omitempty"`
+	To              []ContentModelPutParamsShapeParamsAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                                `json:"hasMany,omitempty"`
+	RowLabelField   *string                                              `json:"rowLabelField,omitempty"`
+	Language        *string                                              `json:"language,omitempty"`
+	From            *string                                              `json:"from,omitempty"`
+	Accept          []string                                             `json:"accept,omitempty"`
+	Admin           *ContentModelPutParamsShapeParamsAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []ContentModelPutParamsShapeParamsAddItemFieldField  `json:"fields,omitempty"`
 }
 
-type SpacesShapePatchParamsParamsAddItem struct {
-	Key             string   `json:"key"`
-	Label           string   `json:"label"`
-	Type            string   `json:"type"`
-	Options         []string `json:"options,omitempty"`
-	RelationSpaceID *string  `json:"relationSpaceId,omitempty"`
-	Hint            *string  `json:"hint,omitempty"`
-	Placeholder     *string  `json:"placeholder,omitempty"`
-	Internal        *bool    `json:"internal,omitempty"`
-	Facet           *bool    `json:"facet,omitempty"`
-	Meta            *bool    `json:"meta,omitempty"`
-	Required        *bool    `json:"required,omitempty"`
-	Default         any      `json:"default,omitempty"`
-	SchemaProperty  *string  `json:"schemaProperty,omitempty"`
+type ContentModelPutParamsShapeParamsAddItem struct {
+	Key             string                                          `json:"key"`
+	Label           string                                          `json:"label"`
+	Type            string                                          `json:"type"`
+	Options         []string                                        `json:"options,omitempty"`
+	RelationSpaceID *string                                         `json:"relationSpaceId,omitempty"`
+	Hint            *string                                         `json:"hint,omitempty"`
+	Placeholder     *string                                         `json:"placeholder,omitempty"`
+	Internal        *bool                                           `json:"internal,omitempty"`
+	Facet           *bool                                           `json:"facet,omitempty"`
+	Meta            *bool                                           `json:"meta,omitempty"`
+	Required        *bool                                           `json:"required,omitempty"`
+	Default         any                                             `json:"default,omitempty"`
+	SchemaProperty  *string                                         `json:"schemaProperty,omitempty"`
+	Min             *float64                                        `json:"min,omitempty"`
+	Max             *float64                                        `json:"max,omitempty"`
+	Visibility      *string                                         `json:"visibility,omitempty"`
+	Localized       *bool                                           `json:"localized,omitempty"`
+	Unique          *bool                                           `json:"unique,omitempty"`
+	Indexed         *bool                                           `json:"indexed,omitempty"`
+	Sortable        *bool                                           `json:"sortable,omitempty"`
+	MinLength       *int64                                          `json:"minLength,omitempty"`
+	MaxLength       *int64                                          `json:"maxLength,omitempty"`
+	Pattern         *string                                         `json:"pattern,omitempty"`
+	Condition       any                                             `json:"condition,omitempty"`
+	Expr            any                                             `json:"expr,omitempty"`
+	Schema          map[string]any                                  `json:"schema,omitempty"`
+	AllowedBlocks   []string                                        `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                        `json:"allowed,omitempty"`
+	AllowedGroups   []string                                        `json:"allowedGroups,omitempty"`
+	To              []ContentModelPutParamsShapeParamsAddItemToItem `json:"to,omitempty"`
+	HasMany         *bool                                           `json:"hasMany,omitempty"`
+	RowLabelField   *string                                         `json:"rowLabelField,omitempty"`
+	Language        *string                                         `json:"language,omitempty"`
+	From            *string                                         `json:"from,omitempty"`
+	Accept          []string                                        `json:"accept,omitempty"`
+	Admin           *ContentModelPutParamsShapeParamsAddItemAdmin   `json:"admin,omitempty"`
+	Fields          []ContentModelPutParamsShapeParamsAddItemField  `json:"fields,omitempty"`
 }
 
-type SpacesShapePatchParamsParams struct {
-	Add   []SpacesShapePatchParamsParamsAddItem `json:"add,omitempty"`
-	Omit  []string                              `json:"omit,omitempty"`
-	Order []string                              `json:"order,omitempty"`
-	Set   map[string]any                        `json:"set,omitempty"`
+type ContentModelPutParamsShapeParams struct {
+	Add   []ContentModelPutParamsShapeParamsAddItem `json:"add,omitempty"`
+	Omit  []string                                  `json:"omit,omitempty"`
+	Order []string                                  `json:"order,omitempty"`
+	Set   map[string]any                            `json:"set,omitempty"`
+	Unset map[string]any                            `json:"unset,omitempty"`
 }
 
-type SpacesShapePatchParams struct {
-	Space    *SpacesShapePatchParamsSpace    `json:"space,omitempty"`
-	Sections *SpacesShapePatchParamsSections `json:"sections,omitempty"`
-	Params   *SpacesShapePatchParamsParams   `json:"params,omitempty"`
+type ContentModelPutParamsShapeBlockTypesAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
 }
 
-type SpacesShapeSetDefaultKindParams struct {
-	Kind *string `json:"kind"`
+type ContentModelPutParamsShapeBlockTypesAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
 }
 
-type SpacesShapeSetKindParamsPatchSpace struct {
-	Index      *string  `json:"index,omitempty"`
-	Order      *string  `json:"order,omitempty"`
-	Nav        *string  `json:"nav,omitempty"`
-	WhoCreates *string  `json:"whoCreates,omitempty"`
-	Summary    []string `json:"summary,omitempty"`
+type ContentModelPutParamsShapeBlockTypesAddItemFieldField struct {
+	Key             string           `json:"key"`
+	Label           string           `json:"label"`
+	Type            string           `json:"type"`
+	Options         []string         `json:"options,omitempty"`
+	RelationSpaceID *string          `json:"relationSpaceId,omitempty"`
+	Hint            *string          `json:"hint,omitempty"`
+	Placeholder     *string          `json:"placeholder,omitempty"`
+	Internal        *bool            `json:"internal,omitempty"`
+	Facet           *bool            `json:"facet,omitempty"`
+	Meta            *bool            `json:"meta,omitempty"`
+	Required        *bool            `json:"required,omitempty"`
+	Default         any              `json:"default,omitempty"`
+	SchemaProperty  *string          `json:"schemaProperty,omitempty"`
+	Min             *float64         `json:"min,omitempty"`
+	Max             *float64         `json:"max,omitempty"`
+	Visibility      *string          `json:"visibility,omitempty"`
+	Localized       *bool            `json:"localized,omitempty"`
+	Unique          *bool            `json:"unique,omitempty"`
+	Indexed         *bool            `json:"indexed,omitempty"`
+	Sortable        *bool            `json:"sortable,omitempty"`
+	MinLength       *int64           `json:"minLength,omitempty"`
+	MaxLength       *int64           `json:"maxLength,omitempty"`
+	Pattern         *string          `json:"pattern,omitempty"`
+	Condition       any              `json:"condition,omitempty"`
+	Expr            any              `json:"expr,omitempty"`
+	Schema          map[string]any   `json:"schema,omitempty"`
+	AllowedBlocks   []string         `json:"allowedBlocks,omitempty"`
+	Allowed         []string         `json:"allowed,omitempty"`
+	AllowedGroups   []string         `json:"allowedGroups,omitempty"`
+	To              []map[string]any `json:"to,omitempty"`
+	HasMany         *bool            `json:"hasMany,omitempty"`
+	RowLabelField   *string          `json:"rowLabelField,omitempty"`
+	Language        *string          `json:"language,omitempty"`
+	From            *string          `json:"from,omitempty"`
+	Accept          []string         `json:"accept,omitempty"`
+	Admin           map[string]any   `json:"admin,omitempty"`
+	Fields          []map[string]any `json:"fields,omitempty"`
 }
 
-type SpacesShapeSetKindParamsPatchSectionsAddItem struct {
-	Key            string  `json:"key"`
-	Label          string  `json:"label"`
-	Kind           string  `json:"kind"`
-	Required       *bool   `json:"required,omitempty"`
-	Hint           *string `json:"hint,omitempty"`
-	Example        *string `json:"example,omitempty"`
-	SchemaProperty *string `json:"schemaProperty,omitempty"`
-	Render         *string `json:"render,omitempty"`
+type ContentModelPutParamsShapeBlockTypesAddItemField struct {
+	Key             string                                                   `json:"key"`
+	Label           string                                                   `json:"label"`
+	Type            string                                                   `json:"type"`
+	Options         []string                                                 `json:"options,omitempty"`
+	RelationSpaceID *string                                                  `json:"relationSpaceId,omitempty"`
+	Hint            *string                                                  `json:"hint,omitempty"`
+	Placeholder     *string                                                  `json:"placeholder,omitempty"`
+	Internal        *bool                                                    `json:"internal,omitempty"`
+	Facet           *bool                                                    `json:"facet,omitempty"`
+	Meta            *bool                                                    `json:"meta,omitempty"`
+	Required        *bool                                                    `json:"required,omitempty"`
+	Default         any                                                      `json:"default,omitempty"`
+	SchemaProperty  *string                                                  `json:"schemaProperty,omitempty"`
+	Min             *float64                                                 `json:"min,omitempty"`
+	Max             *float64                                                 `json:"max,omitempty"`
+	Visibility      *string                                                  `json:"visibility,omitempty"`
+	Localized       *bool                                                    `json:"localized,omitempty"`
+	Unique          *bool                                                    `json:"unique,omitempty"`
+	Indexed         *bool                                                    `json:"indexed,omitempty"`
+	Sortable        *bool                                                    `json:"sortable,omitempty"`
+	MinLength       *int64                                                   `json:"minLength,omitempty"`
+	MaxLength       *int64                                                   `json:"maxLength,omitempty"`
+	Pattern         *string                                                  `json:"pattern,omitempty"`
+	Condition       any                                                      `json:"condition,omitempty"`
+	Expr            any                                                      `json:"expr,omitempty"`
+	Schema          map[string]any                                           `json:"schema,omitempty"`
+	AllowedBlocks   []string                                                 `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                                 `json:"allowed,omitempty"`
+	AllowedGroups   []string                                                 `json:"allowedGroups,omitempty"`
+	To              []ContentModelPutParamsShapeBlockTypesAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                                    `json:"hasMany,omitempty"`
+	RowLabelField   *string                                                  `json:"rowLabelField,omitempty"`
+	Language        *string                                                  `json:"language,omitempty"`
+	From            *string                                                  `json:"from,omitempty"`
+	Accept          []string                                                 `json:"accept,omitempty"`
+	Admin           *ContentModelPutParamsShapeBlockTypesAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []ContentModelPutParamsShapeBlockTypesAddItemFieldField  `json:"fields,omitempty"`
 }
 
-type SpacesShapeSetKindParamsPatchSections struct {
-	Add   []SpacesShapeSetKindParamsPatchSectionsAddItem `json:"add,omitempty"`
-	Omit  []string                                       `json:"omit,omitempty"`
-	Order []string                                       `json:"order,omitempty"`
-	Set   map[string]any                                 `json:"set,omitempty"`
+type ContentModelPutParamsShapeBlockTypesAddItemVariantFields struct {
+	Add   []map[string]any `json:"add,omitempty"`
+	Omit  []string         `json:"omit,omitempty"`
+	Order []string         `json:"order,omitempty"`
+	Set   map[string]any   `json:"set,omitempty"`
+	Unset map[string]any   `json:"unset,omitempty"`
 }
 
-type SpacesShapeSetKindParamsPatchParamsAddItem struct {
-	Key             string   `json:"key"`
-	Label           string   `json:"label"`
-	Type            string   `json:"type"`
-	Options         []string `json:"options,omitempty"`
-	RelationSpaceID *string  `json:"relationSpaceId,omitempty"`
-	Hint            *string  `json:"hint,omitempty"`
-	Placeholder     *string  `json:"placeholder,omitempty"`
-	Internal        *bool    `json:"internal,omitempty"`
-	Facet           *bool    `json:"facet,omitempty"`
-	Meta            *bool    `json:"meta,omitempty"`
-	Required        *bool    `json:"required,omitempty"`
-	Default         any      `json:"default,omitempty"`
-	SchemaProperty  *string  `json:"schemaProperty,omitempty"`
+type ContentModelPutParamsShapeBlockTypesAddItemVariant struct {
+	Key    string                                                    `json:"key"`
+	Label  string                                                    `json:"label"`
+	Fields *ContentModelPutParamsShapeBlockTypesAddItemVariantFields `json:"fields,omitempty"`
 }
 
-type SpacesShapeSetKindParamsPatchParams struct {
-	Add   []SpacesShapeSetKindParamsPatchParamsAddItem `json:"add,omitempty"`
-	Omit  []string                                     `json:"omit,omitempty"`
-	Order []string                                     `json:"order,omitempty"`
-	Set   map[string]any                               `json:"set,omitempty"`
+type ContentModelPutParamsShapeBlockTypesAddItem struct {
+	Key         string                                               `json:"key"`
+	Label       string                                               `json:"label"`
+	Description *string                                              `json:"description,omitempty"`
+	Icon        *string                                              `json:"icon,omitempty"`
+	Group       *string                                              `json:"group,omitempty"`
+	Fields      []ContentModelPutParamsShapeBlockTypesAddItemField   `json:"fields"`
+	Variants    []ContentModelPutParamsShapeBlockTypesAddItemVariant `json:"variants,omitempty"`
 }
 
-type SpacesShapeSetKindParamsPatch struct {
-	Space    *SpacesShapeSetKindParamsPatchSpace    `json:"space,omitempty"`
-	Sections *SpacesShapeSetKindParamsPatchSections `json:"sections,omitempty"`
-	Params   *SpacesShapeSetKindParamsPatchParams   `json:"params,omitempty"`
+type ContentModelPutParamsShapeBlockTypes struct {
+	Add   []ContentModelPutParamsShapeBlockTypesAddItem `json:"add,omitempty"`
+	Omit  []string                                      `json:"omit,omitempty"`
+	Order []string                                      `json:"order,omitempty"`
+	Set   map[string]any                                `json:"set,omitempty"`
+	Unset map[string]any                                `json:"unset,omitempty"`
 }
 
-type SpacesShapeSetKindParams struct {
-	Label       string                         `json:"label"`
-	Description *string                        `json:"description,omitempty"`
-	Patch       *SpacesShapeSetKindParamsPatch `json:"patch"`
+type ContentModelPutParamsShape struct {
+	Space      *ContentModelPutParamsShapeSpace      `json:"space,omitempty"`
+	Sections   *ContentModelPutParamsShapeSections   `json:"sections,omitempty"`
+	Params     *ContentModelPutParamsShapeParams     `json:"params,omitempty"`
+	BlockTypes *ContentModelPutParamsShapeBlockTypes `json:"blockTypes,omitempty"`
+}
+
+type ContentModelPutParamsOp struct {
+	Op        string  `json:"op"`
+	Type      *string `json:"type,omitempty"`
+	BlockType *string `json:"blockType,omitempty"`
+	Variant   *string `json:"variant,omitempty"`
+	From      *string `json:"from,omitempty"`
+	To        *string `json:"to,omitempty"`
+	Path      *string `json:"path,omitempty"`
+}
+
+type ContentModelPutParams struct {
+	Shape *ContentModelPutParamsShape `json:"shape,omitempty"`
+	Types map[string]any              `json:"types,omitempty"`
+	Ops   []ContentModelPutParamsOp   `json:"ops,omitempty"`
+}
+
+type ContentModelPutResponse struct {
+	Model    *ContentModel `json:"model"`
+	Warnings []string      `json:"warnings,omitempty"`
+}
+
+type ContentModelVersionsResponse struct {
+	Versions []ContentModelVersion `json:"versions"`
+	Page     *PageInfo             `json:"page,omitempty"`
+	Data     []ContentModelVersion `json:"data,omitempty"`
+}
+
+type ContentLocalesAddParams struct {
+	Code  any    `json:"code"`
+	Label string `json:"label"`
+}
+
+type ContentLocalesSettingsParams struct {
+	SourceLocale    any            `json:"sourceLocale,omitempty"`
+	LocaleFallbacks map[string]any `json:"localeFallbacks,omitempty"`
+}
+
+type ContentLocalesRelabelParams struct {
+	Label string `json:"label"`
+}
+
+type ContentEntryLocalesWriteParams struct {
+	Fields map[string]any `json:"fields"`
+}
+
+type EntryFieldsPatchParamsOp struct {
+	Op     string  `json:"op"`
+	Path   string  `json:"path"`
+	Value  any     `json:"value,omitempty"`
+	Before *string `json:"before,omitempty"`
+}
+
+type EntryFieldsPatchParams struct {
+	Ops []EntryFieldsPatchParamsOp `json:"ops"`
+}
+
+type EntryFieldsTakeLockParams struct {
+	TakeOver *bool `json:"takeOver,omitempty"`
+}
+
+type EntryCardGetScheduleResponse struct {
+	Schedule *EntrySchedule `json:"schedule"`
+}
+
+type EntryCardScheduleParams struct {
+	PublishAt string `json:"publishAt"`
+}
+
+type EntryCardScheduleResponse struct {
+	Schedule *EntrySchedule `json:"schedule"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type EntryCardCancelScheduleResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type EntryCardRevisionsResponse struct {
+	Revisions []EntryRevision `json:"revisions"`
+	Page      *PageInfo       `json:"page,omitempty"`
+	Data      []EntryRevision `json:"data,omitempty"`
+}
+
+type EntryCardRestoreParams struct {
+	Mode *string `json:"mode,omitempty"`
+}
+
+type EntryCardRestoreResponse struct {
+	Revision *EntryRevision `json:"revision"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type EntryCardTranslateParams struct {
+	Locale any `json:"locale"`
+}
+
+type PreviewSessionsMintParams struct {
+	EntryID   string  `json:"entryId"`
+	ReleaseID *string `json:"releaseId,omitempty"`
+	Path      string  `json:"path"`
+}
+
+type PreviewSessionsMintResponse struct {
+	Session  *PreviewSession `json:"session"`
+	Data     *PreviewSession `json:"data,omitempty"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type PreviewExchangeExchangeParams struct {
+	Token   string  `json:"token"`
+	Path    string  `json:"path"`
+	Library *string `json:"library,omitempty"`
+}
+
+type LibrarySiteListMenusResponse struct {
+	Menus []LibraryMenu     `json:"menus"`
+	Types []LibraryMenuType `json:"types"`
+}
+
+type LibrarySiteGetRedirectsResponse struct {
+	Redirects []StoredRedirect `json:"redirects"`
+	Page      *PageInfo        `json:"page,omitempty"`
+	Data      []StoredRedirect `json:"data,omitempty"`
+}
+
+type LibrarySiteSetRedirectsParamsRedirectMatch struct {
+	Query any `json:"query,omitempty"`
+}
+
+type LibrarySiteSetRedirectsParamsRedirect struct {
+	From      string                                      `json:"from"`
+	To        any                                         `json:"to"`
+	Type      *string                                     `json:"type,omitempty"`
+	Status    *float64                                    `json:"status,omitempty"`
+	Match     *LibrarySiteSetRedirectsParamsRedirectMatch `json:"match,omitempty"`
+	PassQuery *bool                                       `json:"passQuery,omitempty"`
+}
+
+type LibrarySiteSetRedirectsParams struct {
+	Redirects []LibrarySiteSetRedirectsParamsRedirect `json:"redirects"`
+}
+
+type LibrarySiteSetRedirectsResponse struct {
+	Redirects []StoredRedirect `json:"redirects"`
+	Warnings  []string         `json:"warnings,omitempty"`
+}
+
+type ReferenceCandidatesSearchResponse struct {
+	Candidates []ReferenceCandidate `json:"candidates"`
+}
+
+type ModelIoImportParamsOp struct {
+	Op        string  `json:"op"`
+	Type      *string `json:"type,omitempty"`
+	BlockType *string `json:"blockType,omitempty"`
+	Variant   *string `json:"variant,omitempty"`
+	From      *string `json:"from,omitempty"`
+	To        *string `json:"to,omitempty"`
+	Path      *string `json:"path,omitempty"`
+}
+
+type ModelIoImportParams struct {
+	Format      string                  `json:"format"`
+	Content     string                  `json:"content"`
+	DryRun      *bool                   `json:"dryRun,omitempty"`
+	BaseVersion *int64                  `json:"baseVersion,omitempty"`
+	Force       *bool                   `json:"force,omitempty"`
+	Ops         []ModelIoImportParamsOp `json:"ops,omitempty"`
+}
+
+type EnvironmentsListResponse struct {
+	Environments *ContentEnvironments `json:"environments"`
+}
+
+type EnvironmentsForkParams struct {
+	Name           string  `json:"name"`
+	Slug           *string `json:"slug,omitempty"`
+	IncludeContent *bool   `json:"includeContent,omitempty"`
+}
+
+type EnvironmentsForkResponse struct {
+	Environment *ContentEnvironment `json:"environment"`
+	Data        *ContentEnvironment `json:"data,omitempty"`
+	Warnings    []string            `json:"warnings,omitempty"`
+}
+
+type EnvironmentsCompareResponse struct {
+	Compare *EnvironmentCompare `json:"compare"`
+}
+
+type EnvironmentsPromoteResponse struct {
+	Promoted *EnvironmentPromoteResult `json:"promoted"`
+}
+
+type ContentAITranslateParams struct {
+	EntryIds []string `json:"entryIds"`
+	Locale   string   `json:"locale"`
+}
+
+type ContentAISeoParams struct {
+	Locale *string `json:"locale,omitempty"`
+}
+
+type ContentAIDraftParams struct {
+	FieldKey string `json:"fieldKey"`
+	Brief    string `json:"brief"`
 }
 
 type LegalUpdatesSubscribeParamsScope struct {
@@ -15892,30 +17353,13 @@ type OrgsReorderLegalResponse struct {
 	Warnings  []string       `json:"warnings,omitempty"`
 }
 
-type OrgsPlanResponse struct {
-	Metrics []QuotaStatus `json:"metrics"`
-	Plan    string        `json:"plan"`
-}
-
 type OrgsSetPlanParams struct {
 	Plan string `json:"plan"`
-}
-
-type OrgsSetPlanResponse struct {
-	Metrics  []QuotaStatus `json:"metrics"`
-	Plan     string        `json:"plan"`
-	Warnings []string      `json:"warnings,omitempty"`
 }
 
 type OrgsSetOverrideParams struct {
 	Metric string `json:"metric"`
 	Extra  *int64 `json:"extra"`
-}
-
-type OrgsSetOverrideResponse struct {
-	Metrics  []QuotaStatus `json:"metrics"`
-	Plan     string        `json:"plan"`
-	Warnings []string      `json:"warnings,omitempty"`
 }
 
 type OrgsImportParamsMember struct {
@@ -23867,18 +25311,18 @@ type SpacesSettingsPatchThemeParamsForumTopicMap struct {
 }
 
 type SpacesSettingsPatchThemeParamsForumTopicShare struct {
-	Mode        *string `json:"mode,omitempty"`
-	Align       *string `json:"align,omitempty"`
-	Networks    any     `json:"networks,omitempty"`
-	Frame       any     `json:"frame,omitempty"`
-	Radius      any     `json:"radius,omitempty"`
-	BorderColor any     `json:"borderColor,omitempty"`
-	Label       any     `json:"label,omitempty"`
-	LabelEnd    any     `json:"labelEnd,omitempty"`
-	LabelStyle  any     `json:"labelStyle,omitempty"`
-	Marks       any     `json:"marks,omitempty"`
-	Comments    any     `json:"comments,omitempty"`
-	Size        any     `json:"size,omitempty"`
+	Mode        *string  `json:"mode,omitempty"`
+	Align       *string  `json:"align,omitempty"`
+	Networks    []string `json:"networks,omitempty"`
+	Frame       *string  `json:"frame,omitempty"`
+	Radius      *int64   `json:"radius,omitempty"`
+	BorderColor any      `json:"borderColor,omitempty"`
+	Label       any      `json:"label,omitempty"`
+	LabelEnd    any      `json:"labelEnd,omitempty"`
+	LabelStyle  *string  `json:"labelStyle,omitempty"`
+	Marks       *bool    `json:"marks,omitempty"`
+	Comments    *bool    `json:"comments,omitempty"`
+	Size        *int64   `json:"size,omitempty"`
 }
 
 type SpacesSettingsPatchThemeParamsForumTopicTimeline struct {
@@ -24378,6 +25822,15 @@ type SpacesSettingsPatchThemeParamsDocsSidebarFooterLink struct {
 	Audience *string         `json:"audience,omitempty"`
 }
 
+type SpacesSettingsPatchThemeParamsDocsSidebarStatus struct {
+	MonitorSpaceID *string `json:"monitorSpaceId,omitempty"`
+	Style          *string `json:"style,omitempty"`
+	Color          *string `json:"color,omitempty"`
+	Case           *string `json:"case,omitempty"`
+	Font           *string `json:"font,omitempty"`
+	Dot            *bool   `json:"dot,omitempty"`
+}
+
 type SpacesSettingsPatchThemeParamsDocsSidebar struct {
 	Groups          *string                                               `json:"groups,omitempty"`
 	Accordion       *bool                                                 `json:"accordion,omitempty"`
@@ -24400,7 +25853,7 @@ type SpacesSettingsPatchThemeParamsDocsSidebar struct {
 	Icons           *SpacesSettingsPatchThemeParamsDocsSidebarIcons       `json:"icons,omitempty"`
 	Anchors         []SpacesSettingsPatchThemeParamsDocsSidebarAnchor     `json:"anchors,omitempty"`
 	FooterLinks     []SpacesSettingsPatchThemeParamsDocsSidebarFooterLink `json:"footerLinks,omitempty"`
-	Status          any                                                   `json:"status,omitempty"`
+	Status          *SpacesSettingsPatchThemeParamsDocsSidebarStatus      `json:"status,omitempty"`
 	Drilldown       *bool                                                 `json:"drilldown,omitempty"`
 	Search          *string                                               `json:"search,omitempty"`
 	SearchHeight    *int64                                                `json:"searchHeight,omitempty"`
@@ -34016,18 +35469,18 @@ type SpacesSettingsPatchThemeDraftParamsForumTopicMap struct {
 }
 
 type SpacesSettingsPatchThemeDraftParamsForumTopicShare struct {
-	Mode        *string `json:"mode,omitempty"`
-	Align       *string `json:"align,omitempty"`
-	Networks    any     `json:"networks,omitempty"`
-	Frame       any     `json:"frame,omitempty"`
-	Radius      any     `json:"radius,omitempty"`
-	BorderColor any     `json:"borderColor,omitempty"`
-	Label       any     `json:"label,omitempty"`
-	LabelEnd    any     `json:"labelEnd,omitempty"`
-	LabelStyle  any     `json:"labelStyle,omitempty"`
-	Marks       any     `json:"marks,omitempty"`
-	Comments    any     `json:"comments,omitempty"`
-	Size        any     `json:"size,omitempty"`
+	Mode        *string  `json:"mode,omitempty"`
+	Align       *string  `json:"align,omitempty"`
+	Networks    []string `json:"networks,omitempty"`
+	Frame       *string  `json:"frame,omitempty"`
+	Radius      *int64   `json:"radius,omitempty"`
+	BorderColor any      `json:"borderColor,omitempty"`
+	Label       any      `json:"label,omitempty"`
+	LabelEnd    any      `json:"labelEnd,omitempty"`
+	LabelStyle  *string  `json:"labelStyle,omitempty"`
+	Marks       *bool    `json:"marks,omitempty"`
+	Comments    *bool    `json:"comments,omitempty"`
+	Size        *int64   `json:"size,omitempty"`
 }
 
 type SpacesSettingsPatchThemeDraftParamsForumTopicTimeline struct {
@@ -34527,6 +35980,15 @@ type SpacesSettingsPatchThemeDraftParamsDocsSidebarFooterLink struct {
 	Audience *string         `json:"audience,omitempty"`
 }
 
+type SpacesSettingsPatchThemeDraftParamsDocsSidebarStatus struct {
+	MonitorSpaceID *string `json:"monitorSpaceId,omitempty"`
+	Style          *string `json:"style,omitempty"`
+	Color          *string `json:"color,omitempty"`
+	Case           *string `json:"case,omitempty"`
+	Font           *string `json:"font,omitempty"`
+	Dot            *bool   `json:"dot,omitempty"`
+}
+
 type SpacesSettingsPatchThemeDraftParamsDocsSidebar struct {
 	Groups          *string                                                    `json:"groups,omitempty"`
 	Accordion       *bool                                                      `json:"accordion,omitempty"`
@@ -34549,7 +36011,7 @@ type SpacesSettingsPatchThemeDraftParamsDocsSidebar struct {
 	Icons           *SpacesSettingsPatchThemeDraftParamsDocsSidebarIcons       `json:"icons,omitempty"`
 	Anchors         []SpacesSettingsPatchThemeDraftParamsDocsSidebarAnchor     `json:"anchors,omitempty"`
 	FooterLinks     []SpacesSettingsPatchThemeDraftParamsDocsSidebarFooterLink `json:"footerLinks,omitempty"`
-	Status          any                                                        `json:"status,omitempty"`
+	Status          *SpacesSettingsPatchThemeDraftParamsDocsSidebarStatus      `json:"status,omitempty"`
 	Drilldown       *bool                                                      `json:"drilldown,omitempty"`
 	Search          *string                                                    `json:"search,omitempty"`
 	SearchHeight    *int64                                                     `json:"searchHeight,omitempty"`
@@ -43981,10 +45443,20 @@ type ServiceAccountsTokensResponse struct {
 	Data   []PATSummary `json:"data,omitempty"`
 }
 
+type ServiceAccountsMintParamsConstraintsDelivery struct {
+	Stage        string   `json:"stage"`
+	LibraryIds   []string `json:"libraryIds,omitempty"`
+	Publishable  *bool    `json:"publishable,omitempty"`
+	Origins      []string `json:"origins,omitempty"`
+	ContentTypes []string `json:"contentTypes,omitempty"`
+	Locales      []string `json:"locales,omitempty"`
+}
+
 type ServiceAccountsMintParamsConstraints struct {
-	SpaceIds    []string `json:"spaceIds,omitempty"`
-	CategoryIds []string `json:"categoryIds,omitempty"`
-	OrgIds      []string `json:"orgIds,omitempty"`
+	SpaceIds    []string                                      `json:"spaceIds,omitempty"`
+	CategoryIds []string                                      `json:"categoryIds,omitempty"`
+	OrgIds      []string                                      `json:"orgIds,omitempty"`
+	Delivery    *ServiceAccountsMintParamsConstraintsDelivery `json:"delivery,omitempty"`
 }
 
 type ServiceAccountsMintParams struct {
@@ -47615,6 +49087,7 @@ type DocsPagesEmptyTrashResponse struct {
 
 type DocsPagesRestoreResponse struct {
 	Detached           bool    `json:"detached"`
+	Notice             *string `json:"notice,omitempty"`
 	Ok                 bool    `json:"ok"`
 	ReattachedChildren float64 `json:"reattachedChildren"`
 	RenamedFrom        any     `json:"renamedFrom"`
@@ -48729,12 +50202,16 @@ type WebhooksCreateParams struct {
 	URL              string   `json:"url"`
 	Events           []string `json:"events"`
 	SpaceID          *string  `json:"spaceId,omitempty"`
+	LibraryID        *string  `json:"libraryId,omitempty"`
 	Format           *string  `json:"format,omitempty"`
 	CategoryIds      []string `json:"categoryIds,omitempty"`
 	TagIds           []string `json:"tagIds,omitempty"`
 	GroupIds         []string `json:"groupIds,omitempty"`
+	ContentTypes     []string `json:"contentTypes,omitempty"`
+	Locales          []string `json:"locales,omitempty"`
 	BodyEncoding     *string  `json:"bodyEncoding,omitempty"`
 	SignatureVersion *string  `json:"signatureVersion,omitempty"`
+	Kind             *string  `json:"kind,omitempty"`
 }
 
 type WebhooksCreateResponse struct {
@@ -48749,9 +50226,12 @@ type WebhooksUpdateParams struct {
 	Events           []string `json:"events,omitempty"`
 	Active           *bool    `json:"active,omitempty"`
 	SpaceID          *string  `json:"spaceId,omitempty"`
+	LibraryID        *string  `json:"libraryId,omitempty"`
 	CategoryIds      []string `json:"categoryIds,omitempty"`
 	TagIds           []string `json:"tagIds,omitempty"`
 	GroupIds         []string `json:"groupIds,omitempty"`
+	ContentTypes     []string `json:"contentTypes,omitempty"`
+	Locales          []string `json:"locales,omitempty"`
 	BodyEncoding     *string  `json:"bodyEncoding,omitempty"`
 	SignatureVersion *string  `json:"signatureVersion,omitempty"`
 }
@@ -48807,6 +50287,12 @@ type WebhooksRotateResponse struct {
 	PreviousValidUntil string   `json:"previousValidUntil"`
 	Secret             string   `json:"secret"`
 	Warnings           []string `json:"warnings,omitempty"`
+}
+
+type DeployStatusStatusResponse struct {
+	DeployHooks []DeployHookBuildStatus `json:"deployHooks"`
+	Page        *PageInfo               `json:"page,omitempty"`
+	Data        []DeployHookBuildStatus `json:"data,omitempty"`
 }
 
 type NotificationsGetDndResponse struct {
@@ -49037,8 +50523,59 @@ type SpacesAssetsCatalogResponse struct {
 	Data       []CatalogedAsset `json:"data"`
 }
 
+type AssetLibraryUpdateParams struct {
+	Alt      *string  `json:"alt,omitempty"`
+	Caption  *string  `json:"caption,omitempty"`
+	FocalX   *float64 `json:"focalX,omitempty"`
+	FocalY   *float64 `json:"focalY,omitempty"`
+	FolderID *string  `json:"folderId,omitempty"`
+	Tags     []string `json:"tags,omitempty"`
+}
+
+type AssetLibraryUpdateResponse struct {
+	Asset    *UploadedAsset `json:"asset"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
 type SpacesAssetsRemoveResponse struct {
 	Ok bool `json:"ok"`
+}
+
+type AssetLibraryListFoldersResponse struct {
+	Folders []AssetFolderDto `json:"folders"`
+	Page    *PageInfo        `json:"page,omitempty"`
+	Data    []AssetFolderDto `json:"data,omitempty"`
+}
+
+type AssetLibraryCreateFolderParams struct {
+	Name     string  `json:"name"`
+	ParentID *string `json:"parentId,omitempty"`
+}
+
+type AssetLibraryCreateFolderResponse struct {
+	Folder   *AssetFolderDto `json:"folder"`
+	Data     *AssetFolderDto `json:"data,omitempty"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type AssetLibraryUpdateFolderParams struct {
+	Name     *string `json:"name,omitempty"`
+	ParentID *string `json:"parentId,omitempty"`
+}
+
+type AssetLibraryUpdateFolderResponse struct {
+	Folder   *AssetFolderDto `json:"folder"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type AssetLibraryDeleteFolderResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type LibraryAssetListResponse struct {
+	Assets []LibraryAsset `json:"assets"`
+	Page   *PageInfo      `json:"page"`
+	Data   []LibraryAsset `json:"data"`
 }
 
 type SpacesDomainsAddParams struct {
@@ -49102,14 +50639,60 @@ type PublicDomainsPrimaryResponse struct {
 }
 
 type PublicDomainsResolveResponse struct {
-	Mounts []string `json:"mounts"`
-	Site   any      `json:"site"`
-	Space  any      `json:"space"`
+	Library any      `json:"library"`
+	Mounts  []string `json:"mounts"`
+	Site    any      `json:"site"`
+	Space   any      `json:"space"`
 }
 
 type SpacesAddressesListResponse struct {
 	Addresses  []SpaceAddress `json:"addresses"`
 	SitemapURL string         `json:"sitemapUrl"`
+}
+
+type LibraryDomainAddParams struct {
+	Hostname        string  `json:"hostname"`
+	BasePath        *string `json:"basePath,omitempty"`
+	AlsoRedirectWww *bool   `json:"alsoRedirectWww,omitempty"`
+}
+
+type LibraryDomainAllocateSubdomainParams struct {
+	Subdomain string `json:"subdomain"`
+}
+
+type LibraryDomainPreviewParams struct {
+	Hostname string  `json:"hostname"`
+	BasePath *string `json:"basePath,omitempty"`
+}
+
+type LibraryDomainVerifyParams struct {
+	Activate *bool `json:"activate,omitempty"`
+}
+
+type LibraryDomainRemoveResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type LibraryDomainSetWwwParams struct {
+	AlsoRedirectWww bool `json:"alsoRedirectWww"`
+}
+
+type LibraryDomainSetIPAllowListParams struct {
+	IPAllowList []string `json:"ipAllowList"`
+}
+
+type LibraryDomainSetIPAllowListResponse struct {
+	IPAllowList []string `json:"ipAllowList"`
+	Warnings    []string `json:"warnings,omitempty"`
+}
+
+type LibraryDomainSetRedirectParams struct {
+	RedirectTo *string `json:"redirectTo"`
+}
+
+type LibraryDomainSetRedirectResponse struct {
+	Ok       bool     `json:"ok"`
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 type IntegrationsCloudflareSetParams struct {
@@ -75722,6 +77305,655 @@ type MessagesRemoveParticipantResponse struct {
 	Ok bool `json:"ok"`
 }
 
+type ContentStudioRunBulkParams struct {
+	Action    string   `json:"action"`
+	EntryIds  []string `json:"entryIds"`
+	Locale    *string  `json:"locale,omitempty"`
+	Overwrite *bool    `json:"overwrite,omitempty"`
+	Force     *bool    `json:"force,omitempty"`
+}
+
+type DeliveryKeysListResponse struct {
+	Keys []DeliveryKeySummary `json:"keys"`
+	Page *PageInfo            `json:"page,omitempty"`
+	Data []DeliveryKeySummary `json:"data,omitempty"`
+}
+
+type DeliveryKeysCreateParams struct {
+	Name          string   `json:"name"`
+	Kind          string   `json:"kind"`
+	Origins       []string `json:"origins,omitempty"`
+	ContentTypes  []string `json:"contentTypes,omitempty"`
+	Locales       []string `json:"locales,omitempty"`
+	ExpiresInDays *int64   `json:"expiresInDays,omitempty"`
+}
+
+type DeliveryKeysUpdateParams struct {
+	Name         *string  `json:"name,omitempty"`
+	Origins      []string `json:"origins,omitempty"`
+	ContentTypes []string `json:"contentTypes,omitempty"`
+	Locales      []string `json:"locales,omitempty"`
+}
+
+type DeliveryKeysUpdateResponse struct {
+	Key      *DeliveryKeySummary `json:"key"`
+	Warnings []string            `json:"warnings,omitempty"`
+}
+
+type DeliveryKeysRevokeResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type DeliveryKeysRotateParams struct {
+	GraceMinutes *int64 `json:"graceMinutes,omitempty"`
+}
+
+type DeliveryKeyKeyResponse struct {
+	Key *DeliveryKeyInfo `json:"key"`
+}
+
+type DeliveryKeyKeyByKeyIDResponse struct {
+	Key *DeliveryKeyInfo `json:"key"`
+}
+
+type DeliveryEntriesTypes0ResponseTypeLinks struct {
+	Entries string `json:"entries"`
+	Schema  string `json:"schema"`
+}
+
+type DeliveryEntriesTypes0ResponseType struct {
+	Key       string                                  `json:"key"`
+	Label     string                                  `json:"label"`
+	Singleton bool                                    `json:"singleton"`
+	Routable  bool                                    `json:"routable"`
+	Fields    []map[string]any                        `json:"fields"`
+	Links     *DeliveryEntriesTypes0ResponseTypeLinks `json:"_links"`
+}
+
+type DeliveryEntriesTypes0Response struct {
+	LibraryID    string                              `json:"libraryId"`
+	SourceLocale string                              `json:"sourceLocale"`
+	Types        []DeliveryEntriesTypes0ResponseType `json:"types"`
+	BlockTypes   []map[string]any                    `json:"blockTypes"`
+}
+
+type DeliveryEntriesTypes1ResponseTypeLinks struct {
+	Entries string `json:"entries"`
+	Schema  string `json:"schema"`
+}
+
+type DeliveryEntriesTypes1ResponseType struct {
+	Key       string                                  `json:"key"`
+	Label     string                                  `json:"label"`
+	Singleton bool                                    `json:"singleton"`
+	Routable  bool                                    `json:"routable"`
+	Fields    []map[string]any                        `json:"fields"`
+	Links     *DeliveryEntriesTypes1ResponseTypeLinks `json:"_links"`
+}
+
+type DeliveryEntriesTypes1Response struct {
+	LibraryID    string                              `json:"libraryId"`
+	SourceLocale string                              `json:"sourceLocale"`
+	Types        []DeliveryEntriesTypes1ResponseType `json:"types"`
+	BlockTypes   []map[string]any                    `json:"blockTypes"`
+}
+
+type DeliveryEntriesList0ResponseDataItemLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesList0ResponseDataItem struct {
+	ID           string                                     `json:"id"`
+	Type         string                                     `json:"type"`
+	Slug         any                                        `json:"slug"`
+	Title        string                                     `json:"title"`
+	Locale       string                                     `json:"locale"`
+	Status       string                                     `json:"status"`
+	PublishedAt  any                                        `json:"publishedAt"`
+	UpdatedAt    string                                     `json:"updatedAt"`
+	ModelVersion *int64                                     `json:"modelVersion,omitempty"`
+	Fields       map[string]any                             `json:"fields"`
+	Route        any                                        `json:"route"`
+	Locales      []string                                   `json:"locales"`
+	Unresolved   []string                                   `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesList0ResponseDataItemLinks `json:"_links"`
+}
+
+type DeliveryEntriesList0Response struct {
+	Data []DeliveryEntriesList0ResponseDataItem `json:"data"`
+	Page *PageInfo                              `json:"page"`
+}
+
+type DeliveryEntriesList1ResponseDataItemLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesList1ResponseDataItem struct {
+	ID           string                                     `json:"id"`
+	Type         string                                     `json:"type"`
+	Slug         any                                        `json:"slug"`
+	Title        string                                     `json:"title"`
+	Locale       string                                     `json:"locale"`
+	Status       string                                     `json:"status"`
+	PublishedAt  any                                        `json:"publishedAt"`
+	UpdatedAt    string                                     `json:"updatedAt"`
+	ModelVersion *int64                                     `json:"modelVersion,omitempty"`
+	Fields       map[string]any                             `json:"fields"`
+	Route        any                                        `json:"route"`
+	Locales      []string                                   `json:"locales"`
+	Unresolved   []string                                   `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesList1ResponseDataItemLinks `json:"_links"`
+}
+
+type DeliveryEntriesList1Response struct {
+	Data []DeliveryEntriesList1ResponseDataItem `json:"data"`
+	Page *PageInfo                              `json:"page"`
+}
+
+type DeliveryEntriesQuery0Params struct {
+	Where  any   `json:"where,omitempty"`
+	Sort   any   `json:"sort,omitempty"`
+	Select any   `json:"select,omitempty"`
+	Limit  any   `json:"limit,omitempty"`
+	Cursor any   `json:"cursor,omitempty"`
+	Count  *bool `json:"count,omitempty"`
+}
+
+type DeliveryEntriesQuery0ResponseDataItemLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesQuery0ResponseDataItem struct {
+	ID           string                                      `json:"id"`
+	Type         string                                      `json:"type"`
+	Slug         any                                         `json:"slug"`
+	Title        string                                      `json:"title"`
+	Locale       string                                      `json:"locale"`
+	Status       string                                      `json:"status"`
+	PublishedAt  any                                         `json:"publishedAt"`
+	UpdatedAt    string                                      `json:"updatedAt"`
+	ModelVersion *int64                                      `json:"modelVersion,omitempty"`
+	Fields       map[string]any                              `json:"fields"`
+	Route        any                                         `json:"route"`
+	Locales      []string                                    `json:"locales"`
+	Unresolved   []string                                    `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesQuery0ResponseDataItemLinks `json:"_links"`
+}
+
+type DeliveryEntriesQuery0Response struct {
+	Data     []DeliveryEntriesQuery0ResponseDataItem `json:"data"`
+	Page     *PageInfo                               `json:"page"`
+	Warnings []string                                `json:"warnings,omitempty"`
+}
+
+type DeliveryEntriesQuery1Params struct {
+	Where  any   `json:"where,omitempty"`
+	Sort   any   `json:"sort,omitempty"`
+	Select any   `json:"select,omitempty"`
+	Limit  any   `json:"limit,omitempty"`
+	Cursor any   `json:"cursor,omitempty"`
+	Count  *bool `json:"count,omitempty"`
+}
+
+type DeliveryEntriesQuery1ResponseDataItemLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesQuery1ResponseDataItem struct {
+	ID           string                                      `json:"id"`
+	Type         string                                      `json:"type"`
+	Slug         any                                         `json:"slug"`
+	Title        string                                      `json:"title"`
+	Locale       string                                      `json:"locale"`
+	Status       string                                      `json:"status"`
+	PublishedAt  any                                         `json:"publishedAt"`
+	UpdatedAt    string                                      `json:"updatedAt"`
+	ModelVersion *int64                                      `json:"modelVersion,omitempty"`
+	Fields       map[string]any                              `json:"fields"`
+	Route        any                                         `json:"route"`
+	Locales      []string                                    `json:"locales"`
+	Unresolved   []string                                    `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesQuery1ResponseDataItemLinks `json:"_links"`
+}
+
+type DeliveryEntriesQuery1Response struct {
+	Data     []DeliveryEntriesQuery1ResponseDataItem `json:"data"`
+	Page     *PageInfo                               `json:"page"`
+	Warnings []string                                `json:"warnings,omitempty"`
+}
+
+type DeliveryEntriesOne0ResponseLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesOne0Response struct {
+	ID           string                            `json:"id"`
+	Type         string                            `json:"type"`
+	Slug         any                               `json:"slug"`
+	Title        string                            `json:"title"`
+	Locale       string                            `json:"locale"`
+	Status       string                            `json:"status"`
+	PublishedAt  any                               `json:"publishedAt"`
+	UpdatedAt    string                            `json:"updatedAt"`
+	ModelVersion *int64                            `json:"modelVersion,omitempty"`
+	Fields       map[string]any                    `json:"fields"`
+	Route        any                               `json:"route"`
+	Locales      []string                          `json:"locales"`
+	Unresolved   []string                          `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesOne0ResponseLinks `json:"_links"`
+}
+
+type DeliveryEntriesOne1ResponseLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesOne1Response struct {
+	ID           string                            `json:"id"`
+	Type         string                            `json:"type"`
+	Slug         any                               `json:"slug"`
+	Title        string                            `json:"title"`
+	Locale       string                            `json:"locale"`
+	Status       string                            `json:"status"`
+	PublishedAt  any                               `json:"publishedAt"`
+	UpdatedAt    string                            `json:"updatedAt"`
+	ModelVersion *int64                            `json:"modelVersion,omitempty"`
+	Fields       map[string]any                    `json:"fields"`
+	Route        any                               `json:"route"`
+	Locales      []string                          `json:"locales"`
+	Unresolved   []string                          `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesOne1ResponseLinks `json:"_links"`
+}
+
+type DeliveryEntriesResolveParams struct {
+	Fields map[string]any `json:"fields"`
+}
+
+type DeliveryEntriesResolveResponseLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesResolveResponse struct {
+	ID           string                               `json:"id"`
+	Type         string                               `json:"type"`
+	Slug         any                                  `json:"slug"`
+	Title        string                               `json:"title"`
+	Locale       string                               `json:"locale"`
+	Status       string                               `json:"status"`
+	PublishedAt  any                                  `json:"publishedAt"`
+	UpdatedAt    string                               `json:"updatedAt"`
+	ModelVersion *int64                               `json:"modelVersion,omitempty"`
+	Fields       map[string]any                       `json:"fields"`
+	Route        any                                  `json:"route"`
+	Locales      []string                             `json:"locales"`
+	Unresolved   []string                             `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesResolveResponseLinks `json:"_links"`
+	Warnings     []string                             `json:"warnings,omitempty"`
+}
+
+type DeliveryEntriesGlobal0ResponseLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesGlobal0Response struct {
+	ID           string                               `json:"id"`
+	Type         string                               `json:"type"`
+	Slug         any                                  `json:"slug"`
+	Title        string                               `json:"title"`
+	Locale       string                               `json:"locale"`
+	Status       string                               `json:"status"`
+	PublishedAt  any                                  `json:"publishedAt"`
+	UpdatedAt    string                               `json:"updatedAt"`
+	ModelVersion *int64                               `json:"modelVersion,omitempty"`
+	Fields       map[string]any                       `json:"fields"`
+	Route        any                                  `json:"route"`
+	Locales      []string                             `json:"locales"`
+	Unresolved   []string                             `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesGlobal0ResponseLinks `json:"_links"`
+}
+
+type DeliveryEntriesGlobal1ResponseLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliveryEntriesGlobal1Response struct {
+	ID           string                               `json:"id"`
+	Type         string                               `json:"type"`
+	Slug         any                                  `json:"slug"`
+	Title        string                               `json:"title"`
+	Locale       string                               `json:"locale"`
+	Status       string                               `json:"status"`
+	PublishedAt  any                                  `json:"publishedAt"`
+	UpdatedAt    string                               `json:"updatedAt"`
+	ModelVersion *int64                               `json:"modelVersion,omitempty"`
+	Fields       map[string]any                       `json:"fields"`
+	Route        any                                  `json:"route"`
+	Locales      []string                             `json:"locales"`
+	Unresolved   []string                             `json:"_unresolved,omitempty"`
+	Links        *DeliveryEntriesGlobal1ResponseLinks `json:"_links"`
+}
+
+type DeliverySiteRoutes0ResponseDataItem struct {
+	ID        string `json:"id"`
+	Path      string `json:"path"`
+	Entry     any    `json:"entry"`
+	Title     any    `json:"title"`
+	Layout    any    `json:"layout"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type DeliverySiteRoutes0Response struct {
+	Data []DeliverySiteRoutes0ResponseDataItem `json:"data"`
+	Page *PageInfo                             `json:"page"`
+}
+
+type DeliverySiteRoutes1ResponseDataItem struct {
+	ID        string `json:"id"`
+	Path      string `json:"path"`
+	Entry     any    `json:"entry"`
+	Title     any    `json:"title"`
+	Layout    any    `json:"layout"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type DeliverySiteRoutes1Response struct {
+	Data []DeliverySiteRoutes1ResponseDataItem `json:"data"`
+	Page *PageInfo                             `json:"page"`
+}
+
+type DeliverySiteResolve0ResponseRouteLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliverySiteResolve0ResponseRoute struct {
+	ID           string                                  `json:"id"`
+	Type         string                                  `json:"type"`
+	Slug         any                                     `json:"slug"`
+	Title        string                                  `json:"title"`
+	Locale       string                                  `json:"locale"`
+	Status       string                                  `json:"status"`
+	PublishedAt  any                                     `json:"publishedAt"`
+	UpdatedAt    string                                  `json:"updatedAt"`
+	ModelVersion *int64                                  `json:"modelVersion,omitempty"`
+	Fields       map[string]any                          `json:"fields"`
+	Route        any                                     `json:"route"`
+	Locales      []string                                `json:"locales"`
+	Unresolved   []string                                `json:"_unresolved,omitempty"`
+	Links        *DeliverySiteResolve0ResponseRouteLinks `json:"_links"`
+}
+
+type DeliverySiteResolve0ResponseEntryLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliverySiteResolve0ResponseEntry struct {
+	ID           string                                  `json:"id"`
+	Type         string                                  `json:"type"`
+	Slug         any                                     `json:"slug"`
+	Title        string                                  `json:"title"`
+	Locale       string                                  `json:"locale"`
+	Status       string                                  `json:"status"`
+	PublishedAt  any                                     `json:"publishedAt"`
+	UpdatedAt    string                                  `json:"updatedAt"`
+	ModelVersion *int64                                  `json:"modelVersion,omitempty"`
+	Fields       map[string]any                          `json:"fields"`
+	Route        any                                     `json:"route"`
+	Locales      []string                                `json:"locales"`
+	Unresolved   []string                                `json:"_unresolved,omitempty"`
+	Links        *DeliverySiteResolve0ResponseEntryLinks `json:"_links"`
+}
+
+type DeliverySiteResolve0Response struct {
+	Kind   string                             `json:"kind"`
+	Path   string                             `json:"path"`
+	Route  *DeliverySiteResolve0ResponseRoute `json:"route,omitempty"`
+	Entry  *DeliverySiteResolve0ResponseEntry `json:"entry,omitempty"`
+	To     *string                            `json:"to,omitempty"`
+	Status *int64                             `json:"status,omitempty"`
+}
+
+type DeliverySiteResolve1ResponseRouteLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliverySiteResolve1ResponseRoute struct {
+	ID           string                                  `json:"id"`
+	Type         string                                  `json:"type"`
+	Slug         any                                     `json:"slug"`
+	Title        string                                  `json:"title"`
+	Locale       string                                  `json:"locale"`
+	Status       string                                  `json:"status"`
+	PublishedAt  any                                     `json:"publishedAt"`
+	UpdatedAt    string                                  `json:"updatedAt"`
+	ModelVersion *int64                                  `json:"modelVersion,omitempty"`
+	Fields       map[string]any                          `json:"fields"`
+	Route        any                                     `json:"route"`
+	Locales      []string                                `json:"locales"`
+	Unresolved   []string                                `json:"_unresolved,omitempty"`
+	Links        *DeliverySiteResolve1ResponseRouteLinks `json:"_links"`
+}
+
+type DeliverySiteResolve1ResponseEntryLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliverySiteResolve1ResponseEntry struct {
+	ID           string                                  `json:"id"`
+	Type         string                                  `json:"type"`
+	Slug         any                                     `json:"slug"`
+	Title        string                                  `json:"title"`
+	Locale       string                                  `json:"locale"`
+	Status       string                                  `json:"status"`
+	PublishedAt  any                                     `json:"publishedAt"`
+	UpdatedAt    string                                  `json:"updatedAt"`
+	ModelVersion *int64                                  `json:"modelVersion,omitempty"`
+	Fields       map[string]any                          `json:"fields"`
+	Route        any                                     `json:"route"`
+	Locales      []string                                `json:"locales"`
+	Unresolved   []string                                `json:"_unresolved,omitempty"`
+	Links        *DeliverySiteResolve1ResponseEntryLinks `json:"_links"`
+}
+
+type DeliverySiteResolve1Response struct {
+	Kind   string                             `json:"kind"`
+	Path   string                             `json:"path"`
+	Route  *DeliverySiteResolve1ResponseRoute `json:"route,omitempty"`
+	Entry  *DeliverySiteResolve1ResponseEntry `json:"entry,omitempty"`
+	To     *string                            `json:"to,omitempty"`
+	Status *int64                             `json:"status,omitempty"`
+}
+
+type DeliverySiteRedirects0ResponseRedirect struct {
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Status int64  `json:"status"`
+	Type   string `json:"type"`
+	Auto   bool   `json:"auto"`
+}
+
+type DeliverySiteRedirects0ResponseDataItem struct {
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Status int64  `json:"status"`
+	Type   string `json:"type"`
+	Auto   bool   `json:"auto"`
+}
+
+type DeliverySiteRedirects0Response struct {
+	Redirects []DeliverySiteRedirects0ResponseRedirect `json:"redirects"`
+	Page      *PageInfo                                `json:"page,omitempty"`
+	Data      []DeliverySiteRedirects0ResponseDataItem `json:"data,omitempty"`
+}
+
+type DeliverySiteRedirects1ResponseRedirect struct {
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Status int64  `json:"status"`
+	Type   string `json:"type"`
+	Auto   bool   `json:"auto"`
+}
+
+type DeliverySiteRedirects1ResponseDataItem struct {
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Status int64  `json:"status"`
+	Type   string `json:"type"`
+	Auto   bool   `json:"auto"`
+}
+
+type DeliverySiteRedirects1Response struct {
+	Redirects []DeliverySiteRedirects1ResponseRedirect `json:"redirects"`
+	Page      *PageInfo                                `json:"page,omitempty"`
+	Data      []DeliverySiteRedirects1ResponseDataItem `json:"data,omitempty"`
+}
+
+type DeliverySiteSitemap0ResponseEntry struct {
+	Path       string         `json:"path"`
+	Lastmod    string         `json:"lastmod"`
+	Alternates map[string]any `json:"alternates"`
+}
+
+type DeliverySiteSitemap0ResponseDataItem struct {
+	Path       string         `json:"path"`
+	Lastmod    string         `json:"lastmod"`
+	Alternates map[string]any `json:"alternates"`
+}
+
+type DeliverySiteSitemap0Response struct {
+	Entries []DeliverySiteSitemap0ResponseEntry    `json:"entries"`
+	Page    *PageInfo                              `json:"page,omitempty"`
+	Data    []DeliverySiteSitemap0ResponseDataItem `json:"data,omitempty"`
+}
+
+type DeliverySiteSitemap1ResponseEntry struct {
+	Path       string         `json:"path"`
+	Lastmod    string         `json:"lastmod"`
+	Alternates map[string]any `json:"alternates"`
+}
+
+type DeliverySiteSitemap1ResponseDataItem struct {
+	Path       string         `json:"path"`
+	Lastmod    string         `json:"lastmod"`
+	Alternates map[string]any `json:"alternates"`
+}
+
+type DeliverySiteSitemap1Response struct {
+	Entries []DeliverySiteSitemap1ResponseEntry    `json:"entries"`
+	Page    *PageInfo                              `json:"page,omitempty"`
+	Data    []DeliverySiteSitemap1ResponseDataItem `json:"data,omitempty"`
+}
+
+type DeliverySiteSearch0ResponseDataItemEntryLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliverySiteSearch0ResponseDataItemEntry struct {
+	ID           string                                         `json:"id"`
+	Type         string                                         `json:"type"`
+	Slug         any                                            `json:"slug"`
+	Title        string                                         `json:"title"`
+	Locale       string                                         `json:"locale"`
+	Status       string                                         `json:"status"`
+	PublishedAt  any                                            `json:"publishedAt"`
+	UpdatedAt    string                                         `json:"updatedAt"`
+	ModelVersion *int64                                         `json:"modelVersion,omitempty"`
+	Fields       map[string]any                                 `json:"fields"`
+	Route        any                                            `json:"route"`
+	Locales      []string                                       `json:"locales"`
+	Unresolved   []string                                       `json:"_unresolved,omitempty"`
+	Links        *DeliverySiteSearch0ResponseDataItemEntryLinks `json:"_links"`
+}
+
+type DeliverySiteSearch0ResponseDataItem struct {
+	Entry *DeliverySiteSearch0ResponseDataItemEntry `json:"entry"`
+	Score float64                                   `json:"score"`
+}
+
+type DeliverySiteSearch0Response struct {
+	Data []DeliverySiteSearch0ResponseDataItem `json:"data"`
+	Page *PageInfo                             `json:"page"`
+}
+
+type DeliverySiteSearch1ResponseDataItemEntryLinks struct {
+	Self string `json:"self"`
+}
+
+type DeliverySiteSearch1ResponseDataItemEntry struct {
+	ID           string                                         `json:"id"`
+	Type         string                                         `json:"type"`
+	Slug         any                                            `json:"slug"`
+	Title        string                                         `json:"title"`
+	Locale       string                                         `json:"locale"`
+	Status       string                                         `json:"status"`
+	PublishedAt  any                                            `json:"publishedAt"`
+	UpdatedAt    string                                         `json:"updatedAt"`
+	ModelVersion *int64                                         `json:"modelVersion,omitempty"`
+	Fields       map[string]any                                 `json:"fields"`
+	Route        any                                            `json:"route"`
+	Locales      []string                                       `json:"locales"`
+	Unresolved   []string                                       `json:"_unresolved,omitempty"`
+	Links        *DeliverySiteSearch1ResponseDataItemEntryLinks `json:"_links"`
+}
+
+type DeliverySiteSearch1ResponseDataItem struct {
+	Entry *DeliverySiteSearch1ResponseDataItemEntry `json:"entry"`
+	Score float64                                   `json:"score"`
+}
+
+type DeliverySiteSearch1Response struct {
+	Data []DeliverySiteSearch1ResponseDataItem `json:"data"`
+	Page *PageInfo                             `json:"page"`
+}
+
+type SecretScanningGithubParamsItem struct {
+	Token  string  `json:"token"`
+	Type   string  `json:"type"`
+	URL    *string `json:"url,omitempty"`
+	Source *string `json:"source,omitempty"`
+}
+
+type HostedOutputResolveResponse struct {
+	BlockTypes []BlockType    `json:"blockTypes,omitempty"`
+	Entry      map[string]any `json:"entry,omitempty"`
+	Kind       string         `json:"kind"`
+	Locale     *string        `json:"locale,omitempty"`
+	Locales    *PathLocales   `json:"locales"`
+	Path       *string        `json:"path,omitempty"`
+	Route      map[string]any `json:"route,omitempty"`
+	Types      []HostedType   `json:"types,omitempty"`
+	Status     *float64       `json:"status,omitempty"`
+	To         *string        `json:"to,omitempty"`
+}
+
+type EntryDeliveryPreviewResolveParams struct {
+	Fields map[string]any `json:"fields"`
+}
+
+type EntryDeliveryPreviewResolveResponseEntryLinks struct {
+	Self string `json:"self"`
+}
+
+type EntryDeliveryPreviewResolveResponseEntry struct {
+	Links        *EntryDeliveryPreviewResolveResponseEntryLinks `json:"_links"`
+	Unresolved   []string                                       `json:"_unresolved,omitempty"`
+	Fields       map[string]any                                 `json:"fields"`
+	ID           string                                         `json:"id"`
+	Locale       string                                         `json:"locale"`
+	Locales      []string                                       `json:"locales"`
+	ModelVersion *float64                                       `json:"modelVersion,omitempty"`
+	PublishedAt  any                                            `json:"publishedAt"`
+	Route        any                                            `json:"route"`
+	Slug         any                                            `json:"slug"`
+	Status       string                                         `json:"status"`
+	Title        string                                         `json:"title"`
+	Type         string                                         `json:"type"`
+	UpdatedAt    string                                         `json:"updatedAt"`
+}
+
+type EntryDeliveryPreviewResolveResponse struct {
+	Entry    *EntryDeliveryPreviewResolveResponseEntry `json:"entry"`
+	Warnings []string                                  `json:"warnings,omitempty"`
+}
+
 type ItemsCreateParamsContent struct {
 	Type    string `json:"type"`
 	Content []any  `json:"content,omitempty"`
@@ -75820,6 +78052,86 @@ type ItemsPutSectionParams struct {
 type ItemsPutSectionResponse struct {
 	Conformance *Conformance `json:"conformance"`
 	Warnings    []string     `json:"warnings,omitempty"`
+}
+
+type LibraryItemCreateParamsContent struct {
+	Type    string `json:"type"`
+	Content []any  `json:"content,omitempty"`
+}
+
+type LibraryItemCreateParams struct {
+	Title    string                          `json:"title"`
+	Slug     *string                         `json:"slug,omitempty"`
+	Preset   *string                         `json:"preset,omitempty"`
+	Sections map[string]any                  `json:"sections,omitempty"`
+	Body     *string                         `json:"body,omitempty"`
+	Content  *LibraryItemCreateParamsContent `json:"content,omitempty"`
+	Params   map[string]any                  `json:"params,omitempty"`
+}
+
+type LibraryItemCreateResponse struct {
+	Item     *ItemRef `json:"item"`
+	Warnings []string `json:"warnings,omitempty"`
+	Data     *ItemRef `json:"data,omitempty"`
+}
+
+type LibraryItemLookupParams struct {
+	Keys []string `json:"keys"`
+}
+
+type LibraryItemLookupResponse struct {
+	Found    map[string]any `json:"found"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type LibraryItemPatchParams struct {
+	Title  *string        `json:"title,omitempty"`
+	Slug   *string        `json:"slug,omitempty"`
+	Params map[string]any `json:"params,omitempty"`
+}
+
+type LibraryItemPatchResponse struct {
+	Item     *ItemRef `json:"item"`
+	Warnings []string `json:"warnings,omitempty"`
+}
+
+type LibraryItemRemoveResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type LibraryItemFieldsResponse struct {
+	Fields map[string]any `json:"fields"`
+}
+
+type LibraryItemSetFieldsParams struct {
+	Fields map[string]any `json:"fields"`
+}
+
+type LibraryItemSetFieldsResponse struct {
+	Fields   map[string]any `json:"fields"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type LibraryItemPublishResponse struct {
+	Conformance *Conformance `json:"conformance"`
+	Note        *string      `json:"note,omitempty"`
+	Published   bool         `json:"published"`
+	Warnings    []string     `json:"warnings,omitempty"`
+}
+
+type LibraryItemTrashResponse struct {
+	Entries []PageTrashRow `json:"entries"`
+	Page    *PageInfo      `json:"page,omitempty"`
+	Data    []PageTrashRow `json:"data,omitempty"`
+}
+
+type LibraryItemRestoreResponse struct {
+	Detached           bool    `json:"detached"`
+	Notice             *string `json:"notice,omitempty"`
+	Ok                 bool    `json:"ok"`
+	ReattachedChildren float64 `json:"reattachedChildren"`
+	RenamedFrom        any     `json:"renamedFrom"`
+	Slug               string  `json:"slug"`
 }
 
 type QuestionsListResponse struct {
@@ -76671,6 +78983,1265 @@ type ReaderDomainRemoveResponse struct {
 type ReaderDomainVerifyResponse struct {
 	Domain *ReaderDomain `json:"domain"`
 	Data   *ReaderDomain `json:"data,omitempty"`
+}
+
+type ContentWorkflowSettingsResponse struct {
+	Workflow *ContentWorkflowSettings `json:"workflow"`
+}
+
+type ContentWorkflowPutSettingsParams struct {
+	Gates map[string]any `json:"gates"`
+}
+
+type ContentWorkflowPutSettingsResponse struct {
+	Workflow *ContentWorkflowSettings `json:"workflow"`
+	Warnings []string                 `json:"warnings,omitempty"`
+}
+
+type ContentWorkflowListResponse struct {
+	ChangeRequests []ContentChangeRequest `json:"changeRequests"`
+	Page           *PageInfo              `json:"page,omitempty"`
+	Data           []ContentChangeRequest `json:"data,omitempty"`
+}
+
+type ContentWorkflowCreateParams struct {
+	EntryID     string   `json:"entryId"`
+	Title       *string  `json:"title,omitempty"`
+	AssigneeIds []string `json:"assigneeIds,omitempty"`
+	Submit      *bool    `json:"submit,omitempty"`
+}
+
+type ContentWorkflowCreateResponse struct {
+	ChangeRequest *ContentChangeRequest `json:"changeRequest"`
+	Data          *ContentChangeRequest `json:"data,omitempty"`
+	Warnings      []string              `json:"warnings,omitempty"`
+}
+
+type ContentWorkflowGetResponse struct {
+	ChangeRequest *ContentChangeRequest `json:"changeRequest"`
+}
+
+type ContentWorkflowUpdateParams struct {
+	Title       *string  `json:"title,omitempty"`
+	AssigneeIds []string `json:"assigneeIds,omitempty"`
+}
+
+type ContentWorkflowUpdateResponse struct {
+	ChangeRequest *ContentChangeRequest `json:"changeRequest"`
+	Warnings      []string              `json:"warnings,omitempty"`
+}
+
+type ContentWorkflowTransitionParams struct {
+	Action    string  `json:"action"`
+	PublishAt *string `json:"publishAt,omitempty"`
+	Note      *string `json:"note,omitempty"`
+}
+
+type ContentWorkflowTransitionResponse struct {
+	ChangeRequest *ContentChangeRequest `json:"changeRequest"`
+	Warnings      []string              `json:"warnings,omitempty"`
+}
+
+type ReleasesListResponse struct {
+	Releases []ContentReleaseSummary `json:"releases"`
+	Page     *PageInfo               `json:"page,omitempty"`
+	Data     []ContentReleaseSummary `json:"data,omitempty"`
+}
+
+type ReleasesCreateParams struct {
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+}
+
+type ReleasesCreateResponse struct {
+	Release  *ContentRelease `json:"release"`
+	Data     *ContentRelease `json:"data,omitempty"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type ReleasesCandidatesResponse struct {
+	Candidates []ReleaseCandidate `json:"candidates"`
+	Page       *PageInfo          `json:"page,omitempty"`
+	Data       []ReleaseCandidate `json:"data,omitempty"`
+}
+
+type ReleasesGetResponse struct {
+	Release *ContentRelease `json:"release"`
+}
+
+type ReleasesUpdateParams struct {
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type ReleasesUpdateResponse struct {
+	Release  *ContentRelease `json:"release"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type ReleasesRemoveResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type ReleasesAddItemParams struct {
+	Kind      string  `json:"kind"`
+	LibraryID *string `json:"libraryId,omitempty"`
+	EntryID   *string `json:"entryId,omitempty"`
+	PageID    *string `json:"pageId,omitempty"`
+	TopicID   *string `json:"topicId,omitempty"`
+}
+
+type ReleasesAddItemResponse struct {
+	Release  *ContentRelease `json:"release"`
+	Data     *ContentRelease `json:"data,omitempty"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type ReleasesRemoveItemResponse struct {
+	Release *ContentRelease `json:"release"`
+}
+
+type ReleasesScheduleParams struct {
+	PublishAt string `json:"publishAt"`
+}
+
+type ReleasesScheduleResponse struct {
+	Release  *ContentRelease `json:"release"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type ReleasesUnscheduleResponse struct {
+	Release *ContentRelease `json:"release"`
+}
+
+type ReleasesPreviewResponse struct {
+	Preview *ReleasePreview `json:"preview"`
+}
+
+type LibraryMediaUploadParams struct {
+	File string `json:"file"`
+}
+
+type LibraryMediaUploadResponse struct {
+	Asset    *UploadedAsset `json:"asset"`
+	Data     *UploadedAsset `json:"data,omitempty"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type LibraryMediaBulkUpdateParamsUpdate struct {
+	AssetID  string   `json:"assetId"`
+	Alt      *string  `json:"alt,omitempty"`
+	Caption  *string  `json:"caption,omitempty"`
+	FolderID *string  `json:"folderId,omitempty"`
+	Tags     []string `json:"tags,omitempty"`
+}
+
+type LibraryMediaBulkUpdateParams struct {
+	Updates []LibraryMediaBulkUpdateParamsUpdate `json:"updates"`
+}
+
+type LibraryMediaBulkUpdateResponse struct {
+	Assets   []UploadedAsset `json:"assets"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type LibraryMediaSuggestAltTextParams struct {
+	AssetIds []string `json:"assetIds"`
+	Locale   *string  `json:"locale,omitempty"`
+}
+
+type LibraryMediaSuggestAltTextResponse struct {
+	Suggestions []AltTextSuggestion `json:"suggestions"`
+	Warnings    []string            `json:"warnings,omitempty"`
+}
+
+type LibraryMediaUpdateParams struct {
+	Alt      *string  `json:"alt,omitempty"`
+	Caption  *string  `json:"caption,omitempty"`
+	FocalX   *float64 `json:"focalX,omitempty"`
+	FocalY   *float64 `json:"focalY,omitempty"`
+	FolderID *string  `json:"folderId,omitempty"`
+	Tags     []string `json:"tags,omitempty"`
+}
+
+type LibraryMediaUpdateResponse struct {
+	Asset    *UploadedAsset `json:"asset"`
+	Warnings []string       `json:"warnings,omitempty"`
+}
+
+type LibraryMediaRemoveResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type SpacesShapePutParamsSpace struct {
+	Index      *string  `json:"index,omitempty"`
+	Order      *string  `json:"order,omitempty"`
+	Nav        *string  `json:"nav,omitempty"`
+	WhoCreates *string  `json:"whoCreates,omitempty"`
+	Summary    []string `json:"summary,omitempty"`
+}
+
+type SpacesShapePutParamsSectionsAddItem struct {
+	Key            string  `json:"key"`
+	Label          string  `json:"label"`
+	Kind           string  `json:"kind"`
+	Required       *bool   `json:"required,omitempty"`
+	Hint           *string `json:"hint,omitempty"`
+	Example        *string `json:"example,omitempty"`
+	SchemaProperty *string `json:"schemaProperty,omitempty"`
+	Render         *string `json:"render,omitempty"`
+}
+
+type SpacesShapePutParamsSections struct {
+	Add   []SpacesShapePutParamsSectionsAddItem `json:"add,omitempty"`
+	Omit  []string                              `json:"omit,omitempty"`
+	Order []string                              `json:"order,omitempty"`
+	Set   map[string]any                        `json:"set,omitempty"`
+	Unset map[string]any                        `json:"unset,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemFieldFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemFieldField struct {
+	Key             string                                            `json:"key"`
+	Label           string                                            `json:"label"`
+	Type            string                                            `json:"type"`
+	Options         []string                                          `json:"options,omitempty"`
+	RelationSpaceID *string                                           `json:"relationSpaceId,omitempty"`
+	Hint            *string                                           `json:"hint,omitempty"`
+	Placeholder     *string                                           `json:"placeholder,omitempty"`
+	Internal        *bool                                             `json:"internal,omitempty"`
+	Facet           *bool                                             `json:"facet,omitempty"`
+	Meta            *bool                                             `json:"meta,omitempty"`
+	Required        *bool                                             `json:"required,omitempty"`
+	Default         any                                               `json:"default,omitempty"`
+	SchemaProperty  *string                                           `json:"schemaProperty,omitempty"`
+	Min             *float64                                          `json:"min,omitempty"`
+	Max             *float64                                          `json:"max,omitempty"`
+	Visibility      *string                                           `json:"visibility,omitempty"`
+	Localized       *bool                                             `json:"localized,omitempty"`
+	Unique          *bool                                             `json:"unique,omitempty"`
+	Indexed         *bool                                             `json:"indexed,omitempty"`
+	Sortable        *bool                                             `json:"sortable,omitempty"`
+	MinLength       *int64                                            `json:"minLength,omitempty"`
+	MaxLength       *int64                                            `json:"maxLength,omitempty"`
+	Pattern         *string                                           `json:"pattern,omitempty"`
+	Condition       any                                               `json:"condition,omitempty"`
+	Expr            any                                               `json:"expr,omitempty"`
+	Schema          map[string]any                                    `json:"schema,omitempty"`
+	AllowedBlocks   []string                                          `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                          `json:"allowed,omitempty"`
+	AllowedGroups   []string                                          `json:"allowedGroups,omitempty"`
+	To              []map[string]any                                  `json:"to,omitempty"`
+	HasMany         *bool                                             `json:"hasMany,omitempty"`
+	RowLabelField   *string                                           `json:"rowLabelField,omitempty"`
+	Language        *string                                           `json:"language,omitempty"`
+	From            *string                                           `json:"from,omitempty"`
+	Accept          []string                                          `json:"accept,omitempty"`
+	Admin           *SpacesShapePutParamsParamsAddItemFieldFieldAdmin `json:"admin,omitempty"`
+	Fields          []map[string]any                                  `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItemField struct {
+	Key             string                                         `json:"key"`
+	Label           string                                         `json:"label"`
+	Type            string                                         `json:"type"`
+	Options         []string                                       `json:"options,omitempty"`
+	RelationSpaceID *string                                        `json:"relationSpaceId,omitempty"`
+	Hint            *string                                        `json:"hint,omitempty"`
+	Placeholder     *string                                        `json:"placeholder,omitempty"`
+	Internal        *bool                                          `json:"internal,omitempty"`
+	Facet           *bool                                          `json:"facet,omitempty"`
+	Meta            *bool                                          `json:"meta,omitempty"`
+	Required        *bool                                          `json:"required,omitempty"`
+	Default         any                                            `json:"default,omitempty"`
+	SchemaProperty  *string                                        `json:"schemaProperty,omitempty"`
+	Min             *float64                                       `json:"min,omitempty"`
+	Max             *float64                                       `json:"max,omitempty"`
+	Visibility      *string                                        `json:"visibility,omitempty"`
+	Localized       *bool                                          `json:"localized,omitempty"`
+	Unique          *bool                                          `json:"unique,omitempty"`
+	Indexed         *bool                                          `json:"indexed,omitempty"`
+	Sortable        *bool                                          `json:"sortable,omitempty"`
+	MinLength       *int64                                         `json:"minLength,omitempty"`
+	MaxLength       *int64                                         `json:"maxLength,omitempty"`
+	Pattern         *string                                        `json:"pattern,omitempty"`
+	Condition       any                                            `json:"condition,omitempty"`
+	Expr            any                                            `json:"expr,omitempty"`
+	Schema          map[string]any                                 `json:"schema,omitempty"`
+	AllowedBlocks   []string                                       `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                       `json:"allowed,omitempty"`
+	AllowedGroups   []string                                       `json:"allowedGroups,omitempty"`
+	To              []SpacesShapePutParamsParamsAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                          `json:"hasMany,omitempty"`
+	RowLabelField   *string                                        `json:"rowLabelField,omitempty"`
+	Language        *string                                        `json:"language,omitempty"`
+	From            *string                                        `json:"from,omitempty"`
+	Accept          []string                                       `json:"accept,omitempty"`
+	Admin           *SpacesShapePutParamsParamsAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapePutParamsParamsAddItemFieldField  `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsParamsAddItem struct {
+	Key             string                                    `json:"key"`
+	Label           string                                    `json:"label"`
+	Type            string                                    `json:"type"`
+	Options         []string                                  `json:"options,omitempty"`
+	RelationSpaceID *string                                   `json:"relationSpaceId,omitempty"`
+	Hint            *string                                   `json:"hint,omitempty"`
+	Placeholder     *string                                   `json:"placeholder,omitempty"`
+	Internal        *bool                                     `json:"internal,omitempty"`
+	Facet           *bool                                     `json:"facet,omitempty"`
+	Meta            *bool                                     `json:"meta,omitempty"`
+	Required        *bool                                     `json:"required,omitempty"`
+	Default         any                                       `json:"default,omitempty"`
+	SchemaProperty  *string                                   `json:"schemaProperty,omitempty"`
+	Min             *float64                                  `json:"min,omitempty"`
+	Max             *float64                                  `json:"max,omitempty"`
+	Visibility      *string                                   `json:"visibility,omitempty"`
+	Localized       *bool                                     `json:"localized,omitempty"`
+	Unique          *bool                                     `json:"unique,omitempty"`
+	Indexed         *bool                                     `json:"indexed,omitempty"`
+	Sortable        *bool                                     `json:"sortable,omitempty"`
+	MinLength       *int64                                    `json:"minLength,omitempty"`
+	MaxLength       *int64                                    `json:"maxLength,omitempty"`
+	Pattern         *string                                   `json:"pattern,omitempty"`
+	Condition       any                                       `json:"condition,omitempty"`
+	Expr            any                                       `json:"expr,omitempty"`
+	Schema          map[string]any                            `json:"schema,omitempty"`
+	AllowedBlocks   []string                                  `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                  `json:"allowed,omitempty"`
+	AllowedGroups   []string                                  `json:"allowedGroups,omitempty"`
+	To              []SpacesShapePutParamsParamsAddItemToItem `json:"to,omitempty"`
+	HasMany         *bool                                     `json:"hasMany,omitempty"`
+	RowLabelField   *string                                   `json:"rowLabelField,omitempty"`
+	Language        *string                                   `json:"language,omitempty"`
+	From            *string                                   `json:"from,omitempty"`
+	Accept          []string                                  `json:"accept,omitempty"`
+	Admin           *SpacesShapePutParamsParamsAddItemAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapePutParamsParamsAddItemField  `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsParams struct {
+	Add   []SpacesShapePutParamsParamsAddItem `json:"add,omitempty"`
+	Omit  []string                            `json:"omit,omitempty"`
+	Order []string                            `json:"order,omitempty"`
+	Set   map[string]any                      `json:"set,omitempty"`
+	Unset map[string]any                      `json:"unset,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemFieldFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemFieldField struct {
+	Key             string                                                `json:"key"`
+	Label           string                                                `json:"label"`
+	Type            string                                                `json:"type"`
+	Options         []string                                              `json:"options,omitempty"`
+	RelationSpaceID *string                                               `json:"relationSpaceId,omitempty"`
+	Hint            *string                                               `json:"hint,omitempty"`
+	Placeholder     *string                                               `json:"placeholder,omitempty"`
+	Internal        *bool                                                 `json:"internal,omitempty"`
+	Facet           *bool                                                 `json:"facet,omitempty"`
+	Meta            *bool                                                 `json:"meta,omitempty"`
+	Required        *bool                                                 `json:"required,omitempty"`
+	Default         any                                                   `json:"default,omitempty"`
+	SchemaProperty  *string                                               `json:"schemaProperty,omitempty"`
+	Min             *float64                                              `json:"min,omitempty"`
+	Max             *float64                                              `json:"max,omitempty"`
+	Visibility      *string                                               `json:"visibility,omitempty"`
+	Localized       *bool                                                 `json:"localized,omitempty"`
+	Unique          *bool                                                 `json:"unique,omitempty"`
+	Indexed         *bool                                                 `json:"indexed,omitempty"`
+	Sortable        *bool                                                 `json:"sortable,omitempty"`
+	MinLength       *int64                                                `json:"minLength,omitempty"`
+	MaxLength       *int64                                                `json:"maxLength,omitempty"`
+	Pattern         *string                                               `json:"pattern,omitempty"`
+	Condition       any                                                   `json:"condition,omitempty"`
+	Expr            any                                                   `json:"expr,omitempty"`
+	Schema          map[string]any                                        `json:"schema,omitempty"`
+	AllowedBlocks   []string                                              `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                              `json:"allowed,omitempty"`
+	AllowedGroups   []string                                              `json:"allowedGroups,omitempty"`
+	To              []map[string]any                                      `json:"to,omitempty"`
+	HasMany         *bool                                                 `json:"hasMany,omitempty"`
+	RowLabelField   *string                                               `json:"rowLabelField,omitempty"`
+	Language        *string                                               `json:"language,omitempty"`
+	From            *string                                               `json:"from,omitempty"`
+	Accept          []string                                              `json:"accept,omitempty"`
+	Admin           *SpacesShapePutParamsBlockTypesAddItemFieldFieldAdmin `json:"admin,omitempty"`
+	Fields          []map[string]any                                      `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemField struct {
+	Key             string                                             `json:"key"`
+	Label           string                                             `json:"label"`
+	Type            string                                             `json:"type"`
+	Options         []string                                           `json:"options,omitempty"`
+	RelationSpaceID *string                                            `json:"relationSpaceId,omitempty"`
+	Hint            *string                                            `json:"hint,omitempty"`
+	Placeholder     *string                                            `json:"placeholder,omitempty"`
+	Internal        *bool                                              `json:"internal,omitempty"`
+	Facet           *bool                                              `json:"facet,omitempty"`
+	Meta            *bool                                              `json:"meta,omitempty"`
+	Required        *bool                                              `json:"required,omitempty"`
+	Default         any                                                `json:"default,omitempty"`
+	SchemaProperty  *string                                            `json:"schemaProperty,omitempty"`
+	Min             *float64                                           `json:"min,omitempty"`
+	Max             *float64                                           `json:"max,omitempty"`
+	Visibility      *string                                            `json:"visibility,omitempty"`
+	Localized       *bool                                              `json:"localized,omitempty"`
+	Unique          *bool                                              `json:"unique,omitempty"`
+	Indexed         *bool                                              `json:"indexed,omitempty"`
+	Sortable        *bool                                              `json:"sortable,omitempty"`
+	MinLength       *int64                                             `json:"minLength,omitempty"`
+	MaxLength       *int64                                             `json:"maxLength,omitempty"`
+	Pattern         *string                                            `json:"pattern,omitempty"`
+	Condition       any                                                `json:"condition,omitempty"`
+	Expr            any                                                `json:"expr,omitempty"`
+	Schema          map[string]any                                     `json:"schema,omitempty"`
+	AllowedBlocks   []string                                           `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                           `json:"allowed,omitempty"`
+	AllowedGroups   []string                                           `json:"allowedGroups,omitempty"`
+	To              []SpacesShapePutParamsBlockTypesAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                              `json:"hasMany,omitempty"`
+	RowLabelField   *string                                            `json:"rowLabelField,omitempty"`
+	Language        *string                                            `json:"language,omitempty"`
+	From            *string                                            `json:"from,omitempty"`
+	Accept          []string                                           `json:"accept,omitempty"`
+	Admin           *SpacesShapePutParamsBlockTypesAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapePutParamsBlockTypesAddItemFieldField  `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemVariantFieldsAddItem struct {
+	Key             string           `json:"key"`
+	Label           string           `json:"label"`
+	Type            string           `json:"type"`
+	Options         []string         `json:"options,omitempty"`
+	RelationSpaceID *string          `json:"relationSpaceId,omitempty"`
+	Hint            *string          `json:"hint,omitempty"`
+	Placeholder     *string          `json:"placeholder,omitempty"`
+	Internal        *bool            `json:"internal,omitempty"`
+	Facet           *bool            `json:"facet,omitempty"`
+	Meta            *bool            `json:"meta,omitempty"`
+	Required        *bool            `json:"required,omitempty"`
+	Default         any              `json:"default,omitempty"`
+	SchemaProperty  *string          `json:"schemaProperty,omitempty"`
+	Min             *float64         `json:"min,omitempty"`
+	Max             *float64         `json:"max,omitempty"`
+	Visibility      *string          `json:"visibility,omitempty"`
+	Localized       *bool            `json:"localized,omitempty"`
+	Unique          *bool            `json:"unique,omitempty"`
+	Indexed         *bool            `json:"indexed,omitempty"`
+	Sortable        *bool            `json:"sortable,omitempty"`
+	MinLength       *int64           `json:"minLength,omitempty"`
+	MaxLength       *int64           `json:"maxLength,omitempty"`
+	Pattern         *string          `json:"pattern,omitempty"`
+	Condition       any              `json:"condition,omitempty"`
+	Expr            any              `json:"expr,omitempty"`
+	Schema          map[string]any   `json:"schema,omitempty"`
+	AllowedBlocks   []string         `json:"allowedBlocks,omitempty"`
+	Allowed         []string         `json:"allowed,omitempty"`
+	AllowedGroups   []string         `json:"allowedGroups,omitempty"`
+	To              []map[string]any `json:"to,omitempty"`
+	HasMany         *bool            `json:"hasMany,omitempty"`
+	RowLabelField   *string          `json:"rowLabelField,omitempty"`
+	Language        *string          `json:"language,omitempty"`
+	From            *string          `json:"from,omitempty"`
+	Accept          []string         `json:"accept,omitempty"`
+	Admin           map[string]any   `json:"admin,omitempty"`
+	Fields          []map[string]any `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemVariantFields struct {
+	Add   []SpacesShapePutParamsBlockTypesAddItemVariantFieldsAddItem `json:"add,omitempty"`
+	Omit  []string                                                    `json:"omit,omitempty"`
+	Order []string                                                    `json:"order,omitempty"`
+	Set   map[string]any                                              `json:"set,omitempty"`
+	Unset map[string]any                                              `json:"unset,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItemVariant struct {
+	Key    string                                              `json:"key"`
+	Label  string                                              `json:"label"`
+	Fields *SpacesShapePutParamsBlockTypesAddItemVariantFields `json:"fields,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypesAddItem struct {
+	Key         string                                         `json:"key"`
+	Label       string                                         `json:"label"`
+	Description *string                                        `json:"description,omitempty"`
+	Icon        *string                                        `json:"icon,omitempty"`
+	Group       *string                                        `json:"group,omitempty"`
+	Fields      []SpacesShapePutParamsBlockTypesAddItemField   `json:"fields"`
+	Variants    []SpacesShapePutParamsBlockTypesAddItemVariant `json:"variants,omitempty"`
+}
+
+type SpacesShapePutParamsBlockTypes struct {
+	Add   []SpacesShapePutParamsBlockTypesAddItem `json:"add,omitempty"`
+	Omit  []string                                `json:"omit,omitempty"`
+	Order []string                                `json:"order,omitempty"`
+	Set   map[string]any                          `json:"set,omitempty"`
+	Unset map[string]any                          `json:"unset,omitempty"`
+}
+
+type SpacesShapePutParams struct {
+	Space      *SpacesShapePutParamsSpace      `json:"space,omitempty"`
+	Sections   *SpacesShapePutParamsSections   `json:"sections,omitempty"`
+	Params     *SpacesShapePutParamsParams     `json:"params,omitempty"`
+	BlockTypes *SpacesShapePutParamsBlockTypes `json:"blockTypes,omitempty"`
+}
+
+type SpacesShapePatchParamsSpace struct {
+	Index      *string  `json:"index,omitempty"`
+	Order      *string  `json:"order,omitempty"`
+	Nav        *string  `json:"nav,omitempty"`
+	WhoCreates *string  `json:"whoCreates,omitempty"`
+	Summary    []string `json:"summary,omitempty"`
+}
+
+type SpacesShapePatchParamsSectionsAddItem struct {
+	Key            string  `json:"key"`
+	Label          string  `json:"label"`
+	Kind           string  `json:"kind"`
+	Required       *bool   `json:"required,omitempty"`
+	Hint           *string `json:"hint,omitempty"`
+	Example        *string `json:"example,omitempty"`
+	SchemaProperty *string `json:"schemaProperty,omitempty"`
+	Render         *string `json:"render,omitempty"`
+}
+
+type SpacesShapePatchParamsSections struct {
+	Add   []SpacesShapePatchParamsSectionsAddItem `json:"add,omitempty"`
+	Omit  []string                                `json:"omit,omitempty"`
+	Order []string                                `json:"order,omitempty"`
+	Set   map[string]any                          `json:"set,omitempty"`
+	Unset map[string]any                          `json:"unset,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemFieldFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemFieldField struct {
+	Key             string                                              `json:"key"`
+	Label           string                                              `json:"label"`
+	Type            string                                              `json:"type"`
+	Options         []string                                            `json:"options,omitempty"`
+	RelationSpaceID *string                                             `json:"relationSpaceId,omitempty"`
+	Hint            *string                                             `json:"hint,omitempty"`
+	Placeholder     *string                                             `json:"placeholder,omitempty"`
+	Internal        *bool                                               `json:"internal,omitempty"`
+	Facet           *bool                                               `json:"facet,omitempty"`
+	Meta            *bool                                               `json:"meta,omitempty"`
+	Required        *bool                                               `json:"required,omitempty"`
+	Default         any                                                 `json:"default,omitempty"`
+	SchemaProperty  *string                                             `json:"schemaProperty,omitempty"`
+	Min             *float64                                            `json:"min,omitempty"`
+	Max             *float64                                            `json:"max,omitempty"`
+	Visibility      *string                                             `json:"visibility,omitempty"`
+	Localized       *bool                                               `json:"localized,omitempty"`
+	Unique          *bool                                               `json:"unique,omitempty"`
+	Indexed         *bool                                               `json:"indexed,omitempty"`
+	Sortable        *bool                                               `json:"sortable,omitempty"`
+	MinLength       *int64                                              `json:"minLength,omitempty"`
+	MaxLength       *int64                                              `json:"maxLength,omitempty"`
+	Pattern         *string                                             `json:"pattern,omitempty"`
+	Condition       any                                                 `json:"condition,omitempty"`
+	Expr            any                                                 `json:"expr,omitempty"`
+	Schema          map[string]any                                      `json:"schema,omitempty"`
+	AllowedBlocks   []string                                            `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                            `json:"allowed,omitempty"`
+	AllowedGroups   []string                                            `json:"allowedGroups,omitempty"`
+	To              []map[string]any                                    `json:"to,omitempty"`
+	HasMany         *bool                                               `json:"hasMany,omitempty"`
+	RowLabelField   *string                                             `json:"rowLabelField,omitempty"`
+	Language        *string                                             `json:"language,omitempty"`
+	From            *string                                             `json:"from,omitempty"`
+	Accept          []string                                            `json:"accept,omitempty"`
+	Admin           *SpacesShapePatchParamsParamsAddItemFieldFieldAdmin `json:"admin,omitempty"`
+	Fields          []map[string]any                                    `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItemField struct {
+	Key             string                                           `json:"key"`
+	Label           string                                           `json:"label"`
+	Type            string                                           `json:"type"`
+	Options         []string                                         `json:"options,omitempty"`
+	RelationSpaceID *string                                          `json:"relationSpaceId,omitempty"`
+	Hint            *string                                          `json:"hint,omitempty"`
+	Placeholder     *string                                          `json:"placeholder,omitempty"`
+	Internal        *bool                                            `json:"internal,omitempty"`
+	Facet           *bool                                            `json:"facet,omitempty"`
+	Meta            *bool                                            `json:"meta,omitempty"`
+	Required        *bool                                            `json:"required,omitempty"`
+	Default         any                                              `json:"default,omitempty"`
+	SchemaProperty  *string                                          `json:"schemaProperty,omitempty"`
+	Min             *float64                                         `json:"min,omitempty"`
+	Max             *float64                                         `json:"max,omitempty"`
+	Visibility      *string                                          `json:"visibility,omitempty"`
+	Localized       *bool                                            `json:"localized,omitempty"`
+	Unique          *bool                                            `json:"unique,omitempty"`
+	Indexed         *bool                                            `json:"indexed,omitempty"`
+	Sortable        *bool                                            `json:"sortable,omitempty"`
+	MinLength       *int64                                           `json:"minLength,omitempty"`
+	MaxLength       *int64                                           `json:"maxLength,omitempty"`
+	Pattern         *string                                          `json:"pattern,omitempty"`
+	Condition       any                                              `json:"condition,omitempty"`
+	Expr            any                                              `json:"expr,omitempty"`
+	Schema          map[string]any                                   `json:"schema,omitempty"`
+	AllowedBlocks   []string                                         `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                         `json:"allowed,omitempty"`
+	AllowedGroups   []string                                         `json:"allowedGroups,omitempty"`
+	To              []SpacesShapePatchParamsParamsAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                            `json:"hasMany,omitempty"`
+	RowLabelField   *string                                          `json:"rowLabelField,omitempty"`
+	Language        *string                                          `json:"language,omitempty"`
+	From            *string                                          `json:"from,omitempty"`
+	Accept          []string                                         `json:"accept,omitempty"`
+	Admin           *SpacesShapePatchParamsParamsAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapePatchParamsParamsAddItemFieldField  `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsParamsAddItem struct {
+	Key             string                                      `json:"key"`
+	Label           string                                      `json:"label"`
+	Type            string                                      `json:"type"`
+	Options         []string                                    `json:"options,omitempty"`
+	RelationSpaceID *string                                     `json:"relationSpaceId,omitempty"`
+	Hint            *string                                     `json:"hint,omitempty"`
+	Placeholder     *string                                     `json:"placeholder,omitempty"`
+	Internal        *bool                                       `json:"internal,omitempty"`
+	Facet           *bool                                       `json:"facet,omitempty"`
+	Meta            *bool                                       `json:"meta,omitempty"`
+	Required        *bool                                       `json:"required,omitempty"`
+	Default         any                                         `json:"default,omitempty"`
+	SchemaProperty  *string                                     `json:"schemaProperty,omitempty"`
+	Min             *float64                                    `json:"min,omitempty"`
+	Max             *float64                                    `json:"max,omitempty"`
+	Visibility      *string                                     `json:"visibility,omitempty"`
+	Localized       *bool                                       `json:"localized,omitempty"`
+	Unique          *bool                                       `json:"unique,omitempty"`
+	Indexed         *bool                                       `json:"indexed,omitempty"`
+	Sortable        *bool                                       `json:"sortable,omitempty"`
+	MinLength       *int64                                      `json:"minLength,omitempty"`
+	MaxLength       *int64                                      `json:"maxLength,omitempty"`
+	Pattern         *string                                     `json:"pattern,omitempty"`
+	Condition       any                                         `json:"condition,omitempty"`
+	Expr            any                                         `json:"expr,omitempty"`
+	Schema          map[string]any                              `json:"schema,omitempty"`
+	AllowedBlocks   []string                                    `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                    `json:"allowed,omitempty"`
+	AllowedGroups   []string                                    `json:"allowedGroups,omitempty"`
+	To              []SpacesShapePatchParamsParamsAddItemToItem `json:"to,omitempty"`
+	HasMany         *bool                                       `json:"hasMany,omitempty"`
+	RowLabelField   *string                                     `json:"rowLabelField,omitempty"`
+	Language        *string                                     `json:"language,omitempty"`
+	From            *string                                     `json:"from,omitempty"`
+	Accept          []string                                    `json:"accept,omitempty"`
+	Admin           *SpacesShapePatchParamsParamsAddItemAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapePatchParamsParamsAddItemField  `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsParams struct {
+	Add   []SpacesShapePatchParamsParamsAddItem `json:"add,omitempty"`
+	Omit  []string                              `json:"omit,omitempty"`
+	Order []string                              `json:"order,omitempty"`
+	Set   map[string]any                        `json:"set,omitempty"`
+	Unset map[string]any                        `json:"unset,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemFieldFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemFieldField struct {
+	Key             string                                                  `json:"key"`
+	Label           string                                                  `json:"label"`
+	Type            string                                                  `json:"type"`
+	Options         []string                                                `json:"options,omitempty"`
+	RelationSpaceID *string                                                 `json:"relationSpaceId,omitempty"`
+	Hint            *string                                                 `json:"hint,omitempty"`
+	Placeholder     *string                                                 `json:"placeholder,omitempty"`
+	Internal        *bool                                                   `json:"internal,omitempty"`
+	Facet           *bool                                                   `json:"facet,omitempty"`
+	Meta            *bool                                                   `json:"meta,omitempty"`
+	Required        *bool                                                   `json:"required,omitempty"`
+	Default         any                                                     `json:"default,omitempty"`
+	SchemaProperty  *string                                                 `json:"schemaProperty,omitempty"`
+	Min             *float64                                                `json:"min,omitempty"`
+	Max             *float64                                                `json:"max,omitempty"`
+	Visibility      *string                                                 `json:"visibility,omitempty"`
+	Localized       *bool                                                   `json:"localized,omitempty"`
+	Unique          *bool                                                   `json:"unique,omitempty"`
+	Indexed         *bool                                                   `json:"indexed,omitempty"`
+	Sortable        *bool                                                   `json:"sortable,omitempty"`
+	MinLength       *int64                                                  `json:"minLength,omitempty"`
+	MaxLength       *int64                                                  `json:"maxLength,omitempty"`
+	Pattern         *string                                                 `json:"pattern,omitempty"`
+	Condition       any                                                     `json:"condition,omitempty"`
+	Expr            any                                                     `json:"expr,omitempty"`
+	Schema          map[string]any                                          `json:"schema,omitempty"`
+	AllowedBlocks   []string                                                `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                                `json:"allowed,omitempty"`
+	AllowedGroups   []string                                                `json:"allowedGroups,omitempty"`
+	To              []map[string]any                                        `json:"to,omitempty"`
+	HasMany         *bool                                                   `json:"hasMany,omitempty"`
+	RowLabelField   *string                                                 `json:"rowLabelField,omitempty"`
+	Language        *string                                                 `json:"language,omitempty"`
+	From            *string                                                 `json:"from,omitempty"`
+	Accept          []string                                                `json:"accept,omitempty"`
+	Admin           *SpacesShapePatchParamsBlockTypesAddItemFieldFieldAdmin `json:"admin,omitempty"`
+	Fields          []map[string]any                                        `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemField struct {
+	Key             string                                               `json:"key"`
+	Label           string                                               `json:"label"`
+	Type            string                                               `json:"type"`
+	Options         []string                                             `json:"options,omitempty"`
+	RelationSpaceID *string                                              `json:"relationSpaceId,omitempty"`
+	Hint            *string                                              `json:"hint,omitempty"`
+	Placeholder     *string                                              `json:"placeholder,omitempty"`
+	Internal        *bool                                                `json:"internal,omitempty"`
+	Facet           *bool                                                `json:"facet,omitempty"`
+	Meta            *bool                                                `json:"meta,omitempty"`
+	Required        *bool                                                `json:"required,omitempty"`
+	Default         any                                                  `json:"default,omitempty"`
+	SchemaProperty  *string                                              `json:"schemaProperty,omitempty"`
+	Min             *float64                                             `json:"min,omitempty"`
+	Max             *float64                                             `json:"max,omitempty"`
+	Visibility      *string                                              `json:"visibility,omitempty"`
+	Localized       *bool                                                `json:"localized,omitempty"`
+	Unique          *bool                                                `json:"unique,omitempty"`
+	Indexed         *bool                                                `json:"indexed,omitempty"`
+	Sortable        *bool                                                `json:"sortable,omitempty"`
+	MinLength       *int64                                               `json:"minLength,omitempty"`
+	MaxLength       *int64                                               `json:"maxLength,omitempty"`
+	Pattern         *string                                              `json:"pattern,omitempty"`
+	Condition       any                                                  `json:"condition,omitempty"`
+	Expr            any                                                  `json:"expr,omitempty"`
+	Schema          map[string]any                                       `json:"schema,omitempty"`
+	AllowedBlocks   []string                                             `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                             `json:"allowed,omitempty"`
+	AllowedGroups   []string                                             `json:"allowedGroups,omitempty"`
+	To              []SpacesShapePatchParamsBlockTypesAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                                `json:"hasMany,omitempty"`
+	RowLabelField   *string                                              `json:"rowLabelField,omitempty"`
+	Language        *string                                              `json:"language,omitempty"`
+	From            *string                                              `json:"from,omitempty"`
+	Accept          []string                                             `json:"accept,omitempty"`
+	Admin           *SpacesShapePatchParamsBlockTypesAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapePatchParamsBlockTypesAddItemFieldField  `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemVariantFieldsAddItem struct {
+	Key             string           `json:"key"`
+	Label           string           `json:"label"`
+	Type            string           `json:"type"`
+	Options         []string         `json:"options,omitempty"`
+	RelationSpaceID *string          `json:"relationSpaceId,omitempty"`
+	Hint            *string          `json:"hint,omitempty"`
+	Placeholder     *string          `json:"placeholder,omitempty"`
+	Internal        *bool            `json:"internal,omitempty"`
+	Facet           *bool            `json:"facet,omitempty"`
+	Meta            *bool            `json:"meta,omitempty"`
+	Required        *bool            `json:"required,omitempty"`
+	Default         any              `json:"default,omitempty"`
+	SchemaProperty  *string          `json:"schemaProperty,omitempty"`
+	Min             *float64         `json:"min,omitempty"`
+	Max             *float64         `json:"max,omitempty"`
+	Visibility      *string          `json:"visibility,omitempty"`
+	Localized       *bool            `json:"localized,omitempty"`
+	Unique          *bool            `json:"unique,omitempty"`
+	Indexed         *bool            `json:"indexed,omitempty"`
+	Sortable        *bool            `json:"sortable,omitempty"`
+	MinLength       *int64           `json:"minLength,omitempty"`
+	MaxLength       *int64           `json:"maxLength,omitempty"`
+	Pattern         *string          `json:"pattern,omitempty"`
+	Condition       any              `json:"condition,omitempty"`
+	Expr            any              `json:"expr,omitempty"`
+	Schema          map[string]any   `json:"schema,omitempty"`
+	AllowedBlocks   []string         `json:"allowedBlocks,omitempty"`
+	Allowed         []string         `json:"allowed,omitempty"`
+	AllowedGroups   []string         `json:"allowedGroups,omitempty"`
+	To              []map[string]any `json:"to,omitempty"`
+	HasMany         *bool            `json:"hasMany,omitempty"`
+	RowLabelField   *string          `json:"rowLabelField,omitempty"`
+	Language        *string          `json:"language,omitempty"`
+	From            *string          `json:"from,omitempty"`
+	Accept          []string         `json:"accept,omitempty"`
+	Admin           map[string]any   `json:"admin,omitempty"`
+	Fields          []map[string]any `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemVariantFields struct {
+	Add   []SpacesShapePatchParamsBlockTypesAddItemVariantFieldsAddItem `json:"add,omitempty"`
+	Omit  []string                                                      `json:"omit,omitempty"`
+	Order []string                                                      `json:"order,omitempty"`
+	Set   map[string]any                                                `json:"set,omitempty"`
+	Unset map[string]any                                                `json:"unset,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItemVariant struct {
+	Key    string                                                `json:"key"`
+	Label  string                                                `json:"label"`
+	Fields *SpacesShapePatchParamsBlockTypesAddItemVariantFields `json:"fields,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypesAddItem struct {
+	Key         string                                           `json:"key"`
+	Label       string                                           `json:"label"`
+	Description *string                                          `json:"description,omitempty"`
+	Icon        *string                                          `json:"icon,omitempty"`
+	Group       *string                                          `json:"group,omitempty"`
+	Fields      []SpacesShapePatchParamsBlockTypesAddItemField   `json:"fields"`
+	Variants    []SpacesShapePatchParamsBlockTypesAddItemVariant `json:"variants,omitempty"`
+}
+
+type SpacesShapePatchParamsBlockTypes struct {
+	Add   []SpacesShapePatchParamsBlockTypesAddItem `json:"add,omitempty"`
+	Omit  []string                                  `json:"omit,omitempty"`
+	Order []string                                  `json:"order,omitempty"`
+	Set   map[string]any                            `json:"set,omitempty"`
+	Unset map[string]any                            `json:"unset,omitempty"`
+}
+
+type SpacesShapePatchParams struct {
+	Space      *SpacesShapePatchParamsSpace      `json:"space,omitempty"`
+	Sections   *SpacesShapePatchParamsSections   `json:"sections,omitempty"`
+	Params     *SpacesShapePatchParamsParams     `json:"params,omitempty"`
+	BlockTypes *SpacesShapePatchParamsBlockTypes `json:"blockTypes,omitempty"`
+}
+
+type SpacesShapeSetDefaultKindParams struct {
+	Kind *string `json:"kind"`
+}
+
+type SpacesShapeSetKindParamsPatchSpace struct {
+	Index      *string  `json:"index,omitempty"`
+	Order      *string  `json:"order,omitempty"`
+	Nav        *string  `json:"nav,omitempty"`
+	WhoCreates *string  `json:"whoCreates,omitempty"`
+	Summary    []string `json:"summary,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchSectionsAddItem struct {
+	Key            string  `json:"key"`
+	Label          string  `json:"label"`
+	Kind           string  `json:"kind"`
+	Required       *bool   `json:"required,omitempty"`
+	Hint           *string `json:"hint,omitempty"`
+	Example        *string `json:"example,omitempty"`
+	SchemaProperty *string `json:"schemaProperty,omitempty"`
+	Render         *string `json:"render,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchSections struct {
+	Add   []SpacesShapeSetKindParamsPatchSectionsAddItem `json:"add,omitempty"`
+	Omit  []string                                       `json:"omit,omitempty"`
+	Order []string                                       `json:"order,omitempty"`
+	Set   map[string]any                                 `json:"set,omitempty"`
+	Unset map[string]any                                 `json:"unset,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItemToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItemAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItemFieldField struct {
+	Key             string           `json:"key"`
+	Label           string           `json:"label"`
+	Type            string           `json:"type"`
+	Options         []string         `json:"options,omitempty"`
+	RelationSpaceID *string          `json:"relationSpaceId,omitempty"`
+	Hint            *string          `json:"hint,omitempty"`
+	Placeholder     *string          `json:"placeholder,omitempty"`
+	Internal        *bool            `json:"internal,omitempty"`
+	Facet           *bool            `json:"facet,omitempty"`
+	Meta            *bool            `json:"meta,omitempty"`
+	Required        *bool            `json:"required,omitempty"`
+	Default         any              `json:"default,omitempty"`
+	SchemaProperty  *string          `json:"schemaProperty,omitempty"`
+	Min             *float64         `json:"min,omitempty"`
+	Max             *float64         `json:"max,omitempty"`
+	Visibility      *string          `json:"visibility,omitempty"`
+	Localized       *bool            `json:"localized,omitempty"`
+	Unique          *bool            `json:"unique,omitempty"`
+	Indexed         *bool            `json:"indexed,omitempty"`
+	Sortable        *bool            `json:"sortable,omitempty"`
+	MinLength       *int64           `json:"minLength,omitempty"`
+	MaxLength       *int64           `json:"maxLength,omitempty"`
+	Pattern         *string          `json:"pattern,omitempty"`
+	Condition       any              `json:"condition,omitempty"`
+	Expr            any              `json:"expr,omitempty"`
+	Schema          map[string]any   `json:"schema,omitempty"`
+	AllowedBlocks   []string         `json:"allowedBlocks,omitempty"`
+	Allowed         []string         `json:"allowed,omitempty"`
+	AllowedGroups   []string         `json:"allowedGroups,omitempty"`
+	To              []map[string]any `json:"to,omitempty"`
+	HasMany         *bool            `json:"hasMany,omitempty"`
+	RowLabelField   *string          `json:"rowLabelField,omitempty"`
+	Language        *string          `json:"language,omitempty"`
+	From            *string          `json:"from,omitempty"`
+	Accept          []string         `json:"accept,omitempty"`
+	Admin           map[string]any   `json:"admin,omitempty"`
+	Fields          []map[string]any `json:"fields,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItemField struct {
+	Key             string                                                  `json:"key"`
+	Label           string                                                  `json:"label"`
+	Type            string                                                  `json:"type"`
+	Options         []string                                                `json:"options,omitempty"`
+	RelationSpaceID *string                                                 `json:"relationSpaceId,omitempty"`
+	Hint            *string                                                 `json:"hint,omitempty"`
+	Placeholder     *string                                                 `json:"placeholder,omitempty"`
+	Internal        *bool                                                   `json:"internal,omitempty"`
+	Facet           *bool                                                   `json:"facet,omitempty"`
+	Meta            *bool                                                   `json:"meta,omitempty"`
+	Required        *bool                                                   `json:"required,omitempty"`
+	Default         any                                                     `json:"default,omitempty"`
+	SchemaProperty  *string                                                 `json:"schemaProperty,omitempty"`
+	Min             *float64                                                `json:"min,omitempty"`
+	Max             *float64                                                `json:"max,omitempty"`
+	Visibility      *string                                                 `json:"visibility,omitempty"`
+	Localized       *bool                                                   `json:"localized,omitempty"`
+	Unique          *bool                                                   `json:"unique,omitempty"`
+	Indexed         *bool                                                   `json:"indexed,omitempty"`
+	Sortable        *bool                                                   `json:"sortable,omitempty"`
+	MinLength       *int64                                                  `json:"minLength,omitempty"`
+	MaxLength       *int64                                                  `json:"maxLength,omitempty"`
+	Pattern         *string                                                 `json:"pattern,omitempty"`
+	Condition       any                                                     `json:"condition,omitempty"`
+	Expr            any                                                     `json:"expr,omitempty"`
+	Schema          map[string]any                                          `json:"schema,omitempty"`
+	AllowedBlocks   []string                                                `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                                `json:"allowed,omitempty"`
+	AllowedGroups   []string                                                `json:"allowedGroups,omitempty"`
+	To              []SpacesShapeSetKindParamsPatchParamsAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                                   `json:"hasMany,omitempty"`
+	RowLabelField   *string                                                 `json:"rowLabelField,omitempty"`
+	Language        *string                                                 `json:"language,omitempty"`
+	From            *string                                                 `json:"from,omitempty"`
+	Accept          []string                                                `json:"accept,omitempty"`
+	Admin           *SpacesShapeSetKindParamsPatchParamsAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapeSetKindParamsPatchParamsAddItemFieldField  `json:"fields,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParamsAddItem struct {
+	Key             string                                             `json:"key"`
+	Label           string                                             `json:"label"`
+	Type            string                                             `json:"type"`
+	Options         []string                                           `json:"options,omitempty"`
+	RelationSpaceID *string                                            `json:"relationSpaceId,omitempty"`
+	Hint            *string                                            `json:"hint,omitempty"`
+	Placeholder     *string                                            `json:"placeholder,omitempty"`
+	Internal        *bool                                              `json:"internal,omitempty"`
+	Facet           *bool                                              `json:"facet,omitempty"`
+	Meta            *bool                                              `json:"meta,omitempty"`
+	Required        *bool                                              `json:"required,omitempty"`
+	Default         any                                                `json:"default,omitempty"`
+	SchemaProperty  *string                                            `json:"schemaProperty,omitempty"`
+	Min             *float64                                           `json:"min,omitempty"`
+	Max             *float64                                           `json:"max,omitempty"`
+	Visibility      *string                                            `json:"visibility,omitempty"`
+	Localized       *bool                                              `json:"localized,omitempty"`
+	Unique          *bool                                              `json:"unique,omitempty"`
+	Indexed         *bool                                              `json:"indexed,omitempty"`
+	Sortable        *bool                                              `json:"sortable,omitempty"`
+	MinLength       *int64                                             `json:"minLength,omitempty"`
+	MaxLength       *int64                                             `json:"maxLength,omitempty"`
+	Pattern         *string                                            `json:"pattern,omitempty"`
+	Condition       any                                                `json:"condition,omitempty"`
+	Expr            any                                                `json:"expr,omitempty"`
+	Schema          map[string]any                                     `json:"schema,omitempty"`
+	AllowedBlocks   []string                                           `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                           `json:"allowed,omitempty"`
+	AllowedGroups   []string                                           `json:"allowedGroups,omitempty"`
+	To              []SpacesShapeSetKindParamsPatchParamsAddItemToItem `json:"to,omitempty"`
+	HasMany         *bool                                              `json:"hasMany,omitempty"`
+	RowLabelField   *string                                            `json:"rowLabelField,omitempty"`
+	Language        *string                                            `json:"language,omitempty"`
+	From            *string                                            `json:"from,omitempty"`
+	Accept          []string                                           `json:"accept,omitempty"`
+	Admin           *SpacesShapeSetKindParamsPatchParamsAddItemAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapeSetKindParamsPatchParamsAddItemField  `json:"fields,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchParams struct {
+	Add   []SpacesShapeSetKindParamsPatchParamsAddItem `json:"add,omitempty"`
+	Omit  []string                                     `json:"omit,omitempty"`
+	Order []string                                     `json:"order,omitempty"`
+	Set   map[string]any                               `json:"set,omitempty"`
+	Unset map[string]any                               `json:"unset,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItemFieldToItem struct {
+	Kind  string   `json:"kind"`
+	Types []string `json:"types,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItemFieldAdmin struct {
+	Tab         *string `json:"tab,omitempty"`
+	Row         *string `json:"row,omitempty"`
+	Collapsible *string `json:"collapsible,omitempty"`
+	Collapsed   *bool   `json:"collapsed,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItemFieldField struct {
+	Key             string           `json:"key"`
+	Label           string           `json:"label"`
+	Type            string           `json:"type"`
+	Options         []string         `json:"options,omitempty"`
+	RelationSpaceID *string          `json:"relationSpaceId,omitempty"`
+	Hint            *string          `json:"hint,omitempty"`
+	Placeholder     *string          `json:"placeholder,omitempty"`
+	Internal        *bool            `json:"internal,omitempty"`
+	Facet           *bool            `json:"facet,omitempty"`
+	Meta            *bool            `json:"meta,omitempty"`
+	Required        *bool            `json:"required,omitempty"`
+	Default         any              `json:"default,omitempty"`
+	SchemaProperty  *string          `json:"schemaProperty,omitempty"`
+	Min             *float64         `json:"min,omitempty"`
+	Max             *float64         `json:"max,omitempty"`
+	Visibility      *string          `json:"visibility,omitempty"`
+	Localized       *bool            `json:"localized,omitempty"`
+	Unique          *bool            `json:"unique,omitempty"`
+	Indexed         *bool            `json:"indexed,omitempty"`
+	Sortable        *bool            `json:"sortable,omitempty"`
+	MinLength       *int64           `json:"minLength,omitempty"`
+	MaxLength       *int64           `json:"maxLength,omitempty"`
+	Pattern         *string          `json:"pattern,omitempty"`
+	Condition       any              `json:"condition,omitempty"`
+	Expr            any              `json:"expr,omitempty"`
+	Schema          map[string]any   `json:"schema,omitempty"`
+	AllowedBlocks   []string         `json:"allowedBlocks,omitempty"`
+	Allowed         []string         `json:"allowed,omitempty"`
+	AllowedGroups   []string         `json:"allowedGroups,omitempty"`
+	To              []map[string]any `json:"to,omitempty"`
+	HasMany         *bool            `json:"hasMany,omitempty"`
+	RowLabelField   *string          `json:"rowLabelField,omitempty"`
+	Language        *string          `json:"language,omitempty"`
+	From            *string          `json:"from,omitempty"`
+	Accept          []string         `json:"accept,omitempty"`
+	Admin           map[string]any   `json:"admin,omitempty"`
+	Fields          []map[string]any `json:"fields,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItemField struct {
+	Key             string                                                      `json:"key"`
+	Label           string                                                      `json:"label"`
+	Type            string                                                      `json:"type"`
+	Options         []string                                                    `json:"options,omitempty"`
+	RelationSpaceID *string                                                     `json:"relationSpaceId,omitempty"`
+	Hint            *string                                                     `json:"hint,omitempty"`
+	Placeholder     *string                                                     `json:"placeholder,omitempty"`
+	Internal        *bool                                                       `json:"internal,omitempty"`
+	Facet           *bool                                                       `json:"facet,omitempty"`
+	Meta            *bool                                                       `json:"meta,omitempty"`
+	Required        *bool                                                       `json:"required,omitempty"`
+	Default         any                                                         `json:"default,omitempty"`
+	SchemaProperty  *string                                                     `json:"schemaProperty,omitempty"`
+	Min             *float64                                                    `json:"min,omitempty"`
+	Max             *float64                                                    `json:"max,omitempty"`
+	Visibility      *string                                                     `json:"visibility,omitempty"`
+	Localized       *bool                                                       `json:"localized,omitempty"`
+	Unique          *bool                                                       `json:"unique,omitempty"`
+	Indexed         *bool                                                       `json:"indexed,omitempty"`
+	Sortable        *bool                                                       `json:"sortable,omitempty"`
+	MinLength       *int64                                                      `json:"minLength,omitempty"`
+	MaxLength       *int64                                                      `json:"maxLength,omitempty"`
+	Pattern         *string                                                     `json:"pattern,omitempty"`
+	Condition       any                                                         `json:"condition,omitempty"`
+	Expr            any                                                         `json:"expr,omitempty"`
+	Schema          map[string]any                                              `json:"schema,omitempty"`
+	AllowedBlocks   []string                                                    `json:"allowedBlocks,omitempty"`
+	Allowed         []string                                                    `json:"allowed,omitempty"`
+	AllowedGroups   []string                                                    `json:"allowedGroups,omitempty"`
+	To              []SpacesShapeSetKindParamsPatchBlockTypesAddItemFieldToItem `json:"to,omitempty"`
+	HasMany         *bool                                                       `json:"hasMany,omitempty"`
+	RowLabelField   *string                                                     `json:"rowLabelField,omitempty"`
+	Language        *string                                                     `json:"language,omitempty"`
+	From            *string                                                     `json:"from,omitempty"`
+	Accept          []string                                                    `json:"accept,omitempty"`
+	Admin           *SpacesShapeSetKindParamsPatchBlockTypesAddItemFieldAdmin   `json:"admin,omitempty"`
+	Fields          []SpacesShapeSetKindParamsPatchBlockTypesAddItemFieldField  `json:"fields,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItemVariantFields struct {
+	Add   []map[string]any `json:"add,omitempty"`
+	Omit  []string         `json:"omit,omitempty"`
+	Order []string         `json:"order,omitempty"`
+	Set   map[string]any   `json:"set,omitempty"`
+	Unset map[string]any   `json:"unset,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItemVariant struct {
+	Key    string                                                       `json:"key"`
+	Label  string                                                       `json:"label"`
+	Fields *SpacesShapeSetKindParamsPatchBlockTypesAddItemVariantFields `json:"fields,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypesAddItem struct {
+	Key         string                                                  `json:"key"`
+	Label       string                                                  `json:"label"`
+	Description *string                                                 `json:"description,omitempty"`
+	Icon        *string                                                 `json:"icon,omitempty"`
+	Group       *string                                                 `json:"group,omitempty"`
+	Fields      []SpacesShapeSetKindParamsPatchBlockTypesAddItemField   `json:"fields"`
+	Variants    []SpacesShapeSetKindParamsPatchBlockTypesAddItemVariant `json:"variants,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatchBlockTypes struct {
+	Add   []SpacesShapeSetKindParamsPatchBlockTypesAddItem `json:"add,omitempty"`
+	Omit  []string                                         `json:"omit,omitempty"`
+	Order []string                                         `json:"order,omitempty"`
+	Set   map[string]any                                   `json:"set,omitempty"`
+	Unset map[string]any                                   `json:"unset,omitempty"`
+}
+
+type SpacesShapeSetKindParamsPatch struct {
+	Space      *SpacesShapeSetKindParamsPatchSpace      `json:"space,omitempty"`
+	Sections   *SpacesShapeSetKindParamsPatchSections   `json:"sections,omitempty"`
+	Params     *SpacesShapeSetKindParamsPatchParams     `json:"params,omitempty"`
+	BlockTypes *SpacesShapeSetKindParamsPatchBlockTypes `json:"blockTypes,omitempty"`
+}
+
+type SpacesShapeSetKindParamsSettingsVersions struct {
+	Max *int64 `json:"max,omitempty"`
+}
+
+type SpacesShapeSetKindParamsSettings struct {
+	Singleton         any                                       `json:"singleton,omitempty"`
+	SlugField         *string                                   `json:"slugField,omitempty"`
+	TitleField        *string                                   `json:"titleField,omitempty"`
+	PreviewURL        *string                                   `json:"previewUrl,omitempty"`
+	Orderable         any                                       `json:"orderable,omitempty"`
+	DefaultSort       *string                                   `json:"defaultSort,omitempty"`
+	ListColumns       []string                                  `json:"listColumns,omitempty"`
+	SearchableFields  []string                                  `json:"searchableFields,omitempty"`
+	Strict            any                                       `json:"strict,omitempty"`
+	Versions          *SpacesShapeSetKindParamsSettingsVersions `json:"versions,omitempty"`
+	Routable          any                                       `json:"routable,omitempty"`
+	BlockLibrary      any                                       `json:"blockLibrary,omitempty"`
+	DefaultVisibility *string                                   `json:"defaultVisibility,omitempty"`
+	Icon              *string                                   `json:"icon,omitempty"`
+	Group             *string                                   `json:"group,omitempty"`
+}
+
+type SpacesShapeSetKindParams struct {
+	Label       string                            `json:"label"`
+	Description *string                           `json:"description,omitempty"`
+	Patch       *SpacesShapeSetKindParamsPatch    `json:"patch"`
+	Settings    *SpacesShapeSetKindParamsSettings `json:"settings,omitempty"`
 }
 
 type UsersProgressionSignalParams struct {
@@ -99013,18 +102584,18 @@ type ThemesBundlesPatchSiteDraftParamsForumTopicMap struct {
 }
 
 type ThemesBundlesPatchSiteDraftParamsForumTopicShare struct {
-	Mode        *string `json:"mode,omitempty"`
-	Align       *string `json:"align,omitempty"`
-	Networks    any     `json:"networks,omitempty"`
-	Frame       any     `json:"frame,omitempty"`
-	Radius      any     `json:"radius,omitempty"`
-	BorderColor any     `json:"borderColor,omitempty"`
-	Label       any     `json:"label,omitempty"`
-	LabelEnd    any     `json:"labelEnd,omitempty"`
-	LabelStyle  any     `json:"labelStyle,omitempty"`
-	Marks       any     `json:"marks,omitempty"`
-	Comments    any     `json:"comments,omitempty"`
-	Size        any     `json:"size,omitempty"`
+	Mode        *string  `json:"mode,omitempty"`
+	Align       *string  `json:"align,omitempty"`
+	Networks    []string `json:"networks,omitempty"`
+	Frame       *string  `json:"frame,omitempty"`
+	Radius      *int64   `json:"radius,omitempty"`
+	BorderColor any      `json:"borderColor,omitempty"`
+	Label       any      `json:"label,omitempty"`
+	LabelEnd    any      `json:"labelEnd,omitempty"`
+	LabelStyle  *string  `json:"labelStyle,omitempty"`
+	Marks       *bool    `json:"marks,omitempty"`
+	Comments    *bool    `json:"comments,omitempty"`
+	Size        *int64   `json:"size,omitempty"`
 }
 
 type ThemesBundlesPatchSiteDraftParamsForumTopicTimeline struct {
@@ -99524,6 +103095,15 @@ type ThemesBundlesPatchSiteDraftParamsDocsSidebarFooterLink struct {
 	Audience *string         `json:"audience,omitempty"`
 }
 
+type ThemesBundlesPatchSiteDraftParamsDocsSidebarStatus struct {
+	MonitorSpaceID *string `json:"monitorSpaceId,omitempty"`
+	Style          *string `json:"style,omitempty"`
+	Color          *string `json:"color,omitempty"`
+	Case           *string `json:"case,omitempty"`
+	Font           *string `json:"font,omitempty"`
+	Dot            *bool   `json:"dot,omitempty"`
+}
+
 type ThemesBundlesPatchSiteDraftParamsDocsSidebar struct {
 	Groups          *string                                                  `json:"groups,omitempty"`
 	Accordion       *bool                                                    `json:"accordion,omitempty"`
@@ -99546,7 +103126,7 @@ type ThemesBundlesPatchSiteDraftParamsDocsSidebar struct {
 	Icons           *ThemesBundlesPatchSiteDraftParamsDocsSidebarIcons       `json:"icons,omitempty"`
 	Anchors         []ThemesBundlesPatchSiteDraftParamsDocsSidebarAnchor     `json:"anchors,omitempty"`
 	FooterLinks     []ThemesBundlesPatchSiteDraftParamsDocsSidebarFooterLink `json:"footerLinks,omitempty"`
-	Status          any                                                      `json:"status,omitempty"`
+	Status          *ThemesBundlesPatchSiteDraftParamsDocsSidebarStatus      `json:"status,omitempty"`
 	Drilldown       *bool                                                    `json:"drilldown,omitempty"`
 	Search          *string                                                  `json:"search,omitempty"`
 	SearchHeight    *int64                                                   `json:"searchHeight,omitempty"`
@@ -109218,7 +112798,7 @@ type ExtensionsRenderRenderBlockParams struct {
 }
 
 type ExtensionsRenderRenderBlockResponseUIChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109251,7 +112831,7 @@ type ExtensionsRenderRenderBlockResponseUI struct {
 }
 
 type ExtensionsRenderRenderBlockResponseDataChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109299,7 +112879,7 @@ type ExtensionsRenderActionParams struct {
 }
 
 type ExtensionsRenderActionResponseUIChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109332,7 +112912,7 @@ type ExtensionsRenderActionResponseUI struct {
 }
 
 type ExtensionsRenderActionResponseDataChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109377,7 +112957,7 @@ type ExtensionsRenderRenderSurfaceParams struct {
 }
 
 type ExtensionsRenderRenderSurfaceResponseUIChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109410,7 +112990,7 @@ type ExtensionsRenderRenderSurfaceResponseUI struct {
 }
 
 type ExtensionsRenderRenderSurfaceResponseDataChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109457,7 +113037,7 @@ type ExtensionsRenderSurfaceActionParams struct {
 }
 
 type ExtensionsRenderSurfaceActionResponseUIChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -109490,7 +113070,7 @@ type ExtensionsRenderSurfaceActionResponseUI struct {
 }
 
 type ExtensionsRenderSurfaceActionResponseDataChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -110151,7 +113731,7 @@ type PublicInteractionsExtRenderParams struct {
 }
 
 type PublicInteractionsExtRenderResponseUIChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -110198,7 +113778,7 @@ type PublicInteractionsExtActionParams struct {
 }
 
 type PublicInteractionsExtActionResponseUIChildrenItem struct {
-	Children    []map[string]any `json:"children,omitempty"`
+	Children    []any            `json:"children,omitempty"`
 	Type        string           `json:"type"`
 	Muted       *bool            `json:"muted,omitempty"`
 	Text        *string          `json:"text,omitempty"`
@@ -110762,6 +114342,24 @@ type ConnectorsKbSuggestParams struct {
 	Slot     *string `json:"slot,omitempty"`
 	Markdown string  `json:"markdown"`
 	Note     *string `json:"note,omitempty"`
+}
+
+type LibrarySDKPublishParams struct {
+	Target         string  `json:"target"`
+	PackageName    *string `json:"packageName,omitempty"`
+	GoModulePrefix *string `json:"goModulePrefix,omitempty"`
+}
+
+type LibrarySDKPublishResponsePublish struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+}
+
+type LibrarySDKPublishResponse struct {
+	PackageID   string                            `json:"packageId"`
+	PackageName string                            `json:"packageName"`
+	Publish     *LibrarySDKPublishResponsePublish `json:"publish"`
+	Warnings    []string                          `json:"warnings,omitempty"`
 }
 
 type IntegrationsCatalogResponse struct {
@@ -125509,18 +129107,18 @@ type SitesUpdateParamsConfigThemeForumTopicMap struct {
 }
 
 type SitesUpdateParamsConfigThemeForumTopicShare struct {
-	Mode        *string `json:"mode,omitempty"`
-	Align       *string `json:"align,omitempty"`
-	Networks    any     `json:"networks,omitempty"`
-	Frame       any     `json:"frame,omitempty"`
-	Radius      any     `json:"radius,omitempty"`
-	BorderColor any     `json:"borderColor,omitempty"`
-	Label       any     `json:"label,omitempty"`
-	LabelEnd    any     `json:"labelEnd,omitempty"`
-	LabelStyle  any     `json:"labelStyle,omitempty"`
-	Marks       any     `json:"marks,omitempty"`
-	Comments    any     `json:"comments,omitempty"`
-	Size        any     `json:"size,omitempty"`
+	Mode        *string  `json:"mode,omitempty"`
+	Align       *string  `json:"align,omitempty"`
+	Networks    []string `json:"networks,omitempty"`
+	Frame       *string  `json:"frame,omitempty"`
+	Radius      *int64   `json:"radius,omitempty"`
+	BorderColor any      `json:"borderColor,omitempty"`
+	Label       any      `json:"label,omitempty"`
+	LabelEnd    any      `json:"labelEnd,omitempty"`
+	LabelStyle  *string  `json:"labelStyle,omitempty"`
+	Marks       *bool    `json:"marks,omitempty"`
+	Comments    *bool    `json:"comments,omitempty"`
+	Size        *int64   `json:"size,omitempty"`
 }
 
 type SitesUpdateParamsConfigThemeForumTopicTimeline struct {
@@ -126010,6 +129608,15 @@ type SitesUpdateParamsConfigThemeDocsSidebarFooterLink struct {
 	Audience *string         `json:"audience,omitempty"`
 }
 
+type SitesUpdateParamsConfigThemeDocsSidebarStatus struct {
+	MonitorSpaceID *string `json:"monitorSpaceId,omitempty"`
+	Style          *string `json:"style,omitempty"`
+	Color          *string `json:"color,omitempty"`
+	Case           *string `json:"case,omitempty"`
+	Font           *string `json:"font,omitempty"`
+	Dot            *bool   `json:"dot,omitempty"`
+}
+
 type SitesUpdateParamsConfigThemeDocsSidebar struct {
 	Groups          *string                                             `json:"groups,omitempty"`
 	Accordion       *bool                                               `json:"accordion,omitempty"`
@@ -126032,7 +129639,7 @@ type SitesUpdateParamsConfigThemeDocsSidebar struct {
 	Icons           *SitesUpdateParamsConfigThemeDocsSidebarIcons       `json:"icons,omitempty"`
 	Anchors         []SitesUpdateParamsConfigThemeDocsSidebarAnchor     `json:"anchors,omitempty"`
 	FooterLinks     []SitesUpdateParamsConfigThemeDocsSidebarFooterLink `json:"footerLinks,omitempty"`
-	Status          any                                                 `json:"status,omitempty"`
+	Status          *SitesUpdateParamsConfigThemeDocsSidebarStatus      `json:"status,omitempty"`
 	Drilldown       *bool                                               `json:"drilldown,omitempty"`
 	Search          *string                                             `json:"search,omitempty"`
 	SearchHeight    *int64                                              `json:"searchHeight,omitempty"`

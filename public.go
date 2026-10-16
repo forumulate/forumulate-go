@@ -2284,6 +2284,8 @@ type PublicDomainsService struct {
 
 // PublicDomainsPrimaryQuery are the optional query parameters of PublicDomainsService.Primary.
 type PublicDomainsPrimaryQuery struct {
+	// Content library id, for its hosted output (`/h/…`): its own domain first, else the site it feeds, at the library’s slug.
+	Library *string
 	// Space slug or id.
 	Space *string
 	// Organization slug or id.
@@ -2294,6 +2296,9 @@ func (p *PublicDomainsPrimaryQuery) encode(opts []RequestOption) (url.Values, []
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.Library != nil {
+		v.Set("library", *p.Library)
 	}
 	if p.Space != nil {
 		v.Set("space", *p.Space)
@@ -4547,7 +4552,7 @@ func (s *PublicLegalService) Accept(ctx context.Context, orgID string, kind stri
 	return &out, nil
 }
 
-// Versions list versions in an organization
+// Versions list versions in an organization (public reader legal)
 //
 // GET /public/orgs/{orgId}/legal/{kind}/versions
 func (s *PublicLegalService) Versions(ctx context.Context, orgID string, kind string, opts ...RequestOption) (*PublicLegalVersionsResponse, error) {

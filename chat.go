@@ -503,7 +503,7 @@ func (s *ChatService) DeleteDraft(ctx context.Context, orgID string, channelID s
 	return &out, nil
 }
 
-// Heartbeat create the heartbeat in an organization
+// Heartbeat create the heartbeat in an organization (chat channels)
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/heartbeat
 func (s *ChatService) Heartbeat(ctx context.Context, orgID string, channelID string, body ChatHeartbeatParams, opts ...RequestOption) (*ChatHeartbeatResponse, error) {
