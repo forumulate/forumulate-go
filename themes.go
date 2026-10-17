@@ -162,12 +162,12 @@ type ThemesComponentMarketplaceService struct {
 
 // ThemesComponentMarketplaceBrowseQuery are the optional query parameters of ThemesComponentMarketplaceService.Browse.
 type ThemesComponentMarketplaceBrowseQuery struct {
-	Q      *string
-	Tag    *string
-	Outlet *string
+	Q   *string
+	Tag *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Featured *string
 	Sort     *string
+	Outlet   *string
 }
 
 func (p *ThemesComponentMarketplaceBrowseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -181,14 +181,14 @@ func (p *ThemesComponentMarketplaceBrowseQuery) encode(opts []RequestOption) (ur
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
-	if p.Outlet != nil {
-		v.Set("outlet", *p.Outlet)
-	}
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
+	}
+	if p.Outlet != nil {
+		v.Set("outlet", *p.Outlet)
 	}
 	return v, opts
 }
@@ -666,12 +666,12 @@ type ThemesMarketplaceService struct {
 
 // ThemesMarketplaceBrowseQuery are the optional query parameters of ThemesMarketplaceService.Browse.
 type ThemesMarketplaceBrowseQuery struct {
-	Q         *string
-	Tag       *string
-	SpaceType *string
+	Q   *string
+	Tag *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
-	Featured *string
-	Sort     *string
+	Featured  *string
+	Sort      *string
+	SpaceType *string
 }
 
 func (p *ThemesMarketplaceBrowseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -685,14 +685,14 @@ func (p *ThemesMarketplaceBrowseQuery) encode(opts []RequestOption) (url.Values,
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
-	if p.SpaceType != nil {
-		v.Set("spaceType", *p.SpaceType)
-	}
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
+	}
+	if p.SpaceType != nil {
+		v.Set("spaceType", *p.SpaceType)
 	}
 	return v, opts
 }

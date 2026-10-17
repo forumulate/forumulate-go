@@ -323,6 +323,17 @@ func (s *IntegrationsGithubService) EgressIpsAutoPaging(ctx context.Context, org
 	})
 }
 
+// RotateSigningSecret create the signing secret in a space
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/github/signing-secret
+func (s *IntegrationsGithubService) RotateSigningSecret(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*IntegrationsGithubRotateSigningSecretResponse, error) {
+	var out IntegrationsGithubRotateSigningSecretResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/signing-secret", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Import import the GitHub
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/github/import

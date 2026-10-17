@@ -17,14 +17,14 @@ type EventsService struct {
 type EventsListQuery struct {
 	// Events per page, once a version is stated.
 	Limit *int64
-	Scope *string
 	Tag   *string
-	Mode  *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	From *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	To     *string
 	Cursor *string
+	Mode   *string
+	Scope  *string
 }
 
 func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,14 +35,8 @@ func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
-	if p.Scope != nil {
-		v.Set("scope", *p.Scope)
-	}
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
-	}
-	if p.Mode != nil {
-		v.Set("mode", *p.Mode)
 	}
 	if p.From != nil {
 		v.Set("from", *p.From)
@@ -52,6 +46,12 @@ func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Mode != nil {
+		v.Set("mode", *p.Mode)
+	}
+	if p.Scope != nil {
+		v.Set("scope", *p.Scope)
 	}
 	return v, opts
 }

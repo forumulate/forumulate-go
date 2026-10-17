@@ -172,8 +172,8 @@ type ContactListQuery struct {
 	Limit *int64
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Unhandled *string
-	Folder    *string
 	Cursor    *string
+	Folder    *string
 }
 
 func (p *ContactListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -187,11 +187,11 @@ func (p *ContactListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	if p.Unhandled != nil {
 		v.Set("unhandled", *p.Unhandled)
 	}
-	if p.Folder != nil {
-		v.Set("folder", *p.Folder)
-	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Folder != nil {
+		v.Set("folder", *p.Folder)
 	}
 	return v, opts
 }

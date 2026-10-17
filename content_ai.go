@@ -33,6 +33,17 @@ func (s *ContentAIService) Translate(ctx context.Context, orgID string, libraryI
 	return out, nil
 }
 
+// Auto machine-translate an entry
+//
+// POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/translations/{locale}/auto
+func (s *ContentAIService) Auto(ctx context.Context, orgID string, libraryID string, entryID string, locale string, body ContentAIAutoParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Seo suggest an SEO title and description
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/ai/seo

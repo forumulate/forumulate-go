@@ -264,6 +264,17 @@ func (s *ForumService) UpdateSettings(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
+// Trash list items in a space (forum trash)
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/forum/trash/items
+func (s *ForumService) Trash(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ForumTrashResponse, error) {
+	var out ForumTrashResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/trash/items", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ForumFlagsQuery are the optional query parameters of ForumService.Flags.
 type ForumFlagsQuery struct {
 	// Rows per page.
@@ -1525,7 +1536,7 @@ func (s *ForumToolsService) FlagTopic(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
-// Answer create the answer in a space (forum)
+// Answer create the answer in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/answer
 func (s *ForumToolsService) Answer(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsAnswerParams, opts ...RequestOption) (*ForumToolsAnswerResponse, error) {

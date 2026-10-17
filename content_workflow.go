@@ -37,11 +37,11 @@ func (s *ContentWorkflowService) PutSettings(ctx context.Context, orgID string, 
 
 // ContentWorkflowListQuery are the optional query parameters of ContentWorkflowService.List.
 type ContentWorkflowListQuery struct {
-	Stage *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Open     *string
 	Assignee *string
 	EntryID  *string
+	Stage    *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
@@ -53,9 +53,6 @@ func (p *ContentWorkflowListQuery) encode(opts []RequestOption) (url.Values, []R
 	if p == nil {
 		return v, opts
 	}
-	if p.Stage != nil {
-		v.Set("stage", *p.Stage)
-	}
 	if p.Open != nil {
 		v.Set("open", *p.Open)
 	}
@@ -64,6 +61,9 @@ func (p *ContentWorkflowListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.EntryID != nil {
 		v.Set("entryId", *p.EntryID)
+	}
+	if p.Stage != nil {
+		v.Set("stage", *p.Stage)
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))

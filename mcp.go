@@ -32,3 +32,25 @@ func (s *MCPService) RPC(ctx context.Context, orgID string, opts ...RequestOptio
 	}
 	return out, nil
 }
+
+// InfoReadOnly get the readonly in an organization
+//
+// GET /orgs/{orgId}/mcp/readonly
+func (s *MCPService) InfoReadOnly(ctx context.Context, orgID string, opts ...RequestOption) (*MCPInfoReadOnlyResponse, error) {
+	var out MCPInfoReadOnlyResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/mcp/readonly", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// RPCReadOnly create the readonly in an organization
+//
+// POST /orgs/{orgId}/mcp/readonly
+func (s *MCPService) RPCReadOnly(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mcp/readonly", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}

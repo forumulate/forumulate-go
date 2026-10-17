@@ -173,6 +173,8 @@ type DomainSummaryDto struct {
 	Verified           bool                 `json:"verified"`
 	Active             bool                 `json:"active"`
 	AlsoRedirectWww    bool                 `json:"alsoRedirectWww"`
+	IPAllowList        []string             `json:"ipAllowList"`
+	RedirectTo         any                  `json:"redirectTo"`
 	VerificationRecord any                  `json:"verificationRecord"`
 	VerificationFile   any                  `json:"verificationFile"`
 	VerificationMeta   *VerificationMetaDto `json:"verificationMeta"`
@@ -270,6 +272,7 @@ type ItemSummaryDto struct {
 	Published   bool           `json:"published"`
 	Group       *string        `json:"group,omitempty"`
 	State       *string        `json:"state,omitempty"`
+	Locale      any            `json:"locale,omitempty"`
 	UpdatedAt   string         `json:"updatedAt"`
 	URL         any            `json:"url,omitempty"`
 	ContentHash *string        `json:"contentHash,omitempty"`
@@ -1985,6 +1988,7 @@ type CategoryDetail struct {
 	DefaultTopPeriod         any                          `json:"defaultTopPeriod"`
 	Description              string                       `json:"description"`
 	Emoji                    any                          `json:"emoji"`
+	FormTemplateID           any                          `json:"formTemplateId"`
 	Icon                     any                          `json:"icon"`
 	ID                       string                       `json:"id"`
 	LogoURL                  any                          `json:"logoUrl"`
@@ -2044,6 +2048,7 @@ type CategorySummary struct {
 	DefaultTopPeriod         any                `json:"defaultTopPeriod"`
 	Description              string             `json:"description"`
 	Emoji                    any                `json:"emoji"`
+	FormTemplateID           any                `json:"formTemplateId"`
 	Icon                     any                `json:"icon"`
 	ID                       string             `json:"id"`
 	LogoURL                  any                `json:"logoUrl"`
@@ -2759,7 +2764,21 @@ type ConnectionSummary struct {
 	Path           string `json:"path"`
 	Provider       string `json:"provider"`
 	Repo           string `json:"repo"`
+	Signing        string `json:"signing"`
 	WebhookURL     string `json:"webhookUrl"`
+}
+
+type ConnectionWithSecret struct {
+	AutoExport     bool    `json:"autoExport"`
+	Branch         string  `json:"branch"`
+	CommitTemplate any     `json:"commitTemplate"`
+	LastSyncedAt   any     `json:"lastSyncedAt"`
+	Path           string  `json:"path"`
+	Provider       string  `json:"provider"`
+	Repo           string  `json:"repo"`
+	Signing        string  `json:"signing"`
+	SigningSecret  *string `json:"signingSecret,omitempty"`
+	WebhookURL     string  `json:"webhookUrl"`
 }
 
 type ConnectorActivityEntry struct {
@@ -3537,6 +3556,7 @@ type DomainSummary struct {
 	Hostname           string                           `json:"hostname"`
 	ID                 string                           `json:"id"`
 	IPAllowList        []string                         `json:"ipAllowList"`
+	RedirectTo         any                              `json:"redirectTo"`
 	VerificationFile   *DomainSummaryVerificationFile   `json:"verificationFile"`
 	VerificationMeta   *DomainSummaryVerificationMeta   `json:"verificationMeta"`
 	VerificationRecord *DomainSummaryVerificationRecord `json:"verificationRecord"`
@@ -5100,6 +5120,7 @@ type ItemRead struct {
 	ContentIn   string         `json:"contentIn"`
 	ID          string         `json:"id"`
 	Kind        string         `json:"kind"`
+	Locale      *string        `json:"locale,omitempty"`
 	Markdown    string         `json:"markdown"`
 	Preset      *string        `json:"preset,omitempty"`
 	Sections    map[string]any `json:"sections"`
@@ -5111,6 +5132,7 @@ type ItemRef struct {
 	Conformance *Conformance `json:"conformance"`
 	ID          string       `json:"id"`
 	Kind        string       `json:"kind"`
+	Locale      *string      `json:"locale,omitempty"`
 	Preset      *string      `json:"preset,omitempty"`
 	Slug        *string      `json:"slug,omitempty"`
 	Title       string       `json:"title"`
@@ -5124,6 +5146,7 @@ type ItemSummary struct {
 	Group       *string        `json:"group,omitempty"`
 	ID          string         `json:"id"`
 	Kind        string         `json:"kind"`
+	Locale      *string        `json:"locale,omitempty"`
 	Markdown    *string        `json:"markdown,omitempty"`
 	Published   bool           `json:"published"`
 	Sections    map[string]any `json:"sections,omitempty"`
@@ -5227,12 +5250,13 @@ type LegalGateOverrideView struct {
 }
 
 type LegalGroup struct {
-	Description any    `json:"description"`
-	Icon        any    `json:"icon"`
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Slug        string `json:"slug"`
-	SortKey     string `json:"sortKey"`
+	Description  any                `json:"description"`
+	Icon         any                `json:"icon"`
+	ID           string             `json:"id"`
+	Name         string             `json:"name"`
+	Slug         string             `json:"slug"`
+	SortKey      string             `json:"sortKey"`
+	Translations *NamedTranslations `json:"translations,omitempty"`
 }
 
 type LegalStatus struct {
@@ -6082,6 +6106,15 @@ type PageNode struct {
 	UpdatedAt      string         `json:"updatedAt"`
 }
 
+type PageTranslationStatus struct {
+	Code      string `json:"code"`
+	ID        any    `json:"id"`
+	Label     string `json:"label"`
+	Origin    any    `json:"origin"`
+	State     string `json:"state"`
+	UpdatedAt any    `json:"updatedAt"`
+}
+
 type PageTrashRow struct {
 	DeletedAt any    `json:"deletedAt"`
 	ID        string `json:"id"`
@@ -6498,12 +6531,13 @@ type PublicLegalEdition struct {
 }
 
 type PublicLegalGroup struct {
-	Description any    `json:"description"`
-	Icon        any    `json:"icon"`
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Order       string `json:"order"`
-	Slug        string `json:"slug"`
+	Description  any                `json:"description"`
+	Icon         any                `json:"icon"`
+	ID           string             `json:"id"`
+	Name         string             `json:"name"`
+	Order        string             `json:"order"`
+	Slug         string             `json:"slug"`
+	Translations *NamedTranslations `json:"translations,omitempty"`
 }
 
 type PublicStatusBoard struct {
@@ -6709,14 +6743,23 @@ type ReaderAnalytics struct {
 }
 
 type ReaderAuthSetup struct {
-	OneOfConfig      []string          `json:"oneOfConfig,omitempty"`
-	ReaderEndpoints  []ReaderEndpoints `json:"readerEndpoints,omitempty"`
-	RedirectURI      string            `json:"redirectUri"`
-	RequiredConfig   []string          `json:"requiredConfig"`
-	Scope            string            `json:"scope"`
-	Scopes           string            `json:"scopes"`
-	StartURL         string            `json:"startUrl"`
-	SupportedMethods []string          `json:"supportedMethods"`
+	OneOfConfig      []string               `json:"oneOfConfig,omitempty"`
+	ReaderEndpoints  []ReaderEndpoints      `json:"readerEndpoints,omitempty"`
+	RedirectURI      string                 `json:"redirectUri"`
+	RequiredConfig   []string               `json:"requiredConfig"`
+	Scope            string                 `json:"scope"`
+	Scopes           string                 `json:"scopes"`
+	Spaces           []ReaderAuthSetupSpace `json:"spaces,omitempty"`
+	StartURL         string                 `json:"startUrl"`
+	SupportedMethods []string               `json:"supportedMethods"`
+}
+
+type ReaderAuthSetupSpace struct {
+	Name            string            `json:"name"`
+	ReaderEndpoints []ReaderEndpoints `json:"readerEndpoints"`
+	Slug            string            `json:"slug"`
+	SpaceID         string            `json:"spaceId"`
+	StartURL        string            `json:"startUrl"`
 }
 
 type ReaderAuthSpaceOverrideSaved struct {
@@ -7290,16 +7333,17 @@ type ReleaseRollbackResult struct {
 }
 
 type ReleaseTranslation struct {
-	Code      string `json:"code"`
-	Content   any    `json:"content"`
-	Excerpt   any    `json:"excerpt"`
-	Exists    bool   `json:"exists"`
-	Label     string `json:"label"`
-	Origin    any    `json:"origin"`
-	Published bool   `json:"published"`
-	Stale     bool   `json:"stale"`
-	Title     any    `json:"title"`
-	UpdatedAt any    `json:"updatedAt"`
+	Code      string  `json:"code"`
+	Content   any     `json:"content"`
+	Excerpt   any     `json:"excerpt"`
+	Exists    bool    `json:"exists"`
+	Label     string  `json:"label"`
+	Markdown  *string `json:"markdown,omitempty"`
+	Origin    any     `json:"origin"`
+	Published bool    `json:"published"`
+	Stale     bool    `json:"stale"`
+	Title     any     `json:"title"`
+	UpdatedAt any     `json:"updatedAt"`
 }
 
 type ReleaseTranslationStatus struct {
@@ -7735,6 +7779,7 @@ type SitePublicOverview struct {
 	Config          *SiteConfig            `json:"config"`
 	FrontPage       *StoredFrontPage       `json:"frontPage"`
 	Name            string                 `json:"name"`
+	OrgSlug         any                    `json:"orgSlug"`
 	Previewing      *string                `json:"previewing,omitempty"`
 	Sections        []SiteSectionTree      `json:"sections"`
 	Slug            string                 `json:"slug"`
@@ -7750,15 +7795,17 @@ type SiteSectionTree struct {
 }
 
 type SiteSpaceRef struct {
-	Addresses    []SiteSpaceRefAddress `json:"addresses,omitempty"`
-	AIIngestion  bool                  `json:"aiIngestion"`
-	Indexable    bool                  `json:"indexable"`
-	Name         string                `json:"name"`
-	Slug         string                `json:"slug"`
-	SpaceID      string                `json:"spaceId"`
-	Translations *NamedTranslations    `json:"translations,omitempty"`
-	Type         string                `json:"type"`
-	UpdatedAt    *string               `json:"updatedAt,omitempty"`
+	Addresses      []SiteSpaceRefAddress `json:"addresses,omitempty"`
+	AIIngestion    bool                  `json:"aiIngestion"`
+	Indexable      bool                  `json:"indexable"`
+	Locales        []string              `json:"locales,omitempty"`
+	LocaleURLStyle *string               `json:"localeUrlStyle,omitempty"`
+	Name           string                `json:"name"`
+	Slug           string                `json:"slug"`
+	SpaceID        string                `json:"spaceId"`
+	Translations   *NamedTranslations    `json:"translations,omitempty"`
+	Type           string                `json:"type"`
+	UpdatedAt      *string               `json:"updatedAt,omitempty"`
 }
 
 type SiteSummary struct {
@@ -8145,6 +8192,7 @@ type StatusIncidentTemplate struct {
 type StatusIncidentTranslation struct {
 	Body      any            `json:"body"`
 	Locale    string         `json:"locale"`
+	Markdown  *string        `json:"markdown,omitempty"`
 	Origin    string         `json:"origin"`
 	Stale     bool           `json:"stale"`
 	Title     any            `json:"title"`
@@ -8926,11 +8974,54 @@ type TranslatedContent struct {
 	Title   any       `json:"title"`
 }
 
+type TranslationCell struct {
+	ID        any    `json:"id"`
+	Origin    any    `json:"origin"`
+	State     string `json:"state"`
+	UpdatedAt any    `json:"updatedAt"`
+}
+
+type TranslationCoverage struct {
+	Items     []TranslationCoverageItem   `json:"items"`
+	Kind      string                      `json:"kind"`
+	Locales   []TranslationCoverageLocale `json:"locales"`
+	SpaceID   string                      `json:"spaceId"`
+	SpaceType string                      `json:"spaceType"`
+	Totals    map[string]any              `json:"totals"`
+	Truncated bool                        `json:"truncated"`
+}
+
+type TranslationCoverageItem struct {
+	ID      string         `json:"id"`
+	Kind    string         `json:"kind"`
+	Locales map[string]any `json:"locales"`
+	Slug    any            `json:"slug"`
+	Title   string         `json:"title"`
+}
+
 type TranslationOverrideView struct {
 	Key       string `json:"key"`
 	Locale    string `json:"locale"`
 	UpdatedAt string `json:"updatedAt"`
 	Value     string `json:"value"`
+}
+
+type TrashedReply struct {
+	AuthorName string  `json:"authorName"`
+	DeletedAt  string  `json:"deletedAt"`
+	Excerpt    string  `json:"excerpt"`
+	ID         string  `json:"id"`
+	PostNumber float64 `json:"postNumber"`
+	TopicID    string  `json:"topicId"`
+	TopicTitle string  `json:"topicTitle"`
+}
+
+type TrashedTopic struct {
+	DeletedAt string `json:"deletedAt"`
+	ID        string `json:"id"`
+	Kind      string `json:"kind"`
+	Slug      string `json:"slug"`
+	Title     string `json:"title"`
 }
 
 type TrustLevelPoint struct {
@@ -9252,6 +9343,13 @@ type WebhookEventCatalogEntry struct {
 	Subscribe bool   `json:"subscribe"`
 }
 
+type WebhookHealth struct {
+	ConsecutiveFailures float64 `json:"consecutiveFailures"`
+	DisabledAt          any     `json:"disabledAt"`
+	DisabledReason      any     `json:"disabledReason"`
+	FailingSince        any     `json:"failingSince"`
+}
+
 type WebhookSummary struct {
 	Active           bool              `json:"active"`
 	BodyEncoding     string            `json:"bodyEncoding"`
@@ -9262,6 +9360,7 @@ type WebhookSummary struct {
 	Events           []string          `json:"events"`
 	Format           string            `json:"format"`
 	GroupIds         any               `json:"groupIds"`
+	Health           *WebhookHealth    `json:"health"`
 	ID               string            `json:"id"`
 	Kind             string            `json:"kind"`
 	LibraryID        any               `json:"libraryId"`
@@ -9539,6 +9638,7 @@ type CategoryDetailChildrenItem struct {
 	DefaultTopPeriod         any                `json:"defaultTopPeriod"`
 	Description              string             `json:"description"`
 	Emoji                    any                `json:"emoji"`
+	FormTemplateID           any                `json:"formTemplateId"`
 	Icon                     any                `json:"icon"`
 	ID                       string             `json:"id"`
 	Latest                   any                `json:"latest"`
@@ -11544,13 +11644,14 @@ type GatedOutlineModuleWeek struct {
 }
 
 type GatedOutlineModule struct {
-	ID        string                     `json:"id"`
-	IsDefault bool                       `json:"isDefault"`
-	Lessons   []GatedOutlineModuleLesson `json:"lessons"`
-	Name      string                     `json:"name"`
-	Quiz      *GatedOutlineModuleQuiz    `json:"quiz,omitempty"`
-	Slug      string                     `json:"slug"`
-	Week      *GatedOutlineModuleWeek    `json:"week,omitempty"`
+	ID           string                     `json:"id"`
+	IsDefault    bool                       `json:"isDefault"`
+	Lessons      []GatedOutlineModuleLesson `json:"lessons"`
+	Name         string                     `json:"name"`
+	Quiz         *GatedOutlineModuleQuiz    `json:"quiz,omitempty"`
+	Slug         string                     `json:"slug"`
+	Translations *NamedTranslations         `json:"translations,omitempty"`
+	Week         *GatedOutlineModuleWeek    `json:"week,omitempty"`
 }
 
 type GatedOutlineOrderItem struct {
@@ -12310,6 +12411,8 @@ type PieceThemeMotionTargets struct {
 	IndexTitle        any `json:"index-title,omitempty"`
 	Input             any `json:"input,omitempty"`
 	Kicker            any `json:"kicker,omitempty"`
+	LanguageOption    any `json:"language-option,omitempty"`
+	LanguageSuggest   any `json:"language-suggest,omitempty"`
 	LanguageSwitcher  any `json:"language-switcher,omitempty"`
 	Layer             any `json:"layer,omitempty"`
 	Lede              any `json:"lede,omitempty"`
@@ -14145,6 +14248,11 @@ type TopicTimelineMarker struct {
 	PostNumber float64 `json:"postNumber"`
 }
 
+type TranslationCoverageLocale struct {
+	Code  string `json:"code"`
+	Label string `json:"label"`
+}
+
 type TypeLevelSettingsRule struct {
 	Color     *string  `json:"color,omitempty"`
 	ColorDark *string  `json:"colorDark,omitempty"`
@@ -15136,6 +15244,11 @@ type ContentAITranslateParams struct {
 	Locale   string   `json:"locale"`
 }
 
+type ContentAIAutoParams struct {
+	Force     *bool `json:"force,omitempty"`
+	Published *bool `json:"published,omitempty"`
+}
+
 type ContentAISeoParams struct {
 	Locale *string `json:"locale,omitempty"`
 }
@@ -15157,6 +15270,7 @@ type LegalUpdatesSubscribeParams struct {
 	Email        string                            `json:"email"`
 	CaptchaToken *string                           `json:"captchaToken,omitempty"`
 	Scope        *LegalUpdatesSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                           `json:"locale,omitempty"`
 }
 
 type LegalUpdatesSubscribeResponse struct {
@@ -21136,8 +21250,16 @@ type SpacesSettingsSetThemeParamsFootnotes struct {
 }
 
 type SpacesSettingsSetThemeParamsI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SpacesSettingsSetThemeParamsI18n struct {
@@ -22172,6 +22294,7 @@ type SpacesSettingsSetThemeParamsCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -26218,8 +26341,16 @@ type SpacesSettingsPatchThemeParamsFootnotes struct {
 }
 
 type SpacesSettingsPatchThemeParamsI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SpacesSettingsPatchThemeParamsI18n struct {
@@ -27254,6 +27385,7 @@ type SpacesSettingsPatchThemeParamsCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -31300,8 +31432,16 @@ type SpacesSettingsSetThemeDraftParamsFootnotes struct {
 }
 
 type SpacesSettingsSetThemeDraftParamsI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SpacesSettingsSetThemeDraftParamsI18n struct {
@@ -32336,6 +32476,7 @@ type SpacesSettingsSetThemeDraftParamsCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -36376,8 +36517,16 @@ type SpacesSettingsPatchThemeDraftParamsFootnotes struct {
 }
 
 type SpacesSettingsPatchThemeDraftParamsI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SpacesSettingsPatchThemeDraftParamsI18n struct {
@@ -37412,6 +37561,7 @@ type SpacesSettingsPatchThemeDraftParamsCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -41338,8 +41488,16 @@ type SpacesSettingsSetReaderThemesParamsThemeThemeFootnotes struct {
 }
 
 type SpacesSettingsSetReaderThemesParamsThemeThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SpacesSettingsSetReaderThemesParamsThemeThemeI18n struct {
@@ -42332,6 +42490,7 @@ type SpacesSettingsSetReaderThemesParamsThemeThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -45554,6 +45713,46 @@ type AnalyticsSetParams struct {
 	PosthogHost     any `json:"posthogHost,omitempty"`
 }
 
+type OrgLanguageSwitcherGetResponse struct {
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+}
+
+type OrgLanguageSwitcherSetParams struct {
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
+}
+
+type OrgLanguageSwitcherSetResponse struct {
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Warnings      []string       `json:"warnings,omitempty"`
+}
+
 type OrgImportJobListResponse struct {
 	Jobs []OrgImportJobView `json:"jobs"`
 	Page *PageInfo          `json:"page,omitempty"`
@@ -45671,6 +45870,133 @@ type OrgImportJobEnqueueRoadmapParams struct {
 
 type OrgImportJobGetResponse struct {
 	Job *OrgImportJobView `json:"job"`
+}
+
+type WebhooksEventsResponse struct {
+	Catalog []WebhookEventCatalogEntry `json:"catalog"`
+	Events  []string                   `json:"events"`
+}
+
+type WebhooksListResponse struct {
+	Page     *PageInfo        `json:"page"`
+	Webhooks []WebhookSummary `json:"webhooks"`
+	Data     []WebhookSummary `json:"data"`
+}
+
+type WebhooksCreateParams struct {
+	URL              string   `json:"url"`
+	Events           []string `json:"events"`
+	SpaceID          *string  `json:"spaceId,omitempty"`
+	LibraryID        *string  `json:"libraryId,omitempty"`
+	Format           *string  `json:"format,omitempty"`
+	CategoryIds      []string `json:"categoryIds,omitempty"`
+	TagIds           []string `json:"tagIds,omitempty"`
+	GroupIds         []string `json:"groupIds,omitempty"`
+	ContentTypes     []string `json:"contentTypes,omitempty"`
+	Locales          []string `json:"locales,omitempty"`
+	BodyEncoding     *string  `json:"bodyEncoding,omitempty"`
+	SignatureVersion *string  `json:"signatureVersion,omitempty"`
+	Kind             *string  `json:"kind,omitempty"`
+}
+
+type WebhooksCreateResponse struct {
+	Secret   string          `json:"secret"`
+	Webhook  *WebhookSummary `json:"webhook"`
+	Data     *WebhookSummary `json:"data,omitempty"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type WebhooksUpdateParams struct {
+	URL              *string  `json:"url,omitempty"`
+	Events           []string `json:"events,omitempty"`
+	Active           *bool    `json:"active,omitempty"`
+	SpaceID          *string  `json:"spaceId,omitempty"`
+	LibraryID        *string  `json:"libraryId,omitempty"`
+	CategoryIds      []string `json:"categoryIds,omitempty"`
+	TagIds           []string `json:"tagIds,omitempty"`
+	GroupIds         []string `json:"groupIds,omitempty"`
+	ContentTypes     []string `json:"contentTypes,omitempty"`
+	Locales          []string `json:"locales,omitempty"`
+	BodyEncoding     *string  `json:"bodyEncoding,omitempty"`
+	SignatureVersion *string  `json:"signatureVersion,omitempty"`
+}
+
+type WebhooksUpdateResponse struct {
+	Webhook  *WebhookSummary `json:"webhook"`
+	Warnings []string        `json:"warnings,omitempty"`
+}
+
+type WebhooksRemoveResponse struct {
+	Ok bool `json:"ok"`
+}
+
+type WebhooksDeliveriesResponseDelivery struct {
+	Attempts       any `json:"attempts"`
+	CompletedAt    any `json:"completedAt"`
+	CreatedAt      any `json:"createdAt"`
+	Error          any `json:"error"`
+	Event          any `json:"event"`
+	ID             any `json:"id"`
+	OrganizationID any `json:"organizationId"`
+	Payload        any `json:"payload"`
+	Status         any `json:"status"`
+	StatusCode     any `json:"statusCode"`
+	WebhookID      any `json:"webhookId"`
+}
+
+type WebhooksDeliveriesResponseDataItem struct {
+	Attempts       any `json:"attempts"`
+	CompletedAt    any `json:"completedAt"`
+	CreatedAt      any `json:"createdAt"`
+	Error          any `json:"error"`
+	Event          any `json:"event"`
+	ID             any `json:"id"`
+	OrganizationID any `json:"organizationId"`
+	Payload        any `json:"payload"`
+	Status         any `json:"status"`
+	StatusCode     any `json:"statusCode"`
+	WebhookID      any `json:"webhookId"`
+}
+
+type WebhooksDeliveriesResponse struct {
+	Deliveries []WebhooksDeliveriesResponseDelivery `json:"deliveries"`
+	Page       *PageInfo                            `json:"page,omitempty"`
+	Data       []WebhooksDeliveriesResponseDataItem `json:"data,omitempty"`
+}
+
+type WebhooksRotateParams struct {
+	OverlapHours *int64 `json:"overlapHours,omitempty"`
+}
+
+type WebhooksRotateResponse struct {
+	PreviousValidUntil string   `json:"previousValidUntil"`
+	Secret             string   `json:"secret"`
+	Warnings           []string `json:"warnings,omitempty"`
+}
+
+type DeployStatusStatusResponse struct {
+	DeployHooks []DeployHookBuildStatus `json:"deployHooks"`
+	Page        *PageInfo               `json:"page,omitempty"`
+	Data        []DeployHookBuildStatus `json:"data,omitempty"`
+}
+
+type WebhookSettingsGetResponse struct {
+	AutoDisable any `json:"autoDisable"`
+}
+
+type WebhookSettingsSetParamsAutoDisable struct {
+	Enabled     *bool  `json:"enabled,omitempty"`
+	Failures    *int64 `json:"failures,omitempty"`
+	WindowHours *int64 `json:"windowHours,omitempty"`
+}
+
+type WebhookSettingsSetParams struct {
+	AutoDisable *WebhookSettingsSetParamsAutoDisable `json:"autoDisable"`
+}
+
+type WebhookSettingsSetResponse struct {
+	AutoDisable any      `json:"autoDisable"`
+	Warnings    []string `json:"warnings,omitempty"`
 }
 
 type CoursesCompleteParams struct {
@@ -49606,6 +49932,22 @@ type DocsTranslationsRemoveResponse struct {
 	Locales []DocLocale `json:"locales"`
 }
 
+type PageTranslationListResponse struct {
+	Translations []PageTranslationStatus `json:"translations"`
+	Page         *PageInfo               `json:"page,omitempty"`
+	Data         []PageTranslationStatus `json:"data,omitempty"`
+}
+
+type PageTranslationAutoParams struct {
+	Force     *bool `json:"force,omitempty"`
+	Published *bool `json:"published,omitempty"`
+}
+
+type PageTranslationAutoResponse struct {
+	Translation *PageTranslationStatus `json:"translation"`
+	Warnings    []string               `json:"warnings,omitempty"`
+}
+
 type DocsOpenapiListSpecsResponse struct {
 	Specs []StoredSpecSummary `json:"specs"`
 	Page  *PageInfo           `json:"page,omitempty"`
@@ -50185,114 +50527,6 @@ type DocsTemplatesNewPageResponse struct {
 	Page     *DocsTemplatesNewPageResponsePage `json:"page"`
 	Data     *DocsTemplatesNewPageResponseData `json:"data,omitempty"`
 	Warnings []string                          `json:"warnings,omitempty"`
-}
-
-type WebhooksEventsResponse struct {
-	Catalog []WebhookEventCatalogEntry `json:"catalog"`
-	Events  []string                   `json:"events"`
-}
-
-type WebhooksListResponse struct {
-	Page     *PageInfo        `json:"page"`
-	Webhooks []WebhookSummary `json:"webhooks"`
-	Data     []WebhookSummary `json:"data"`
-}
-
-type WebhooksCreateParams struct {
-	URL              string   `json:"url"`
-	Events           []string `json:"events"`
-	SpaceID          *string  `json:"spaceId,omitempty"`
-	LibraryID        *string  `json:"libraryId,omitempty"`
-	Format           *string  `json:"format,omitempty"`
-	CategoryIds      []string `json:"categoryIds,omitempty"`
-	TagIds           []string `json:"tagIds,omitempty"`
-	GroupIds         []string `json:"groupIds,omitempty"`
-	ContentTypes     []string `json:"contentTypes,omitempty"`
-	Locales          []string `json:"locales,omitempty"`
-	BodyEncoding     *string  `json:"bodyEncoding,omitempty"`
-	SignatureVersion *string  `json:"signatureVersion,omitempty"`
-	Kind             *string  `json:"kind,omitempty"`
-}
-
-type WebhooksCreateResponse struct {
-	Secret   string          `json:"secret"`
-	Webhook  *WebhookSummary `json:"webhook"`
-	Data     *WebhookSummary `json:"data,omitempty"`
-	Warnings []string        `json:"warnings,omitempty"`
-}
-
-type WebhooksUpdateParams struct {
-	URL              *string  `json:"url,omitempty"`
-	Events           []string `json:"events,omitempty"`
-	Active           *bool    `json:"active,omitempty"`
-	SpaceID          *string  `json:"spaceId,omitempty"`
-	LibraryID        *string  `json:"libraryId,omitempty"`
-	CategoryIds      []string `json:"categoryIds,omitempty"`
-	TagIds           []string `json:"tagIds,omitempty"`
-	GroupIds         []string `json:"groupIds,omitempty"`
-	ContentTypes     []string `json:"contentTypes,omitempty"`
-	Locales          []string `json:"locales,omitempty"`
-	BodyEncoding     *string  `json:"bodyEncoding,omitempty"`
-	SignatureVersion *string  `json:"signatureVersion,omitempty"`
-}
-
-type WebhooksUpdateResponse struct {
-	Webhook  *WebhookSummary `json:"webhook"`
-	Warnings []string        `json:"warnings,omitempty"`
-}
-
-type WebhooksRemoveResponse struct {
-	Ok bool `json:"ok"`
-}
-
-type WebhooksDeliveriesResponseDelivery struct {
-	Attempts       any `json:"attempts"`
-	CompletedAt    any `json:"completedAt"`
-	CreatedAt      any `json:"createdAt"`
-	Error          any `json:"error"`
-	Event          any `json:"event"`
-	ID             any `json:"id"`
-	OrganizationID any `json:"organizationId"`
-	Payload        any `json:"payload"`
-	Status         any `json:"status"`
-	StatusCode     any `json:"statusCode"`
-	WebhookID      any `json:"webhookId"`
-}
-
-type WebhooksDeliveriesResponseDataItem struct {
-	Attempts       any `json:"attempts"`
-	CompletedAt    any `json:"completedAt"`
-	CreatedAt      any `json:"createdAt"`
-	Error          any `json:"error"`
-	Event          any `json:"event"`
-	ID             any `json:"id"`
-	OrganizationID any `json:"organizationId"`
-	Payload        any `json:"payload"`
-	Status         any `json:"status"`
-	StatusCode     any `json:"statusCode"`
-	WebhookID      any `json:"webhookId"`
-}
-
-type WebhooksDeliveriesResponse struct {
-	Deliveries []WebhooksDeliveriesResponseDelivery `json:"deliveries"`
-	Page       *PageInfo                            `json:"page,omitempty"`
-	Data       []WebhooksDeliveriesResponseDataItem `json:"data,omitempty"`
-}
-
-type WebhooksRotateParams struct {
-	OverlapHours *int64 `json:"overlapHours,omitempty"`
-}
-
-type WebhooksRotateResponse struct {
-	PreviousValidUntil string   `json:"previousValidUntil"`
-	Secret             string   `json:"secret"`
-	Warnings           []string `json:"warnings,omitempty"`
-}
-
-type DeployStatusStatusResponse struct {
-	DeployHooks []DeployHookBuildStatus `json:"deployHooks"`
-	Page        *PageInfo               `json:"page,omitempty"`
-	Data        []DeployHookBuildStatus `json:"data,omitempty"`
 }
 
 type NotificationsGetDndResponse struct {
@@ -57018,15 +57252,6 @@ type BlogArticlesPinResponse struct {
 	Warnings []string       `json:"warnings,omitempty"`
 }
 
-type BlogArticlesAnswerParams struct {
-	PostID *string `json:"postId"`
-}
-
-type BlogArticlesAnswerResponse struct {
-	Article  *ArticleDetail `json:"article"`
-	Warnings []string       `json:"warnings,omitempty"`
-}
-
 type BlogArticlesReplyParamsContent struct {
 	Type    string `json:"type"`
 	Content []any  `json:"content,omitempty"`
@@ -57239,6 +57464,7 @@ type PublicBlogSubscribeParams struct {
 	Email        string                          `json:"email"`
 	CaptchaToken *string                         `json:"captchaToken,omitempty"`
 	Scope        *PublicBlogSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                         `json:"locale,omitempty"`
 }
 
 type PublicBlogSubscribeResponse struct {
@@ -59639,6 +59865,11 @@ type ForumUpdateSettingsParams struct {
 type ForumUpdateSettingsResponse struct {
 	Settings *CommunitySettings `json:"settings"`
 	Warnings []string           `json:"warnings,omitempty"`
+}
+
+type ForumTrashResponse struct {
+	Replies []TrashedReply `json:"replies"`
+	Topics  []TrashedTopic `json:"topics"`
 }
 
 type ForumFlagsResponse struct {
@@ -62729,6 +62960,7 @@ type PublicForumTaxonomyCategoriesOverviewResponseCategory struct {
 	DefaultTopPeriod         any                   `json:"defaultTopPeriod"`
 	Description              string                `json:"description"`
 	Emoji                    any                   `json:"emoji"`
+	FormTemplateID           any                   `json:"formTemplateId"`
 	Icon                     any                   `json:"icon"`
 	ID                       string                `json:"id"`
 	Latest                   any                   `json:"latest"`
@@ -62996,6 +63228,7 @@ type PublicForumThreadsTopicResponseReaderSettingsContentLocalization struct {
 
 type PublicForumThreadsTopicResponseReaderSettings struct {
 	ContentLocalization *PublicForumThreadsTopicResponseReaderSettingsContentLocalization `json:"contentLocalization"`
+	InlineOnebox        bool                                                              `json:"inlineOnebox"`
 	ThreadedReplies     bool                                                              `json:"threadedReplies"`
 }
 
@@ -67159,6 +67392,7 @@ type PublicRoadmapWriteSubscribeParams struct {
 	Email        string                                  `json:"email"`
 	CaptchaToken *string                                 `json:"captchaToken,omitempty"`
 	Scope        *PublicRoadmapWriteSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                                 `json:"locale,omitempty"`
 }
 
 type PublicRoadmapWriteSubscribeResponse struct {
@@ -71909,6 +72143,7 @@ type PublicChangelogSubscribeParams struct {
 	Email        string                               `json:"email"`
 	CaptchaToken *string                              `json:"captchaToken,omitempty"`
 	Scope        *PublicChangelogSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                              `json:"locale,omitempty"`
 }
 
 type PublicChangelogSubscribeResponse struct {
@@ -75927,6 +76162,7 @@ type PublicEventsSubscribeParams struct {
 	Email        string                            `json:"email"`
 	CaptchaToken *string                           `json:"captchaToken,omitempty"`
 	Scope        *PublicEventsSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                           `json:"locale,omitempty"`
 }
 
 type PublicEventsSubscribeResponse struct {
@@ -76631,11 +76867,13 @@ type DocsAIAgentParams struct {
 
 type DocsAIAgentResponsePage struct {
 	ID    string `json:"id"`
+	Slug  string `json:"slug"`
 	Title string `json:"title"`
 }
 
 type DocsAIAgentResponseData struct {
 	ID    string `json:"id"`
+	Slug  string `json:"slug"`
 	Title string `json:"title"`
 }
 
@@ -77979,6 +78217,7 @@ type ItemsPatchParams struct {
 	Title  *string        `json:"title,omitempty"`
 	Slug   *string        `json:"slug,omitempty"`
 	Params map[string]any `json:"params,omitempty"`
+	Locale *string        `json:"locale,omitempty"`
 }
 
 type ItemsPatchResponse struct {
@@ -78088,6 +78327,7 @@ type LibraryItemPatchParams struct {
 	Title  *string        `json:"title,omitempty"`
 	Slug   *string        `json:"slug,omitempty"`
 	Params map[string]any `json:"params,omitempty"`
+	Locale *string        `json:"locale,omitempty"`
 }
 
 type LibraryItemPatchResponse struct {
@@ -78488,6 +78728,7 @@ type PublicStatusSubscribeParams struct {
 	Email        string                            `json:"email"`
 	CaptchaToken *string                           `json:"captchaToken,omitempty"`
 	Scope        *PublicStatusSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                           `json:"locale,omitempty"`
 }
 
 type PublicStatusSubscribeResponse struct {
@@ -78740,6 +78981,16 @@ type StatusTranslationsMachineParams struct {
 }
 
 type StatusTranslationsMachineResponse struct {
+	Translation *StatusIncidentTranslation `json:"translation"`
+	Warnings    []string                   `json:"warnings,omitempty"`
+}
+
+type StatusTranslationsAutoParams struct {
+	Force   *bool `json:"force,omitempty"`
+	Replace *bool `json:"replace,omitempty"`
+}
+
+type StatusTranslationsAutoResponse struct {
 	Translation *StatusIncidentTranslation `json:"translation"`
 	Warnings    []string                   `json:"warnings,omitempty"`
 }
@@ -84466,8 +84717,16 @@ type ThemesBundlesImportSpaceParamsThemeFootnotes struct {
 }
 
 type ThemesBundlesImportSpaceParamsThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type ThemesBundlesImportSpaceParamsThemeI18n struct {
@@ -85492,6 +85751,7 @@ type ThemesBundlesImportSpaceParamsThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -91405,8 +91665,16 @@ type ThemesBundlesImportSiteParamsThemeFootnotes struct {
 }
 
 type ThemesBundlesImportSiteParamsThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type ThemesBundlesImportSiteParamsThemeI18n struct {
@@ -92431,6 +92699,7 @@ type ThemesBundlesImportSiteParamsThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -98415,8 +98684,16 @@ type ThemesBundlesSetSiteDraftParamsFootnotes struct {
 }
 
 type ThemesBundlesSetSiteDraftParamsI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type ThemesBundlesSetSiteDraftParamsI18n struct {
@@ -99451,6 +99728,7 @@ type ThemesBundlesSetSiteDraftParamsCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -103491,8 +103769,16 @@ type ThemesBundlesPatchSiteDraftParamsFootnotes struct {
 }
 
 type ThemesBundlesPatchSiteDraftParamsI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type ThemesBundlesPatchSiteDraftParamsI18n struct {
@@ -104527,6 +104813,7 @@ type ThemesBundlesPatchSiteDraftParamsCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -108528,8 +108815,16 @@ type ThemesLibraryImportParamsThemeFootnotes struct {
 }
 
 type ThemesLibraryImportParamsThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type ThemesLibraryImportParamsThemeI18n struct {
@@ -109554,6 +109849,7 @@ type ThemesLibraryImportParamsThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -113202,6 +113498,15 @@ type SSOAtlasCreateSSOResponse struct {
 	Warnings   []string           `json:"warnings,omitempty"`
 }
 
+type SSOAtlasSetEnforcedParams struct {
+	Enforced bool `json:"enforced"`
+}
+
+type SSOAtlasSetEnforcedResponse struct {
+	Enforced bool     `json:"enforced"`
+	Warnings []string `json:"warnings,omitempty"`
+}
+
 type SSOAtlasUpdateSSOParamsOIDC struct {
 	Issuer       *string `json:"issuer,omitempty"`
 	ClientID     *string `json:"clientId,omitempty"`
@@ -113230,15 +113535,6 @@ type SSOAtlasUpdateSSOResponse struct {
 
 type SSOAtlasDeleteSSOResponse struct {
 	Deleted bool `json:"deleted"`
-}
-
-type SSOAtlasSetEnforcedParams struct {
-	Enforced bool `json:"enforced"`
-}
-
-type SSOAtlasSetEnforcedResponse struct {
-	Enforced bool     `json:"enforced"`
-	Warnings []string `json:"warnings,omitempty"`
 }
 
 type SSOAtlasGetSCIMResponse struct {
@@ -113419,14 +113715,18 @@ type IntegrationsGithubConnectParams struct {
 }
 
 type IntegrationsGithubConnectResponse struct {
-	Connection *ConnectionSummary `json:"connection"`
-	Warnings   []string           `json:"warnings,omitempty"`
+	Connection *ConnectionWithSecret `json:"connection"`
+	Warnings   []string              `json:"warnings,omitempty"`
 }
 
 type IntegrationsGithubEgressIpsResponse struct {
 	Ips  []string  `json:"ips"`
 	Page *PageInfo `json:"page,omitempty"`
 	Data []string  `json:"data,omitempty"`
+}
+
+type IntegrationsGithubRotateSigningSecretResponse struct {
+	Connection *ConnectionWithSecret `json:"connection"`
 }
 
 type IntegrationsGithubImportResponse struct {
@@ -113470,6 +113770,7 @@ type PublicOrgsScriptOriginsResponse struct {
 }
 
 type PublicOrgsGetResponseOrganization struct {
+	ID   string `json:"id"`
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 }
@@ -113936,6 +114237,7 @@ type PublicSubscribeParams struct {
 	Email        string                      `json:"email"`
 	CaptchaToken *string                     `json:"captchaToken,omitempty"`
 	Scope        *PublicSubscribeParamsScope `json:"scope,omitempty"`
+	Locale       *string                     `json:"locale,omitempty"`
 }
 
 type PublicSubscribeResponse struct {
@@ -118577,8 +118879,16 @@ type SitesCreateParamsConfigThemeFootnotes struct {
 }
 
 type SitesCreateParamsConfigThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SitesCreateParamsConfigThemeI18n struct {
@@ -119583,6 +119893,7 @@ type SitesCreateParamsConfigThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -124296,8 +124607,16 @@ type SitesReplaceParamsConfigThemeFootnotes struct {
 }
 
 type SitesReplaceParamsConfigThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SitesReplaceParamsConfigThemeI18n struct {
@@ -125302,6 +125621,7 @@ type SitesReplaceParamsConfigThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -126529,9 +126849,9 @@ type SitesUpdateParamsConfigSignInStyle struct {
 }
 
 type SitesUpdateParamsConfigTab struct {
-	Title    *string  `json:"title,omitempty"`
-	Slug     *string  `json:"slug,omitempty"`
-	SpaceIds []string `json:"spaceIds,omitempty"`
+	Title    string   `json:"title"`
+	Slug     string   `json:"slug"`
+	SpaceIds []string `json:"spaceIds"`
 }
 
 type SitesUpdateParamsConfigThemePalette struct {
@@ -130004,8 +130324,16 @@ type SitesUpdateParamsConfigThemeFootnotes struct {
 }
 
 type SitesUpdateParamsConfigThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type SitesUpdateParamsConfigThemeI18n struct {
@@ -131010,6 +131338,7 @@ type SitesUpdateParamsConfigThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`
@@ -131511,9 +131840,9 @@ type SitesUpdateParamsConfigTheme struct {
 }
 
 type SitesUpdateParamsConfigPageMount struct {
-	Path    *string `json:"path,omitempty"`
-	SpaceID *string `json:"spaceId,omitempty"`
-	Page    *string `json:"page,omitempty"`
+	Path    string `json:"path"`
+	SpaceID string `json:"spaceId"`
+	Page    string `json:"page"`
 }
 
 type SitesUpdateParamsConfig struct {
@@ -133749,6 +134078,11 @@ type PublicMCPInfoResponse struct {
 }
 
 type MCPInfoResponse struct {
+	Server    string `json:"server"`
+	Transport string `json:"transport"`
+}
+
+type MCPInfoReadOnlyResponse struct {
 	Server    string `json:"server"`
 	Transport string `json:"transport"`
 }
@@ -137193,8 +137527,16 @@ type OrgsApplyParamsSpaceThemeFootnotes struct {
 }
 
 type OrgsApplyParamsSpaceThemeI18nSwitcher struct {
-	Placement *string `json:"placement,omitempty"`
-	Style     *string `json:"style,omitempty"`
+	Enabled       *bool          `json:"enabled,omitempty"`
+	Placement     *string        `json:"placement,omitempty"`
+	Style         *string        `json:"style,omitempty"`
+	Names         *string        `json:"names,omitempty"`
+	Flags         *bool          `json:"flags,omitempty"`
+	FlagCountries map[string]any `json:"flagCountries,omitempty"`
+	Locales       []string       `json:"locales,omitempty"`
+	CustomLabels  map[string]any `json:"customLabels,omitempty"`
+	Missing       *string        `json:"missing,omitempty"`
+	Remember      *bool          `json:"remember,omitempty"`
 }
 
 type OrgsApplyParamsSpaceThemeI18n struct {
@@ -138187,6 +138529,7 @@ type OrgsApplyParamsSpaceThemeCoursesLanding struct {
 	ShowInstructors *bool   `json:"showInstructors,omitempty"`
 	ShowOutcomes    *bool   `json:"showOutcomes,omitempty"`
 	ShowPrereqs     *bool   `json:"showPrereqs,omitempty"`
+	ShowPaths       *bool   `json:"showPaths,omitempty"`
 	CTAStyle        *string `json:"ctaStyle,omitempty"`
 	CoverAspect     *string `json:"coverAspect,omitempty"`
 	CoverRadius     any     `json:"coverRadius,omitempty"`

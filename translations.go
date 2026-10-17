@@ -83,12 +83,35 @@ func (s *TranslationsOverridesService) Set(ctx context.Context, orgID string, bo
 	return &out, nil
 }
 
+// TranslationsOverridesRemoveQuery are the optional query parameters of TranslationsOverridesService.Remove.
+type TranslationsOverridesRemoveQuery struct {
+	// The interface translation key whose override to remove (1 to 120 characters); the built-in copy for that key is served again.
+	Key *string
+	// The language whose override to remove, as set with PUT.
+	Locale *string
+}
+
+func (p *TranslationsOverridesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Key != nil {
+		v.Set("key", *p.Key)
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
 // Remove delete translation overrides in an organization
 //
 // DELETE /orgs/{orgId}/translation-overrides
-func (s *TranslationsOverridesService) Remove(ctx context.Context, orgID string, opts ...RequestOption) (*TranslationsOverridesRemoveResponse, error) {
+func (s *TranslationsOverridesService) Remove(ctx context.Context, orgID string, query *TranslationsOverridesRemoveQuery, opts ...RequestOption) (*TranslationsOverridesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out TranslationsOverridesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/translation-overrides", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/translation-overrides", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

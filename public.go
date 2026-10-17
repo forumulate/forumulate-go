@@ -1715,7 +1715,6 @@ type PublicChangelogListQuery struct {
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	Since   *string
 	Cursor  *string
-	Match   *string
 	Month   *string
 	Version *string
 	Type    *string
@@ -1730,10 +1729,11 @@ type PublicChangelogListQuery struct {
 	Pinned *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Featured *string
-	Sort     *string
 	Preview  *string
 	Locale   *string
 	Tag      *string
+	Sort     *string
+	Match    *string
 }
 
 func (p *PublicChangelogListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1758,9 +1758,6 @@ func (p *PublicChangelogListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
-	}
-	if p.Match != nil {
-		v.Set("match", *p.Match)
 	}
 	if p.Month != nil {
 		v.Set("month", *p.Month)
@@ -1795,9 +1792,6 @@ func (p *PublicChangelogListQuery) encode(opts []RequestOption) (url.Values, []R
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
-	if p.Sort != nil {
-		v.Set("sort", *p.Sort)
-	}
 	if p.Preview != nil {
 		v.Set("preview", *p.Preview)
 	}
@@ -1806,6 +1800,12 @@ func (p *PublicChangelogListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
+	}
+	if p.Sort != nil {
+		v.Set("sort", *p.Sort)
+	}
+	if p.Match != nil {
+		v.Set("match", *p.Match)
 	}
 	return v, opts
 }
@@ -2364,15 +2364,15 @@ type PublicEventsService struct {
 type PublicEventsListQuery struct {
 	// Events per page, once a version is stated.
 	Limit *int64
-	Scope *string
 	Tag   *string
-	Mode  *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	From *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	To     *string
 	Cursor *string
 	Share  *string
+	Mode   *string
+	Scope  *string
 }
 
 func (p *PublicEventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -2383,14 +2383,8 @@ func (p *PublicEventsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
-	if p.Scope != nil {
-		v.Set("scope", *p.Scope)
-	}
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
-	}
-	if p.Mode != nil {
-		v.Set("mode", *p.Mode)
 	}
 	if p.From != nil {
 		v.Set("from", *p.From)
@@ -2403,6 +2397,12 @@ func (p *PublicEventsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Share != nil {
 		v.Set("share", *p.Share)
+	}
+	if p.Mode != nil {
+		v.Set("mode", *p.Mode)
+	}
+	if p.Scope != nil {
+		v.Set("scope", *p.Scope)
 	}
 	return v, opts
 }
@@ -3829,7 +3829,7 @@ func (s *PublicForumTopicsService) FlagTopic(ctx context.Context, orgID string, 
 	return &out, nil
 }
 
-// Answer create the answer in a space (public reader forum t)
+// Answer create the answer in a space (public reader t)
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/answer
 func (s *PublicForumTopicsService) Answer(ctx context.Context, orgID string, spaceID string, slug string, body PublicForumTopicsAnswerParams, opts ...RequestOption) (*PublicForumTopicsAnswerResponse, error) {
@@ -4530,12 +4530,29 @@ type PublicLegalService struct {
 	c *Client
 }
 
+// PublicLegalListQuery are the optional query parameters of PublicLegalService.List.
+type PublicLegalListQuery struct {
+	Locale *string
+}
+
+func (p *PublicLegalListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Locale != nil {
+		v.Set("locale", *p.Locale)
+	}
+	return v, opts
+}
+
 // List get the legal in an organization (public reader)
 //
 // GET /public/orgs/{orgId}/legal
-func (s *PublicLegalService) List(ctx context.Context, orgID string, opts ...RequestOption) (*PublicLegalListResponse, error) {
+func (s *PublicLegalService) List(ctx context.Context, orgID string, query *PublicLegalListQuery, opts ...RequestOption) (*PublicLegalListResponse, error) {
+	v, opts := query.encode(opts)
 	var out PublicLegalListResponse
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/legal", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -5341,12 +5358,12 @@ type PublicRoadmapBoardQuery struct {
 	Pinned *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Featured *string
-	Sort     *string
 	Tag      *string
 	Status   *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Mine *string
 	Q    *string
+	Sort *string
 }
 
 func (p *PublicRoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -5375,9 +5392,6 @@ func (p *PublicRoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []Re
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
-	if p.Sort != nil {
-		v.Set("sort", *p.Sort)
-	}
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
@@ -5389,6 +5403,9 @@ func (p *PublicRoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Q != nil {
 		v.Set("q", *p.Q)
+	}
+	if p.Sort != nil {
+		v.Set("sort", *p.Sort)
 	}
 	return v, opts
 }
@@ -6485,12 +6502,12 @@ type PublicThemeComponentRegistryService struct {
 
 // PublicThemeComponentRegistryBrowseQuery are the optional query parameters of PublicThemeComponentRegistryService.Browse.
 type PublicThemeComponentRegistryBrowseQuery struct {
-	Q      *string
-	Tag    *string
-	Outlet *string
+	Q   *string
+	Tag *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Featured *string
 	Sort     *string
+	Outlet   *string
 }
 
 func (p *PublicThemeComponentRegistryBrowseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -6504,14 +6521,14 @@ func (p *PublicThemeComponentRegistryBrowseQuery) encode(opts []RequestOption) (
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
-	if p.Outlet != nil {
-		v.Set("outlet", *p.Outlet)
-	}
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
+	}
+	if p.Outlet != nil {
+		v.Set("outlet", *p.Outlet)
 	}
 	return v, opts
 }
@@ -6557,12 +6574,12 @@ type PublicThemeRegistryService struct {
 
 // PublicThemeRegistryBrowseQuery are the optional query parameters of PublicThemeRegistryService.Browse.
 type PublicThemeRegistryBrowseQuery struct {
-	Q         *string
-	Tag       *string
-	SpaceType *string
+	Q   *string
+	Tag *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
-	Featured *string
-	Sort     *string
+	Featured  *string
+	Sort      *string
+	SpaceType *string
 }
 
 func (p *PublicThemeRegistryBrowseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -6576,14 +6593,14 @@ func (p *PublicThemeRegistryBrowseQuery) encode(opts []RequestOption) (url.Value
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
-	if p.SpaceType != nil {
-		v.Set("spaceType", *p.SpaceType)
-	}
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
+	}
+	if p.SpaceType != nil {
+		v.Set("spaceType", *p.SpaceType)
 	}
 	return v, opts
 }

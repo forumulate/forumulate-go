@@ -402,17 +402,6 @@ func (s *BlogArticlesService) Pin(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
-// Answer create the answer in a space (blog)
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/answer
-func (s *BlogArticlesService) Answer(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesAnswerParams, opts ...RequestOption) (*BlogArticlesAnswerResponse, error) {
-	var out BlogArticlesAnswerResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/answer", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // Reply create a reply in a space (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/replies

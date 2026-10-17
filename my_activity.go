@@ -17,10 +17,10 @@ type MyActivityService struct {
 type MyActivityListQuery struct {
 	// Rows per page.
 	Limit   *int64
-	Type    *string
 	SpaceID *string
 	Q       *string
 	Cursor  *string
+	Type    *string
 }
 
 func (p *MyActivityListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,9 +31,6 @@ func (p *MyActivityListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
-	if p.Type != nil {
-		v.Set("type", *p.Type)
-	}
 	if p.SpaceID != nil {
 		v.Set("spaceId", *p.SpaceID)
 	}
@@ -42,6 +39,9 @@ func (p *MyActivityListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Type != nil {
+		v.Set("type", *p.Type)
 	}
 	return v, opts
 }

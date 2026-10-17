@@ -154,6 +154,17 @@ func (s *SSOAtlasService) CreateSSO(ctx context.Context, orgID string, body SSOA
 	return &out, nil
 }
 
+// SetEnforced update the enforce in an organization
+//
+// PATCH /orgs/{orgId}/atlas-enterprise/sso/enforce
+func (s *SSOAtlasService) SetEnforced(ctx context.Context, orgID string, body SSOAtlasSetEnforcedParams, opts ...RequestOption) (*SSOAtlasSetEnforcedResponse, error) {
+	var out SSOAtlasSetEnforcedResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/enforce", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // UpdateSSO update the SSO
 //
 // PATCH /orgs/{orgId}/atlas-enterprise/sso/{id}
@@ -171,17 +182,6 @@ func (s *SSOAtlasService) UpdateSSO(ctx context.Context, orgID string, id string
 func (s *SSOAtlasService) DeleteSSO(ctx context.Context, orgID string, id string, opts ...RequestOption) (*SSOAtlasDeleteSSOResponse, error) {
 	var out SSOAtlasDeleteSSOResponse
 	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/"+pathEscape(id), nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetEnforced update the enforce in an organization
-//
-// PATCH /orgs/{orgId}/atlas-enterprise/sso/enforce
-func (s *SSOAtlasService) SetEnforced(ctx context.Context, orgID string, body SSOAtlasSetEnforcedParams, opts ...RequestOption) (*SSOAtlasSetEnforcedResponse, error) {
-	var out SSOAtlasSetEnforcedResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/enforce", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

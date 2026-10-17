@@ -94,3 +94,14 @@ func (s *StatusTranslationsService) Machine(ctx context.Context, orgID string, s
 	}
 	return &out, nil
 }
+
+// Auto machine-translate an incident (canonical)
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}/translations/{locale}/auto
+func (s *StatusTranslationsService) Auto(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsAutoParams, opts ...RequestOption) (*StatusTranslationsAutoResponse, error) {
+	var out StatusTranslationsAutoResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}

@@ -19,6 +19,8 @@ type ChatService struct {
 
 // ChatChannelsQuery are the optional query parameters of ChatService.Channels.
 type ChatChannelsQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Archived *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
@@ -29,6 +31,9 @@ func (p *ChatChannelsQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.Archived != nil {
+		v.Set("archived", *p.Archived)
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))

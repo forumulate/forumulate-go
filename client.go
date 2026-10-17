@@ -139,9 +139,11 @@ type Client struct {
 	Notifications         *NotificationsService
 	Onboarding            *OnboardingService
 	OrgImportJob          *OrgImportJobService
+	OrgLanguageSwitcher   *OrgLanguageSwitcherService
 	OrgPayments           *OrgPaymentsService
 	Orgs                  *OrgsService
 	OrgSms                *OrgSmsService
+	PageTranslation       *PageTranslationService
 	PreviewExchange       *PreviewExchangeService
 	PreviewSessions       *PreviewSessionsService
 	PreviewStatus         *PreviewStatusService
@@ -187,10 +189,12 @@ type Client struct {
 	Templates             *TemplatesService
 	Themes                *ThemesService
 	Tokens                *TokensService
+	TranslationCoverage   *TranslationCoverageService
 	Translations          *TranslationsService
 	Users                 *UsersService
 	Versioning            *VersioningService
 	Webhooks              *WebhooksService
+	WebhookSettings       *WebhookSettingsService
 }
 
 // Option configures a Client.
@@ -410,12 +414,14 @@ func NewClient(opts ...Option) *Client {
 	c.Notifications.Push = &NotificationsPushService{c: c}
 	c.Onboarding = &OnboardingService{c: c}
 	c.OrgImportJob = &OrgImportJobService{c: c}
+	c.OrgLanguageSwitcher = &OrgLanguageSwitcherService{c: c}
 	c.OrgPayments = &OrgPaymentsService{c: c}
 	c.Orgs = &OrgsService{c: c}
 	c.Orgs.Captcha = &OrgsCaptchaService{c: c}
 	c.Orgs.Health = &OrgsHealthService{c: c}
 	c.Orgs.Settings = &OrgsSettingsService{c: c}
 	c.OrgSms = &OrgSmsService{c: c}
+	c.PageTranslation = &PageTranslationService{c: c}
 	c.PreviewExchange = &PreviewExchangeService{c: c}
 	c.PreviewSessions = &PreviewSessionsService{c: c}
 	c.PreviewStatus = &PreviewStatusService{c: c}
@@ -551,6 +557,7 @@ func NewClient(opts ...Option) *Client {
 	c.Themes.Library = &ThemesLibraryService{c: c}
 	c.Themes.Marketplace = &ThemesMarketplaceService{c: c}
 	c.Tokens = &TokensService{c: c}
+	c.TranslationCoverage = &TranslationCoverageService{c: c}
 	c.Translations = &TranslationsService{c: c}
 	c.Translations.Overrides = &TranslationsOverridesService{c: c}
 	c.Users = &UsersService{c: c}
@@ -559,6 +566,7 @@ func NewClient(opts ...Option) *Client {
 	c.Users.Wallet = &UsersWalletService{c: c}
 	c.Versioning = &VersioningService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
+	c.WebhookSettings = &WebhookSettingsService{c: c}
 	return c
 }
 
