@@ -24,12 +24,30 @@ func (s *CareersService) GetPipeline(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// CareersSetPipelineQuery are the optional query parameters of CareersService.SetPipeline.
+type CareersSetPipelineQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersSetPipelineQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetPipeline replace the pipeline in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/careers/pipeline
-func (s *CareersService) SetPipeline(ctx context.Context, orgID string, spaceID string, body CareersSetPipelineParams, opts ...RequestOption) (*CareersSetPipelineResponse, error) {
+func (s *CareersService) SetPipeline(ctx context.Context, orgID string, spaceID string, body CareersSetPipelineParams, query *CareersSetPipelineQuery, opts ...RequestOption) (*CareersSetPipelineResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersSetPipelineResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/pipeline", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/pipeline", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -46,12 +64,30 @@ func (s *CareersService) Form(ctx context.Context, orgID string, spaceID string,
 	return &out, nil
 }
 
+// CareersSetFormQuery are the optional query parameters of CareersService.SetForm.
+type CareersSetFormQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersSetFormQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetForm update the form in a space (careers)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/careers/form
-func (s *CareersService) SetForm(ctx context.Context, orgID string, spaceID string, body CareersSetFormParams, opts ...RequestOption) (*CareersSetFormResponse, error) {
+func (s *CareersService) SetForm(ctx context.Context, orgID string, spaceID string, body CareersSetFormParams, query *CareersSetFormQuery, opts ...RequestOption) (*CareersSetFormResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersSetFormResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/form", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/form", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -85,6 +121,10 @@ type CareersListQuery struct {
 	Limit  *int64
 	Status *string
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CareersListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -100,6 +140,12 @@ func (p *CareersListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -131,12 +177,30 @@ func (s *CareersService) ListAutoPaging(ctx context.Context, orgID string, space
 	})
 }
 
+// CareersSetStatusQuery are the optional query parameters of CareersService.SetStatus.
+type CareersSetStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersSetStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetStatus update the application
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}
-func (s *CareersService) SetStatus(ctx context.Context, orgID string, spaceID string, id string, body CareersSetStatusParams, opts ...RequestOption) (*CareersSetStatusResponse, error) {
+func (s *CareersService) SetStatus(ctx context.Context, orgID string, spaceID string, id string, body CareersSetStatusParams, query *CareersSetStatusQuery, opts ...RequestOption) (*CareersSetStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersSetStatusResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -147,6 +211,10 @@ type CareersRepliesQuery struct {
 	// Replies per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CareersRepliesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -159,6 +227,12 @@ func (p *CareersRepliesQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -190,23 +264,59 @@ func (s *CareersService) RepliesAutoPaging(ctx context.Context, orgID string, sp
 	})
 }
 
-// Reply create the reply in a space (careers applications)
+// CareersReplyQuery are the optional query parameters of CareersService.Reply.
+type CareersReplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersReplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Reply reply to the application
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/reply
-func (s *CareersService) Reply(ctx context.Context, orgID string, spaceID string, id string, body CareersReplyParams, opts ...RequestOption) (*CareersReplyResponse, error) {
+func (s *CareersService) Reply(ctx context.Context, orgID string, spaceID string, id string, body CareersReplyParams, query *CareersReplyQuery, opts ...RequestOption) (*CareersReplyResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersReplyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/reply", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/reply", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CareersAssignQuery are the optional query parameters of CareersService.Assign.
+type CareersAssignQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersAssignQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Assign assign the application
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/assign
-func (s *CareersService) Assign(ctx context.Context, orgID string, spaceID string, id string, body CareersAssignParams, opts ...RequestOption) (*CareersAssignResponse, error) {
+func (s *CareersService) Assign(ctx context.Context, orgID string, spaceID string, id string, body CareersAssignParams, query *CareersAssignQuery, opts ...RequestOption) (*CareersAssignResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersAssignResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/assign", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/assign", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -218,6 +328,10 @@ type CareersNotesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CareersNotesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -231,10 +345,16 @@ func (p *CareersNotesQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Notes list notes in a space
+// Notes list notes in a space (careers applications)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/notes
 func (s *CareersService) Notes(ctx context.Context, orgID string, spaceID string, id string, query *CareersNotesQuery, opts ...RequestOption) (*CareersNotesResponse, error) {
@@ -261,23 +381,59 @@ func (s *CareersService) NotesAutoPaging(ctx context.Context, orgID string, spac
 	})
 }
 
-// AddNote create a note in a space
+// CareersAddNoteQuery are the optional query parameters of CareersService.AddNote.
+type CareersAddNoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersAddNoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// AddNote create a note in a space (careers applications)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/notes
-func (s *CareersService) AddNote(ctx context.Context, orgID string, spaceID string, id string, body CareersAddNoteParams, opts ...RequestOption) (*CareersAddNoteResponse, error) {
+func (s *CareersService) AddNote(ctx context.Context, orgID string, spaceID string, id string, body CareersAddNoteParams, query *CareersAddNoteQuery, opts ...RequestOption) (*CareersAddNoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersAddNoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CareersDeleteNoteQuery are the optional query parameters of CareersService.DeleteNote.
+type CareersDeleteNoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersDeleteNoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteNote delete the note (spaces careers applications)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/notes/{noteId}
-func (s *CareersService) DeleteNote(ctx context.Context, orgID string, spaceID string, id string, noteID string, opts ...RequestOption) (*CareersDeleteNoteResponse, error) {
+func (s *CareersService) DeleteNote(ctx context.Context, orgID string, spaceID string, id string, noteID string, query *CareersDeleteNoteQuery, opts ...RequestOption) (*CareersDeleteNoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersDeleteNoteResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes/"+pathEscape(noteID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/notes/"+pathEscape(noteID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -289,6 +445,10 @@ type CareersRatingsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CareersRatingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -302,10 +462,16 @@ func (p *CareersRatingsQuery) encode(opts []RequestOption) (url.Values, []Reques
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Ratings list ratings in a space
+// Ratings list ratings in a space (careers applications)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/ratings
 func (s *CareersService) Ratings(ctx context.Context, orgID string, spaceID string, id string, query *CareersRatingsQuery, opts ...RequestOption) (*CareersRatingsResponse, error) {
@@ -332,12 +498,30 @@ func (s *CareersService) RatingsAutoPaging(ctx context.Context, orgID string, sp
 	})
 }
 
-// Rate replace the rating in a space
+// CareersRateQuery are the optional query parameters of CareersService.Rate.
+type CareersRateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersRateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Rate rate the rating (careers applications)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/careers/applications/{id}/rating
-func (s *CareersService) Rate(ctx context.Context, orgID string, spaceID string, id string, body CareersRateParams, opts ...RequestOption) (*CareersRateResponse, error) {
+func (s *CareersService) Rate(ctx context.Context, orgID string, spaceID string, id string, body CareersRateParams, query *CareersRateQuery, opts ...RequestOption) (*CareersRateResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersRateResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/rating", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/applications/"+pathEscape(id)+"/rating", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

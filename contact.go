@@ -19,6 +19,10 @@ type ContactDepartmentsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContactDepartmentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *ContactDepartmentsQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,94 +72,30 @@ func (s *ContactService) DepartmentsAutoPaging(ctx context.Context, orgID string
 	})
 }
 
-// SetDepartments update departments in a space
-//
-// PATCH /orgs/{orgId}/spaces/{spaceId}/contact/departments
-func (s *ContactService) SetDepartments(ctx context.Context, orgID string, spaceID string, body ContactSetDepartmentsParams, opts ...RequestOption) (*ContactSetDepartmentsResponse, error) {
-	var out ContactSetDepartmentsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/departments", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
+// ContactSetDepartmentsQuery are the optional query parameters of ContactService.SetDepartments.
+type ContactSetDepartmentsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
-// ContactFormFieldsQuery are the optional query parameters of ContactService.FormFields.
-type ContactFormFieldsQuery struct {
-	// Rows per page.
-	Limit *int64
-	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
-	Cursor *string
-}
-
-func (p *ContactFormFieldsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *ContactSetDepartmentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
 	}
-	if p.Limit != nil {
-		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
-	}
-	if p.Cursor != nil {
-		v.Set("cursor", *p.Cursor)
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
 	}
 	return v, opts
 }
 
-// FormFields list form fields in a space
+// SetDepartments update departments in a space
 //
-// GET /orgs/{orgId}/spaces/{spaceId}/contact/form-fields
-func (s *ContactService) FormFields(ctx context.Context, orgID string, spaceID string, query *ContactFormFieldsQuery, opts ...RequestOption) (*ContactFormFieldsResponse, error) {
+// PATCH /orgs/{orgId}/spaces/{spaceId}/contact/departments
+func (s *ContactService) SetDepartments(ctx context.Context, orgID string, spaceID string, body ContactSetDepartmentsParams, query *ContactSetDepartmentsQuery, opts ...RequestOption) (*ContactSetDepartmentsResponse, error) {
 	v, opts := query.encode(opts)
-	var out ContactFormFieldsResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form-fields", v, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// FormFieldsAutoPaging walks every item of FormFields across all pages.
-func (s *ContactService) FormFieldsAutoPaging(ctx context.Context, orgID string, spaceID string, query *ContactFormFieldsQuery, opts ...RequestOption) *Iter[any] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
-		v, opts := query.encode(opts)
-		if cursor != "" {
-			v.Set("cursor", cursor)
-		}
-		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form-fields", v, nil, opts)
-		if err != nil {
-			return nil, "", err
-		}
-		return decodePage[any](raw, "")
-	})
-}
-
-// SetFormFields update form fields in a space
-//
-// PATCH /orgs/{orgId}/spaces/{spaceId}/contact/form-fields
-func (s *ContactService) SetFormFields(ctx context.Context, orgID string, spaceID string, body ContactSetFormFieldsParams, opts ...RequestOption) (*ContactSetFormFieldsResponse, error) {
-	var out ContactSetFormFieldsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form-fields", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// Form get the form in a space (contact)
-//
-// GET /orgs/{orgId}/spaces/{spaceId}/contact/form
-func (s *ContactService) Form(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ContactFormResponse, error) {
-	var out ContactFormResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetForm update the form in a space (contact)
-//
-// PATCH /orgs/{orgId}/spaces/{spaceId}/contact/form
-func (s *ContactService) SetForm(ctx context.Context, orgID string, spaceID string, body ContactSetFormParams, opts ...RequestOption) (*ContactSetFormResponse, error) {
-	var out ContactSetFormResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/form", nil, body, &out, opts); err != nil {
+	var out ContactSetDepartmentsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/departments", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -172,8 +118,12 @@ type ContactListQuery struct {
 	Limit *int64
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Unhandled *string
-	Cursor    *string
 	Folder    *string
+	Cursor    *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContactListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -187,11 +137,17 @@ func (p *ContactListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	if p.Unhandled != nil {
 		v.Set("unhandled", *p.Unhandled)
 	}
+	if p.Folder != nil {
+		v.Set("folder", *p.Folder)
+	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
-	if p.Folder != nil {
-		v.Set("folder", *p.Folder)
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -223,34 +179,88 @@ func (s *ContactService) ListAutoPaging(ctx context.Context, orgID string, space
 	})
 }
 
+// ContactSetHandledQuery are the optional query parameters of ContactService.SetHandled.
+type ContactSetHandledQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContactSetHandledQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetHandled update the contact
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/contact/{id}
-func (s *ContactService) SetHandled(ctx context.Context, orgID string, spaceID string, id string, body ContactSetHandledParams, opts ...RequestOption) (*ContactSetHandledResponse, error) {
+func (s *ContactService) SetHandled(ctx context.Context, orgID string, spaceID string, id string, body ContactSetHandledParams, query *ContactSetHandledQuery, opts ...RequestOption) (*ContactSetHandledResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContactSetHandledResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ContactSetStatusQuery are the optional query parameters of ContactService.SetStatus.
+type ContactSetStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContactSetStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetStatus update the status in a space
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/contact/{id}/status
-func (s *ContactService) SetStatus(ctx context.Context, orgID string, spaceID string, id string, body ContactSetStatusParams, opts ...RequestOption) (*ContactSetStatusResponse, error) {
+func (s *ContactService) SetStatus(ctx context.Context, orgID string, spaceID string, id string, body ContactSetStatusParams, query *ContactSetStatusQuery, opts ...RequestOption) (*ContactSetStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContactSetStatusResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/status", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/status", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ContactAssignQuery are the optional query parameters of ContactService.Assign.
+type ContactAssignQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContactAssignQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Assign assign the contact
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/contact/{id}/assign
-func (s *ContactService) Assign(ctx context.Context, orgID string, spaceID string, id string, body ContactAssignParams, opts ...RequestOption) (*ContactAssignResponse, error) {
+func (s *ContactService) Assign(ctx context.Context, orgID string, spaceID string, id string, body ContactAssignParams, query *ContactAssignQuery, opts ...RequestOption) (*ContactAssignResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContactAssignResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/assign", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/assign", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -261,6 +271,10 @@ type ContactRepliesQuery struct {
 	// Replies per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContactRepliesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -274,15 +288,21 @@ func (p *ContactRepliesQuery) encode(opts []RequestOption) (url.Values, []Reques
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
 // Replies list replies in a space (contact)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/contact/{id}/replies
-func (s *ContactService) Replies(ctx context.Context, orgID string, spaceID string, id string, query *ContactRepliesQuery, opts ...RequestOption) (*ContactRepliesResponse, error) {
+func (s *ContactService) Replies(ctx context.Context, orgID string, spaceID string, id string, query *ContactRepliesQuery, opts ...RequestOption) (*CareersRepliesResponse, error) {
 	v, opts := query.encode(opts)
-	var out ContactRepliesResponse
+	var out CareersRepliesResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/replies", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -304,12 +324,30 @@ func (s *ContactService) RepliesAutoPaging(ctx context.Context, orgID string, sp
 	})
 }
 
-// Reply create the reply in a space (contact)
+// ContactReplyQuery are the optional query parameters of ContactService.Reply.
+type ContactReplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContactReplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Reply reply to the contact
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/contact/{id}/reply
-func (s *ContactService) Reply(ctx context.Context, orgID string, spaceID string, id string, body ContactReplyParams, opts ...RequestOption) (*ContactReplyResponse, error) {
+func (s *ContactService) Reply(ctx context.Context, orgID string, spaceID string, id string, body ContactReplyParams, query *ContactReplyQuery, opts ...RequestOption) (*ContactReplyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContactReplyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/reply", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/contact/"+pathEscape(id)+"/reply", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

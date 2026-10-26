@@ -19,6 +19,10 @@ type InvitesPendingQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *InvitesPendingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *InvitesPendingQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *InvitesService) PendingAutoPaging(ctx context.Context, query *InvitesPe
 	})
 }
 
+// InvitesAcceptPendingQuery are the optional query parameters of InvitesService.AcceptPending.
+type InvitesAcceptPendingQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *InvitesAcceptPendingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AcceptPending accept the pending
 //
 // POST /invites/pending/{inviteId}/accept
-func (s *InvitesService) AcceptPending(ctx context.Context, inviteID string, opts ...RequestOption) (*InvitesAcceptPendingResponse, error) {
+func (s *InvitesService) AcceptPending(ctx context.Context, inviteID string, query *InvitesAcceptPendingQuery, opts ...RequestOption) (*InvitesAcceptPendingResponse, error) {
+	v, opts := query.encode(opts)
 	var out InvitesAcceptPendingResponse
-	if err := s.c.do(ctx, "POST", "/invites/pending/"+pathEscape(inviteID)+"/accept", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/invites/pending/"+pathEscape(inviteID)+"/accept", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// InvitesAcceptQuery are the optional query parameters of InvitesService.Accept.
+type InvitesAcceptQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *InvitesAcceptQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Accept accept the invite
 //
 // POST /invites/accept
-func (s *InvitesService) Accept(ctx context.Context, body InvitesAcceptParams, opts ...RequestOption) (*InvitesAcceptResponse, error) {
+func (s *InvitesService) Accept(ctx context.Context, body InvitesAcceptParams, query *InvitesAcceptQuery, opts ...RequestOption) (*InvitesAcceptResponse, error) {
+	v, opts := query.encode(opts)
 	var out InvitesAcceptResponse
-	if err := s.c.do(ctx, "POST", "/invites/accept", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/invites/accept", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// InvitesAcceptLinkQuery are the optional query parameters of InvitesService.AcceptLink.
+type InvitesAcceptLinkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *InvitesAcceptLinkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AcceptLink accept link
 //
 // POST /invites/accept-link
-func (s *InvitesService) AcceptLink(ctx context.Context, body InvitesAcceptLinkParams, opts ...RequestOption) (*InvitesAcceptLinkResponse, error) {
+func (s *InvitesService) AcceptLink(ctx context.Context, body InvitesAcceptLinkParams, query *InvitesAcceptLinkQuery, opts ...RequestOption) (*InvitesAcceptLinkResponse, error) {
+	v, opts := query.encode(opts)
 	var out InvitesAcceptLinkResponse
-	if err := s.c.do(ctx, "POST", "/invites/accept-link", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/invites/accept-link", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

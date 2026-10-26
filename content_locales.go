@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // ContentLocalesService holds the operations under client.ContentLocales.
@@ -22,45 +24,117 @@ func (s *ContentLocalesService) List(ctx context.Context, orgID string, libraryI
 	return &out, nil
 }
 
+// ContentLocalesAddQuery are the optional query parameters of ContentLocalesService.Add.
+type ContentLocalesAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLocalesAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add create a locale in an organization
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/locales
-func (s *ContentLocalesService) Add(ctx context.Context, orgID string, libraryID string, body ContentLocalesAddParams, opts ...RequestOption) (any, error) {
+func (s *ContentLocalesService) Add(ctx context.Context, orgID string, libraryID string, body ContentLocalesAddParams, query *ContentLocalesAddQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ContentLocalesSettingsQuery are the optional query parameters of ContentLocalesService.Settings.
+type ContentLocalesSettingsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLocalesSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Settings update locales in an organization
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/locales
-func (s *ContentLocalesService) Settings(ctx context.Context, orgID string, libraryID string, body ContentLocalesSettingsParams, opts ...RequestOption) (any, error) {
+func (s *ContentLocalesService) Settings(ctx context.Context, orgID string, libraryID string, body ContentLocalesSettingsParams, query *ContentLocalesSettingsQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ContentLocalesRelabelQuery are the optional query parameters of ContentLocalesService.Relabel.
+type ContentLocalesRelabelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLocalesRelabelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Relabel update the locale (content libraries)
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/locales/{code}
-func (s *ContentLocalesService) Relabel(ctx context.Context, orgID string, libraryID string, code string, body ContentLocalesRelabelParams, opts ...RequestOption) (any, error) {
+func (s *ContentLocalesService) Relabel(ctx context.Context, orgID string, libraryID string, code string, body ContentLocalesRelabelParams, query *ContentLocalesRelabelQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales/"+pathEscape(code), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales/"+pathEscape(code), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// ContentLocalesRemoveQuery are the optional query parameters of ContentLocalesService.Remove.
+type ContentLocalesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLocalesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the locale (content libraries)
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/locales/{code}
-func (s *ContentLocalesService) Remove(ctx context.Context, orgID string, libraryID string, code string, opts ...RequestOption) (*LibraryLocales, error) {
+func (s *ContentLocalesService) Remove(ctx context.Context, orgID string, libraryID string, code string, query *ContentLocalesRemoveQuery, opts ...RequestOption) (*LibraryLocales, error) {
+	v, opts := query.encode(opts)
 	var out LibraryLocales
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales/"+pathEscape(code), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/locales/"+pathEscape(code), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

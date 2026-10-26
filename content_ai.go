@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // ContentAIService holds the operations under client.ContentAI.
@@ -22,45 +24,117 @@ func (s *ContentAIService) Status(ctx context.Context, orgID string, libraryID s
 	return &out, nil
 }
 
+// ContentAITranslateQuery are the optional query parameters of ContentAIService.Translate.
+type ContentAITranslateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentAITranslateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Translate translate entries with the organization’s AI provider
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/ai/translate
-func (s *ContentAIService) Translate(ctx context.Context, orgID string, libraryID string, body ContentAITranslateParams, opts ...RequestOption) (any, error) {
+func (s *ContentAIService) Translate(ctx context.Context, orgID string, libraryID string, body ContentAITranslateParams, query *ContentAITranslateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/ai/translate", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/ai/translate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ContentAIAutoQuery are the optional query parameters of ContentAIService.Auto.
+type ContentAIAutoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentAIAutoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Auto machine-translate an entry
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/translations/{locale}/auto
-func (s *ContentAIService) Auto(ctx context.Context, orgID string, libraryID string, entryID string, locale string, body ContentAIAutoParams, opts ...RequestOption) (any, error) {
+func (s *ContentAIService) Auto(ctx context.Context, orgID string, libraryID string, entryID string, locale string, body ContentAIAutoParams, query *ContentAIAutoQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/translations/"+pathEscape(locale)+"/auto", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ContentAISeoQuery are the optional query parameters of ContentAIService.Seo.
+type ContentAISeoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentAISeoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Seo suggest an SEO title and description
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/ai/seo
-func (s *ContentAIService) Seo(ctx context.Context, orgID string, libraryID string, entryID string, body ContentAISeoParams, opts ...RequestOption) (any, error) {
+func (s *ContentAIService) Seo(ctx context.Context, orgID string, libraryID string, entryID string, body ContentAISeoParams, query *ContentAISeoQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/ai/seo", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/ai/seo", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// ContentAIDraftQuery are the optional query parameters of ContentAIService.Draft.
+type ContentAIDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentAIDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Draft draft a blocks field from a brief
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/ai/draft
-func (s *ContentAIService) Draft(ctx context.Context, orgID string, libraryID string, entryID string, body ContentAIDraftParams, opts ...RequestOption) (any, error) {
+func (s *ContentAIService) Draft(ctx context.Context, orgID string, libraryID string, entryID string, body ContentAIDraftParams, query *ContentAIDraftQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/ai/draft", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/ai/draft", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

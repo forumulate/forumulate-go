@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // UsersService holds the operations under client.Users.
@@ -25,45 +27,117 @@ func (s *UsersService) Me(ctx context.Context, opts ...RequestOption) (*UsersMeR
 	return &out, nil
 }
 
+// UsersUpdateQuery are the optional query parameters of UsersService.Update.
+type UsersUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update your account
 //
 // PATCH /users/me
-func (s *UsersService) Update(ctx context.Context, body UsersUpdateParams, opts ...RequestOption) (*UsersUpdateResponse, error) {
+func (s *UsersService) Update(ctx context.Context, body UsersUpdateParams, query *UsersUpdateQuery, opts ...RequestOption) (*UsersUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/users/me", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/users/me", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// UsersSetLocaleQuery are the optional query parameters of UsersService.SetLocale.
+type UsersSetLocaleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersSetLocaleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetLocale set your interface language
 //
 // PUT /users/me/locale
-func (s *UsersService) SetLocale(ctx context.Context, body UsersSetLocaleParams, opts ...RequestOption) (*UsersSetLocaleResponse, error) {
+func (s *UsersService) SetLocale(ctx context.Context, body UsersSetLocaleParams, query *UsersSetLocaleQuery, opts ...RequestOption) (*UsersSetLocaleResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersSetLocaleResponse
-	if err := s.c.do(ctx, "PUT", "/users/me/locale", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/users/me/locale", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// UsersChangeUsernameQuery are the optional query parameters of UsersService.ChangeUsername.
+type UsersChangeUsernameQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersChangeUsernameQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ChangeUsername change your @handle
 //
 // PATCH /users/me/username
-func (s *UsersService) ChangeUsername(ctx context.Context, body UsersChangeUsernameParams, opts ...RequestOption) (*UsersChangeUsernameResponse, error) {
+func (s *UsersService) ChangeUsername(ctx context.Context, body UsersChangeUsernameParams, query *UsersChangeUsernameQuery, opts ...RequestOption) (*UsersChangeUsernameResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersChangeUsernameResponse
-	if err := s.c.do(ctx, "PATCH", "/users/me/username", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/users/me/username", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// UsersSetProfileVisibilityQuery are the optional query parameters of UsersService.SetProfileVisibility.
+type UsersSetProfileVisibilityQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersSetProfileVisibilityQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetProfileVisibility hide or show your public profile
 //
 // PUT /users/me/profile-visibility
-func (s *UsersService) SetProfileVisibility(ctx context.Context, body UsersSetProfileVisibilityParams, opts ...RequestOption) (*UsersSetProfileVisibilityResponse, error) {
+func (s *UsersService) SetProfileVisibility(ctx context.Context, body UsersSetProfileVisibilityParams, query *UsersSetProfileVisibilityQuery, opts ...RequestOption) (*UsersSetProfileVisibilityResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersSetProfileVisibilityResponse
-	if err := s.c.do(ctx, "PUT", "/users/me/profile-visibility", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/users/me/profile-visibility", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -80,12 +154,30 @@ func (s *UsersService) ExportData(ctx context.Context, opts ...RequestOption) (a
 	return out, nil
 }
 
+// UsersDeleteAccountQuery are the optional query parameters of UsersService.DeleteAccount.
+type UsersDeleteAccountQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersDeleteAccountQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteAccount erase this account (GDPR Article 17)
 //
 // POST /users/me/delete
-func (s *UsersService) DeleteAccount(ctx context.Context, body UsersDeleteAccountParams, opts ...RequestOption) (*UsersDeleteAccountResponse, error) {
+func (s *UsersService) DeleteAccount(ctx context.Context, body UsersDeleteAccountParams, query *UsersDeleteAccountQuery, opts ...RequestOption) (*UsersDeleteAccountResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersDeleteAccountResponse
-	if err := s.c.do(ctx, "POST", "/users/me/delete", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/users/me/delete", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -96,34 +188,88 @@ type UsersAvatarService struct {
 	c *Client
 }
 
+// UsersAvatarUploadQuery are the optional query parameters of UsersAvatarService.Upload.
+type UsersAvatarUploadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersAvatarUploadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Upload upload your avatar
 //
 // PUT /users/me/avatar
-func (s *UsersAvatarService) Upload(ctx context.Context, body UsersAvatarUploadParams, opts ...RequestOption) (*UsersAvatarUploadResponse, error) {
+func (s *UsersAvatarService) Upload(ctx context.Context, body UsersAvatarUploadParams, query *UsersAvatarUploadQuery, opts ...RequestOption) (*UsersAvatarUploadResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersAvatarUploadResponse
-	if err := s.c.do(ctx, "PUT", "/users/me/avatar", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/users/me/avatar", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// UsersAvatarClearQuery are the optional query parameters of UsersAvatarService.Clear.
+type UsersAvatarClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersAvatarClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Clear remove your avatar
 //
 // DELETE /users/me/avatar
-func (s *UsersAvatarService) Clear(ctx context.Context, opts ...RequestOption) (*UsersAvatarClearResponse, error) {
+func (s *UsersAvatarService) Clear(ctx context.Context, query *UsersAvatarClearQuery, opts ...RequestOption) (*UsersAvatarClearResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersAvatarClearResponse
-	if err := s.c.do(ctx, "DELETE", "/users/me/avatar", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/users/me/avatar", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// UsersAvatarGravatarQuery are the optional query parameters of UsersAvatarService.Gravatar.
+type UsersAvatarGravatarQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersAvatarGravatarQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Gravatar use your Gravatar as your avatar
 //
 // POST /users/me/avatar/gravatar
-func (s *UsersAvatarService) Gravatar(ctx context.Context, opts ...RequestOption) (*UsersAvatarGravatarResponse, error) {
+func (s *UsersAvatarService) Gravatar(ctx context.Context, query *UsersAvatarGravatarQuery, opts ...RequestOption) (*UsersAvatarGravatarResponse, error) {
+	v, opts := query.encode(opts)
 	var out UsersAvatarGravatarResponse
-	if err := s.c.do(ctx, "POST", "/users/me/avatar/gravatar", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/users/me/avatar/gravatar", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -156,12 +302,30 @@ func (s *UsersProgressionService) State(ctx context.Context, orgID string, userI
 	return &out, nil
 }
 
+// UsersProgressionSignalQuery are the optional query parameters of UsersProgressionService.Signal.
+type UsersProgressionSignalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersProgressionSignalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Signal create a signal in an organization
 //
 // POST /orgs/{orgId}/users/{userId}/progression/signals
-func (s *UsersProgressionService) Signal(ctx context.Context, orgID string, userID string, body UsersProgressionSignalParams, opts ...RequestOption) (any, error) {
+func (s *UsersProgressionService) Signal(ctx context.Context, orgID string, userID string, body UsersProgressionSignalParams, query *UsersProgressionSignalQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/progression/signals", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/progression/signals", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -183,45 +347,117 @@ func (s *UsersWalletService) Summary(ctx context.Context, orgID string, userID s
 	return &out, nil
 }
 
-// Credit create the credit in an organization
+// UsersWalletCreditQuery are the optional query parameters of UsersWalletService.Credit.
+type UsersWalletCreditQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersWalletCreditQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Credit credit the wallet
 //
 // POST /orgs/{orgId}/users/{userId}/wallet/credit
-func (s *UsersWalletService) Credit(ctx context.Context, orgID string, userID string, body UsersWalletCreditParams, opts ...RequestOption) (any, error) {
+func (s *UsersWalletService) Credit(ctx context.Context, orgID string, userID string, body UsersWalletCreditParams, query *UsersWalletCreditQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/credit", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/credit", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Debit create the debit in an organization
+// UsersWalletDebitQuery are the optional query parameters of UsersWalletService.Debit.
+type UsersWalletDebitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersWalletDebitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Debit debit the wallet
 //
 // POST /orgs/{orgId}/users/{userId}/wallet/debit
-func (s *UsersWalletService) Debit(ctx context.Context, orgID string, userID string, body UsersWalletDebitParams, opts ...RequestOption) (any, error) {
+func (s *UsersWalletService) Debit(ctx context.Context, orgID string, userID string, body UsersWalletDebitParams, query *UsersWalletDebitQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/debit", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/debit", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// GrantItem create the grant in an organization
+// UsersWalletGrantItemQuery are the optional query parameters of UsersWalletService.GrantItem.
+type UsersWalletGrantItemQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersWalletGrantItemQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// GrantItem grant the item
 //
 // POST /orgs/{orgId}/users/{userId}/wallet/items/grant
-func (s *UsersWalletService) GrantItem(ctx context.Context, orgID string, userID string, body UsersWalletGrantItemParams, opts ...RequestOption) (any, error) {
+func (s *UsersWalletService) GrantItem(ctx context.Context, orgID string, userID string, body UsersWalletGrantItemParams, query *UsersWalletGrantItemQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/items/grant", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/items/grant", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ConsumeItem create the consume in an organization
+// UsersWalletConsumeItemQuery are the optional query parameters of UsersWalletService.ConsumeItem.
+type UsersWalletConsumeItemQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *UsersWalletConsumeItemQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ConsumeItem consume the item
 //
 // POST /orgs/{orgId}/users/{userId}/wallet/items/consume
-func (s *UsersWalletService) ConsumeItem(ctx context.Context, orgID string, userID string, body UsersWalletConsumeItemParams, opts ...RequestOption) (any, error) {
+func (s *UsersWalletService) ConsumeItem(ctx context.Context, orgID string, userID string, body UsersWalletConsumeItemParams, query *UsersWalletConsumeItemQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/items/consume", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/users/"+pathEscape(userID)+"/wallet/items/consume", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

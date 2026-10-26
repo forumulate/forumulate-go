@@ -4,6 +4,7 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
 )
 
 // EventNoticesService holds the operations under client.EventNotices.
@@ -22,13 +23,65 @@ func (s *EventNoticesService) Get(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
+// EventNoticesPutQuery are the optional query parameters of EventNoticesService.Put.
+type EventNoticesPutQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *EventNoticesPutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Put replace event notices in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/event-notices
-func (s *EventNoticesService) Put(ctx context.Context, orgID string, spaceID string, body EventNoticesPutParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-notices", nil, body, &out, opts); err != nil {
+func (s *EventNoticesService) Put(ctx context.Context, orgID string, spaceID string, body EventNoticesPutParams, query *EventNoticesPutQuery, opts ...RequestOption) (*EventNoticesPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out EventNoticesPatchResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-notices", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// EventNoticesPatchQuery are the optional query parameters of EventNoticesService.Patch.
+type EventNoticesPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *EventNoticesPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update event notices in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/event-notices
+func (s *EventNoticesService) Patch(ctx context.Context, orgID string, spaceID string, body any, query *EventNoticesPatchQuery, opts ...RequestOption) (*EventNoticesPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out EventNoticesPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-notices", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }

@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // SpaceFrontPageService holds the operations under client.SpaceFrontPage.
@@ -11,34 +13,137 @@ type SpaceFrontPageService struct {
 	c *Client
 }
 
-// Get get the front page in a space
+// SpaceFrontPageGetQuery are the optional query parameters of SpaceFrontPageService.Get.
+type SpaceFrontPageGetQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+}
+
+func (p *SpaceFrontPageGetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	return v, opts
+}
+
+// Get the front page
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/front-page
-func (s *SpaceFrontPageService) Get(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpaceFrontPageGetResponse, error) {
+func (s *SpaceFrontPageService) Get(ctx context.Context, orgID string, spaceID string, query *SpaceFrontPageGetQuery, opts ...RequestOption) (*SpaceFrontPageGetResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceFrontPageGetResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Set replace the front page in a space
+// SpaceFrontPageSetQuery are the optional query parameters of SpaceFrontPageService.Set.
+type SpaceFrontPageSetQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SpaceFrontPageSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Set replace the front page
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/front-page
-func (s *SpaceFrontPageService) Set(ctx context.Context, orgID string, spaceID string, body SpaceFrontPageSetParams, opts ...RequestOption) (*SpaceFrontPageSetResponse, error) {
-	var out SpaceFrontPageSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", nil, body, &out, opts); err != nil {
+func (s *SpaceFrontPageService) Set(ctx context.Context, orgID string, spaceID string, body SiteFrontPageSetBody, query *SpaceFrontPageSetQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
-// Remove delete the front page in a space
+// SpaceFrontPagePatchQuery are the optional query parameters of SpaceFrontPageService.Patch.
+type SpaceFrontPagePatchQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SpaceFrontPagePatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch change part of the space front page
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/front-page
+func (s *SpaceFrontPageService) Patch(ctx context.Context, orgID string, spaceID string, body any, query *SpaceFrontPagePatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SpaceFrontPageRemoveQuery are the optional query parameters of SpaceFrontPageService.Remove.
+type SpaceFrontPageRemoveQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceFrontPageRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Remove reset the front page
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/front-page
-func (s *SpaceFrontPageService) Remove(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpaceFrontPageRemoveResponse, error) {
+func (s *SpaceFrontPageService) Remove(ctx context.Context, orgID string, spaceID string, query *SpaceFrontPageRemoveQuery, opts ...RequestOption) (*SpaceFrontPageRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceFrontPageRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/front-page", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

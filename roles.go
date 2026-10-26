@@ -47,6 +47,10 @@ type RolesCustomListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *RolesCustomListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -59,6 +63,12 @@ func (p *RolesCustomListQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -90,34 +100,88 @@ func (s *RolesCustomService) ListAutoPaging(ctx context.Context, orgID string, q
 	})
 }
 
+// RolesCustomCreateQuery are the optional query parameters of RolesCustomService.Create.
+type RolesCustomCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RolesCustomCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a custom role in an organization
 //
 // POST /orgs/{orgId}/custom-roles
-func (s *RolesCustomService) Create(ctx context.Context, orgID string, body RolesCustomCreateParams, opts ...RequestOption) (*RolesCustomCreateResponse, error) {
+func (s *RolesCustomService) Create(ctx context.Context, orgID string, body RolesCustomCreateParams, query *RolesCustomCreateQuery, opts ...RequestOption) (*RolesCustomCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out RolesCustomCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-roles", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-roles", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// RolesCustomUpdateQuery are the optional query parameters of RolesCustomService.Update.
+type RolesCustomUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RolesCustomUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the custom role
 //
 // PATCH /orgs/{orgId}/custom-roles/{id}
-func (s *RolesCustomService) Update(ctx context.Context, orgID string, id string, body RolesCustomUpdateParams, opts ...RequestOption) (*RolesCustomUpdateResponse, error) {
+func (s *RolesCustomService) Update(ctx context.Context, orgID string, id string, body RolesCustomUpdateParams, query *RolesCustomUpdateQuery, opts ...RequestOption) (*RolesCustomUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out RolesCustomUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/custom-roles/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/custom-roles/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// RolesCustomRemoveQuery are the optional query parameters of RolesCustomService.Remove.
+type RolesCustomRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RolesCustomRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the custom role
 //
 // DELETE /orgs/{orgId}/custom-roles/{id}
-func (s *RolesCustomService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*RolesCustomRemoveResponse, error) {
+func (s *RolesCustomService) Remove(ctx context.Context, orgID string, id string, query *RolesCustomRemoveQuery, opts ...RequestOption) (*RolesCustomRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out RolesCustomRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-roles/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-roles/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

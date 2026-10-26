@@ -29,45 +29,117 @@ func (s *ForumService) SpaceLevel(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
+// ForumSetSpaceLevelQuery are the optional query parameters of ForumService.SetSpaceLevel.
+type ForumSetSpaceLevelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumSetSpaceLevelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetSpaceLevel create a notification in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/notifications
-func (s *ForumService) SetSpaceLevel(ctx context.Context, orgID string, spaceID string, body ForumSetSpaceLevelParams, opts ...RequestOption) (*ForumSetSpaceLevelResponse, error) {
+func (s *ForumService) SetSpaceLevel(ctx context.Context, orgID string, spaceID string, body ForumSetSpaceLevelParams, query *ForumSetSpaceLevelQuery, opts ...RequestOption) (*ForumSetSpaceLevelResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumSetSpaceLevelResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/notifications", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/notifications", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// MarkRead create the read in a space
+// ForumMarkReadQuery are the optional query parameters of ForumService.MarkRead.
+type ForumMarkReadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumMarkReadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// MarkRead mark the topic read
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/read
-func (s *ForumService) MarkRead(ctx context.Context, orgID string, spaceID string, topicID string, body ForumMarkReadParams, opts ...RequestOption) (*ForumMarkReadResponse, error) {
+func (s *ForumService) MarkRead(ctx context.Context, orgID string, spaceID string, topicID string, body ForumMarkReadParams, query *ForumMarkReadQuery, opts ...RequestOption) (*ForumMarkReadResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumMarkReadResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/read", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/read", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ReadTime create the read time in a space
+// ForumReadTimeQuery are the optional query parameters of ForumService.ReadTime.
+type ForumReadTimeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumReadTimeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReadTime record reading time on a topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/read-time
-func (s *ForumService) ReadTime(ctx context.Context, orgID string, spaceID string, topicID string, body ForumReadTimeParams, opts ...RequestOption) (*ForumReadTimeResponse, error) {
+func (s *ForumService) ReadTime(ctx context.Context, orgID string, spaceID string, topicID string, body ForumReadTimeParams, query *ForumReadTimeQuery, opts ...RequestOption) (*ForumReadTimeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumReadTimeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/read-time", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/read-time", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumSetTopicLevelQuery are the optional query parameters of ForumService.SetTopicLevel.
+type ForumSetTopicLevelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumSetTopicLevelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetTopicLevel create a notification in a space (for a topic)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/notifications
-func (s *ForumService) SetTopicLevel(ctx context.Context, orgID string, spaceID string, topicID string, body ForumSetTopicLevelParams, opts ...RequestOption) (*ForumSetTopicLevelResponse, error) {
+func (s *ForumService) SetTopicLevel(ctx context.Context, orgID string, spaceID string, topicID string, body ForumSetTopicLevelParams, query *ForumSetTopicLevelQuery, opts ...RequestOption) (*ForumSetTopicLevelResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumSetTopicLevelResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/notifications", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/notifications", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -79,6 +151,10 @@ type ForumTagSubscriptionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTagSubscriptionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -91,6 +167,12 @@ func (p *ForumTagSubscriptionsQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -122,12 +204,30 @@ func (s *ForumService) TagSubscriptionsAutoPaging(ctx context.Context, orgID str
 	})
 }
 
+// ForumSetTagSubscriptionQuery are the optional query parameters of ForumService.SetTagSubscription.
+type ForumSetTagSubscriptionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumSetTagSubscriptionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetTagSubscription create a tag subscription in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/tag-subscriptions
-func (s *ForumService) SetTagSubscription(ctx context.Context, orgID string, spaceID string, body ForumSetTagSubscriptionParams, opts ...RequestOption) (*ForumSetTagSubscriptionResponse, error) {
+func (s *ForumService) SetTagSubscription(ctx context.Context, orgID string, spaceID string, body ForumSetTagSubscriptionParams, query *ForumSetTagSubscriptionQuery, opts ...RequestOption) (*ForumSetTagSubscriptionResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumSetTagSubscriptionResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-subscriptions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-subscriptions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -139,6 +239,10 @@ type ForumCategorySubscriptionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumCategorySubscriptionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -151,6 +255,12 @@ func (p *ForumCategorySubscriptionsQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -182,12 +292,30 @@ func (s *ForumService) CategorySubscriptionsAutoPaging(ctx context.Context, orgI
 	})
 }
 
+// ForumSetCategorySubscriptionQuery are the optional query parameters of ForumService.SetCategorySubscription.
+type ForumSetCategorySubscriptionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumSetCategorySubscriptionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetCategorySubscription create a category subscription in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/category-subscriptions
-func (s *ForumService) SetCategorySubscription(ctx context.Context, orgID string, spaceID string, body ForumSetCategorySubscriptionParams, opts ...RequestOption) (*ForumSetCategorySubscriptionResponse, error) {
+func (s *ForumService) SetCategorySubscription(ctx context.Context, orgID string, spaceID string, body ForumSetCategorySubscriptionParams, query *ForumSetCategorySubscriptionQuery, opts ...RequestOption) (*ForumSetCategorySubscriptionResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumSetCategorySubscriptionResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/category-subscriptions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/category-subscriptions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -199,6 +327,10 @@ type ForumTagsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -211,6 +343,12 @@ func (p *ForumTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOpti
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -253,12 +391,30 @@ func (s *ForumService) GetSettings(ctx context.Context, orgID string, spaceID st
 	return &out, nil
 }
 
+// ForumUpdateSettingsQuery are the optional query parameters of ForumService.UpdateSettings.
+type ForumUpdateSettingsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumUpdateSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // UpdateSettings update settings in a space (forum)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/forum/settings
-func (s *ForumService) UpdateSettings(ctx context.Context, orgID string, spaceID string, body ForumUpdateSettingsParams, opts ...RequestOption) (*ForumUpdateSettingsResponse, error) {
+func (s *ForumService) UpdateSettings(ctx context.Context, orgID string, spaceID string, body ForumUpdateSettingsBody, query *ForumUpdateSettingsQuery, opts ...RequestOption) (*ForumUpdateSettingsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumUpdateSettingsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/settings", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/settings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -281,6 +437,10 @@ type ForumFlagsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumFlagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -293,6 +453,12 @@ func (p *ForumFlagsQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -324,34 +490,88 @@ func (s *ForumService) FlagsAutoPaging(ctx context.Context, orgID string, spaceI
 	})
 }
 
+// ForumResolveFlagQuery are the optional query parameters of ForumService.ResolveFlag.
+type ForumResolveFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumResolveFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // ResolveFlag resolve the flag (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/flags/{flagId}/resolve
-func (s *ForumService) ResolveFlag(ctx context.Context, orgID string, spaceID string, flagID string, body ForumResolveFlagParams, opts ...RequestOption) (*ForumResolveFlagResponse, error) {
+func (s *ForumService) ResolveFlag(ctx context.Context, orgID string, spaceID string, flagID string, body ForumResolveFlagParams, query *ForumResolveFlagQuery, opts ...RequestOption) (*ForumResolveFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumResolveFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/flags/"+pathEscape(flagID)+"/resolve", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/flags/"+pathEscape(flagID)+"/resolve", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// BulkModerate create the bulk in a space
+// ForumBulkModerateQuery are the optional query parameters of ForumService.BulkModerate.
+type ForumBulkModerateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumBulkModerateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// BulkModerate moderate forum in bulk
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/bulk
-func (s *ForumService) BulkModerate(ctx context.Context, orgID string, spaceID string, body ForumBulkModerateParams, opts ...RequestOption) (*ForumBulkModerateResponse, error) {
+func (s *ForumService) BulkModerate(ctx context.Context, orgID string, spaceID string, body ForumBulkModerateParams, query *ForumBulkModerateQuery, opts ...RequestOption) (*ForumBulkModerateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumBulkModerateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/bulk", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/bulk", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ReviewFlag create the review in a space (forum flags)
+// ForumReviewFlagQuery are the optional query parameters of ForumService.ReviewFlag.
+type ForumReviewFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumReviewFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReviewFlag review a flag on a forum post
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/flags/{flagId}/review
-func (s *ForumService) ReviewFlag(ctx context.Context, orgID string, spaceID string, flagID string, body ForumReviewFlagParams, opts ...RequestOption) (*ForumReviewFlagResponse, error) {
+func (s *ForumService) ReviewFlag(ctx context.Context, orgID string, spaceID string, flagID string, body ForumReviewFlagParams, query *ForumReviewFlagQuery, opts ...RequestOption) (*ForumReviewFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumReviewFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/flags/"+pathEscape(flagID)+"/review", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/flags/"+pathEscape(flagID)+"/review", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -364,11 +584,16 @@ type ForumAutomationsService struct {
 
 // ForumAutomationsListQuery are the optional query parameters of ForumAutomationsService.List.
 type ForumAutomationsListQuery struct {
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
 	SpaceID *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumAutomationsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -384,6 +609,12 @@ func (p *ForumAutomationsListQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -415,12 +646,30 @@ func (s *ForumAutomationsService) ListAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// ForumAutomationsCreateQuery are the optional query parameters of ForumAutomationsService.Create.
+type ForumAutomationsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumAutomationsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a forum automation in an organization
 //
 // POST /orgs/{orgId}/forum-automations
-func (s *ForumAutomationsService) Create(ctx context.Context, orgID string, body ForumAutomationsCreateParams, opts ...RequestOption) (any, error) {
+func (s *ForumAutomationsService) Create(ctx context.Context, orgID string, body ForumAutomationsCreateParams, query *ForumAutomationsCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forum-automations", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forum-automations", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -437,23 +686,59 @@ func (s *ForumAutomationsService) Get(ctx context.Context, orgID string, id stri
 	return &out, nil
 }
 
+// ForumAutomationsUpdateQuery are the optional query parameters of ForumAutomationsService.Update.
+type ForumAutomationsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumAutomationsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the forum automation
 //
 // PATCH /orgs/{orgId}/forum-automations/{id}
-func (s *ForumAutomationsService) Update(ctx context.Context, orgID string, id string, body ForumAutomationsUpdateParams, opts ...RequestOption) (any, error) {
+func (s *ForumAutomationsService) Update(ctx context.Context, orgID string, id string, body ForumAutomationsUpdateParams, query *ForumAutomationsUpdateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forum-automations/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forum-automations/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// ForumAutomationsRemoveQuery are the optional query parameters of ForumAutomationsService.Remove.
+type ForumAutomationsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumAutomationsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the forum automation
 //
 // DELETE /orgs/{orgId}/forum-automations/{id}
-func (s *ForumAutomationsService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ForumAutomationsRemoveResponse, error) {
+func (s *ForumAutomationsService) Remove(ctx context.Context, orgID string, id string, query *ForumAutomationsRemoveQuery, opts ...RequestOption) (*ForumAutomationsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumAutomationsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forum-automations/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forum-automations/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -464,6 +749,10 @@ type ForumAutomationsRunsQuery struct {
 	// Runs listed, newest first.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumAutomationsRunsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -477,10 +766,16 @@ func (p *ForumAutomationsRunsQuery) encode(opts []RequestOption) (url.Values, []
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Runs list runs in an organization
+// Runs list runs in an organization (forum automations)
 //
 // GET /orgs/{orgId}/forum-automations/{id}/runs
 func (s *ForumAutomationsService) Runs(ctx context.Context, orgID string, id string, query *ForumAutomationsRunsQuery, opts ...RequestOption) (*ForumAutomationsRunsResponse, error) {
@@ -507,12 +802,30 @@ func (s *ForumAutomationsService) RunsAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
-// Invoke create the invoke in an organization
+// ForumAutomationsInvokeQuery are the optional query parameters of ForumAutomationsService.Invoke.
+type ForumAutomationsInvokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumAutomationsInvokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Invoke invoke the forum automation
 //
 // POST /orgs/{orgId}/forum-automations/{id}/invoke
-func (s *ForumAutomationsService) Invoke(ctx context.Context, orgID string, id string, body ForumAutomationsInvokeParams, opts ...RequestOption) (any, error) {
+func (s *ForumAutomationsService) Invoke(ctx context.Context, orgID string, id string, body ForumAutomationsInvokeParams, query *ForumAutomationsInvokeQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forum-automations/"+pathEscape(id)+"/invoke", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forum-automations/"+pathEscape(id)+"/invoke", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -531,6 +844,10 @@ type ForumTaxonomyListCategoriesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListCategoriesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -546,6 +863,12 @@ func (p *ForumTaxonomyListCategoriesQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -577,34 +900,88 @@ func (s *ForumTaxonomyService) ListCategoriesAutoPaging(ctx context.Context, org
 	})
 }
 
+// ForumTaxonomyCreateCategoryQuery are the optional query parameters of ForumTaxonomyService.CreateCategory.
+type ForumTaxonomyCreateCategoryQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyCreateCategoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateCategory create a category in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/categories
-func (s *ForumTaxonomyService) CreateCategory(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreateCategoryParams, opts ...RequestOption) (*ForumTaxonomyCreateCategoryResponse, error) {
+func (s *ForumTaxonomyService) CreateCategory(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreateCategoryBody, query *ForumTaxonomyCreateCategoryQuery, opts ...RequestOption) (*ForumTaxonomyCreateCategoryResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyCreateCategoryResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTaxonomyReorderCategoriesQuery are the optional query parameters of ForumTaxonomyService.ReorderCategories.
+type ForumTaxonomyReorderCategoriesQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyReorderCategoriesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ReorderCategories reorder the category
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/categories/reorder
-func (s *ForumTaxonomyService) ReorderCategories(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyReorderCategoriesParams, opts ...RequestOption) (*ForumTaxonomyReorderCategoriesResponse, error) {
+func (s *ForumTaxonomyService) ReorderCategories(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyReorderCategoriesParams, query *ForumTaxonomyReorderCategoriesQuery, opts ...RequestOption) (*ForumTaxonomyReorderCategoriesResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyReorderCategoriesResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/reorder", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/reorder", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumTaxonomyUpdateCategoryQuery are the optional query parameters of ForumTaxonomyService.UpdateCategory.
+type ForumTaxonomyUpdateCategoryQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyUpdateCategoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // UpdateCategory update the category
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/forum/categories/{categoryId}
-func (s *ForumTaxonomyService) UpdateCategory(ctx context.Context, orgID string, spaceID string, categoryID string, body ForumTaxonomyUpdateCategoryParams, opts ...RequestOption) (*ForumTaxonomyUpdateCategoryResponse, error) {
+func (s *ForumTaxonomyService) UpdateCategory(ctx context.Context, orgID string, spaceID string, categoryID string, body ForumTaxonomyUpdateCategoryParams, query *ForumTaxonomyUpdateCategoryQuery, opts ...RequestOption) (*ForumTaxonomyUpdateCategoryResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyUpdateCategoryResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -616,6 +993,8 @@ type ForumTaxonomyRemoveCategoryQuery struct {
 	Force *bool
 	// Re-file this category's topics under this category (which must be in the same space) before deleting it.
 	MoveTo *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *ForumTaxonomyRemoveCategoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -628,6 +1007,9 @@ func (p *ForumTaxonomyRemoveCategoryQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.MoveTo != nil {
 		v.Set("moveTo", *p.MoveTo)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
 	}
 	return v, opts
 }
@@ -646,6 +1028,7 @@ func (s *ForumTaxonomyService) RemoveCategory(ctx context.Context, orgID string,
 
 // ForumTaxonomyEmailInQuery are the optional query parameters of ForumTaxonomyService.EmailIn.
 type ForumTaxonomyEmailInQuery struct {
+	// The category uuid (uuid only — a slug is not resolved in a query parameter).
 	CategoryID *string
 }
 
@@ -678,6 +1061,10 @@ type ForumTaxonomyListSharedDraftsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListSharedDraftsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -690,6 +1077,12 @@ func (p *ForumTaxonomyListSharedDraftsQuery) encode(opts []RequestOption) (url.V
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -721,45 +1114,117 @@ func (s *ForumTaxonomyService) ListSharedDraftsAutoPaging(ctx context.Context, o
 	})
 }
 
+// ForumTaxonomyCreateSharedDraftQuery are the optional query parameters of ForumTaxonomyService.CreateSharedDraft.
+type ForumTaxonomyCreateSharedDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyCreateSharedDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateSharedDraft create a shared draft in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/shared-drafts
-func (s *ForumTaxonomyService) CreateSharedDraft(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreateSharedDraftParams, opts ...RequestOption) (*ForumTaxonomyCreateSharedDraftResponse, error) {
+func (s *ForumTaxonomyService) CreateSharedDraft(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreateSharedDraftBody, query *ForumTaxonomyCreateSharedDraftQuery, opts ...RequestOption) (*ForumTaxonomyCreateSharedDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyCreateSharedDraftResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTaxonomyUpdateSharedDraftQuery are the optional query parameters of ForumTaxonomyService.UpdateSharedDraft.
+type ForumTaxonomyUpdateSharedDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyUpdateSharedDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // UpdateSharedDraft update the shared draft
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/forum/shared-drafts/{id}
-func (s *ForumTaxonomyService) UpdateSharedDraft(ctx context.Context, orgID string, spaceID string, id string, body ForumTaxonomyUpdateSharedDraftParams, opts ...RequestOption) (*ForumTaxonomyUpdateSharedDraftResponse, error) {
+func (s *ForumTaxonomyService) UpdateSharedDraft(ctx context.Context, orgID string, spaceID string, id string, body ForumTaxonomyCreateSharedDraftBody, query *ForumTaxonomyUpdateSharedDraftQuery, opts ...RequestOption) (*ForumTaxonomyUpdateSharedDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyUpdateSharedDraftResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTaxonomyRemoveSharedDraftQuery are the optional query parameters of ForumTaxonomyService.RemoveSharedDraft.
+type ForumTaxonomyRemoveSharedDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyRemoveSharedDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveSharedDraft delete the shared draft
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/shared-drafts/{id}
-func (s *ForumTaxonomyService) RemoveSharedDraft(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*ForumTaxonomyRemoveSharedDraftResponse, error) {
+func (s *ForumTaxonomyService) RemoveSharedDraft(ctx context.Context, orgID string, spaceID string, id string, query *ForumTaxonomyRemoveSharedDraftQuery, opts ...RequestOption) (*ForumTaxonomyRemoveSharedDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyRemoveSharedDraftResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumTaxonomyPublishSharedDraftQuery are the optional query parameters of ForumTaxonomyService.PublishSharedDraft.
+type ForumTaxonomyPublishSharedDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyPublishSharedDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PublishSharedDraft publish the shared draft
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/shared-drafts/{id}/publish
-func (s *ForumTaxonomyService) PublishSharedDraft(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*ForumTaxonomyPublishSharedDraftResponse, error) {
+func (s *ForumTaxonomyService) PublishSharedDraft(ctx context.Context, orgID string, spaceID string, id string, query *ForumTaxonomyPublishSharedDraftQuery, opts ...RequestOption) (*ForumTaxonomyPublishSharedDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyPublishSharedDraftResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts/"+pathEscape(id)+"/publish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/shared-drafts/"+pathEscape(id)+"/publish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -771,6 +1236,10 @@ type ForumTaxonomyListPermalinksQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListPermalinksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -783,6 +1252,12 @@ func (p *ForumTaxonomyListPermalinksQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -814,34 +1289,88 @@ func (s *ForumTaxonomyService) ListPermalinksAutoPaging(ctx context.Context, org
 	})
 }
 
+// ForumTaxonomyCreatePermalinkQuery are the optional query parameters of ForumTaxonomyService.CreatePermalink.
+type ForumTaxonomyCreatePermalinkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyCreatePermalinkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreatePermalink create a permalink in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/permalinks
-func (s *ForumTaxonomyService) CreatePermalink(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreatePermalinkParams, opts ...RequestOption) (*ForumTaxonomyCreatePermalinkResponse, error) {
+func (s *ForumTaxonomyService) CreatePermalink(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreatePermalinkParams, query *ForumTaxonomyCreatePermalinkQuery, opts ...RequestOption) (*ForumTaxonomyCreatePermalinkResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyCreatePermalinkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/permalinks", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/permalinks", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTaxonomyImportPermalinksQuery are the optional query parameters of ForumTaxonomyService.ImportPermalinks.
+type ForumTaxonomyImportPermalinksQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyImportPermalinksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ImportPermalinks import the permalink
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/permalinks/import
-func (s *ForumTaxonomyService) ImportPermalinks(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyImportPermalinksParams, opts ...RequestOption) (*ForumTaxonomyImportPermalinksResponse, error) {
+func (s *ForumTaxonomyService) ImportPermalinks(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyImportPermalinksParams, query *ForumTaxonomyImportPermalinksQuery, opts ...RequestOption) (*ForumTaxonomyImportPermalinksResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyImportPermalinksResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/permalinks/import", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/permalinks/import", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumTaxonomyRemovePermalinkQuery are the optional query parameters of ForumTaxonomyService.RemovePermalink.
+type ForumTaxonomyRemovePermalinkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyRemovePermalinkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemovePermalink delete the permalink
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/permalinks/{id}
-func (s *ForumTaxonomyService) RemovePermalink(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*ForumTaxonomyRemovePermalinkResponse, error) {
+func (s *ForumTaxonomyService) RemovePermalink(ctx context.Context, orgID string, spaceID string, id string, query *ForumTaxonomyRemovePermalinkQuery, opts ...RequestOption) (*ForumTaxonomyRemovePermalinkResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyRemovePermalinkResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/permalinks/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/permalinks/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -853,6 +1382,10 @@ type ForumTaxonomyListCategoryPermsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListCategoryPermsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -865,6 +1398,12 @@ func (p *ForumTaxonomyListCategoryPermsQuery) encode(opts []RequestOption) (url.
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -896,12 +1435,30 @@ func (s *ForumTaxonomyService) ListCategoryPermsAutoPaging(ctx context.Context, 
 	})
 }
 
+// ForumTaxonomySetCategoryPermsQuery are the optional query parameters of ForumTaxonomyService.SetCategoryPerms.
+type ForumTaxonomySetCategoryPermsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomySetCategoryPermsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetCategoryPerms replace permissions in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/forum/categories/{categoryId}/permissions
-func (s *ForumTaxonomyService) SetCategoryPerms(ctx context.Context, orgID string, spaceID string, categoryID string, body ForumTaxonomySetCategoryPermsParams, opts ...RequestOption) (*ForumTaxonomySetCategoryPermsResponse, error) {
+func (s *ForumTaxonomyService) SetCategoryPerms(ctx context.Context, orgID string, spaceID string, categoryID string, body ForumTaxonomySetCategoryPermsParams, query *ForumTaxonomySetCategoryPermsQuery, opts ...RequestOption) (*ForumTaxonomySetCategoryPermsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomySetCategoryPermsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID)+"/permissions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID)+"/permissions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -913,6 +1470,10 @@ type ForumTaxonomyListCategoryModsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListCategoryModsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -925,6 +1486,12 @@ func (p *ForumTaxonomyListCategoryModsQuery) encode(opts []RequestOption) (url.V
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -956,23 +1523,59 @@ func (s *ForumTaxonomyService) ListCategoryModsAutoPaging(ctx context.Context, o
 	})
 }
 
+// ForumTaxonomyAddCategoryModQuery are the optional query parameters of ForumTaxonomyService.AddCategoryMod.
+type ForumTaxonomyAddCategoryModQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyAddCategoryModQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AddCategoryMod create a moderator in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/categories/{categoryId}/moderators
-func (s *ForumTaxonomyService) AddCategoryMod(ctx context.Context, orgID string, spaceID string, categoryID string, body ForumTaxonomyAddCategoryModParams, opts ...RequestOption) (*ForumTaxonomyAddCategoryModResponse, error) {
+func (s *ForumTaxonomyService) AddCategoryMod(ctx context.Context, orgID string, spaceID string, categoryID string, body ForumTaxonomyAddCategoryModParams, query *ForumTaxonomyAddCategoryModQuery, opts ...RequestOption) (*ForumTaxonomyAddCategoryModResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyAddCategoryModResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID)+"/moderators", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID)+"/moderators", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumTaxonomyRemoveCategoryModQuery are the optional query parameters of ForumTaxonomyService.RemoveCategoryMod.
+type ForumTaxonomyRemoveCategoryModQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyRemoveCategoryModQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveCategoryMod delete the moderator
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/categories/{categoryId}/moderators/{userId}
-func (s *ForumTaxonomyService) RemoveCategoryMod(ctx context.Context, orgID string, spaceID string, categoryID string, userID string, opts ...RequestOption) (*ForumTaxonomyRemoveCategoryModResponse, error) {
+func (s *ForumTaxonomyService) RemoveCategoryMod(ctx context.Context, orgID string, spaceID string, categoryID string, userID string, query *ForumTaxonomyRemoveCategoryModQuery, opts ...RequestOption) (*ForumTaxonomyRemoveCategoryModResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyRemoveCategoryModResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID)+"/moderators/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/categories/"+pathEscape(categoryID)+"/moderators/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -984,6 +1587,10 @@ type ForumTaxonomyListTagGroupsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListTagGroupsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -996,6 +1603,12 @@ func (p *ForumTaxonomyListTagGroupsQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1027,34 +1640,88 @@ func (s *ForumTaxonomyService) ListTagGroupsAutoPaging(ctx context.Context, orgI
 	})
 }
 
+// ForumTaxonomyCreateTagGroupQuery are the optional query parameters of ForumTaxonomyService.CreateTagGroup.
+type ForumTaxonomyCreateTagGroupQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyCreateTagGroupQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateTagGroup create a tag group in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/tag-groups
-func (s *ForumTaxonomyService) CreateTagGroup(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreateTagGroupParams, opts ...RequestOption) (*ForumTaxonomyCreateTagGroupResponse, error) {
+func (s *ForumTaxonomyService) CreateTagGroup(ctx context.Context, orgID string, spaceID string, body ForumTaxonomyCreateTagGroupParams, query *ForumTaxonomyCreateTagGroupQuery, opts ...RequestOption) (*ForumTaxonomyCreateTagGroupResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyCreateTagGroupResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-groups", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-groups", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTaxonomyUpdateTagGroupQuery are the optional query parameters of ForumTaxonomyService.UpdateTagGroup.
+type ForumTaxonomyUpdateTagGroupQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyUpdateTagGroupQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // UpdateTagGroup update the tag group
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/forum/tag-groups/{groupId}
-func (s *ForumTaxonomyService) UpdateTagGroup(ctx context.Context, orgID string, spaceID string, groupID string, body ForumTaxonomyUpdateTagGroupParams, opts ...RequestOption) (*ForumTaxonomyUpdateTagGroupResponse, error) {
+func (s *ForumTaxonomyService) UpdateTagGroup(ctx context.Context, orgID string, spaceID string, groupID string, body ForumTaxonomyUpdateTagGroupParams, query *ForumTaxonomyUpdateTagGroupQuery, opts ...RequestOption) (*ForumTaxonomyUpdateTagGroupResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyUpdateTagGroupResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-groups/"+pathEscape(groupID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-groups/"+pathEscape(groupID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumTaxonomyRemoveTagGroupQuery are the optional query parameters of ForumTaxonomyService.RemoveTagGroup.
+type ForumTaxonomyRemoveTagGroupQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyRemoveTagGroupQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveTagGroup delete the tag group
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/tag-groups/{groupId}
-func (s *ForumTaxonomyService) RemoveTagGroup(ctx context.Context, orgID string, spaceID string, groupID string, opts ...RequestOption) (*ForumTaxonomyRemoveTagGroupResponse, error) {
+func (s *ForumTaxonomyService) RemoveTagGroup(ctx context.Context, orgID string, spaceID string, groupID string, query *ForumTaxonomyRemoveTagGroupQuery, opts ...RequestOption) (*ForumTaxonomyRemoveTagGroupResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyRemoveTagGroupResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-groups/"+pathEscape(groupID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-groups/"+pathEscape(groupID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1066,6 +1733,10 @@ type ForumTaxonomyListTagInfoQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTaxonomyListTagInfoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1078,6 +1749,12 @@ func (p *ForumTaxonomyListTagInfoQuery) encode(opts []RequestOption) (url.Values
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1109,34 +1786,88 @@ func (s *ForumTaxonomyService) ListTagInfoAutoPaging(ctx context.Context, orgID 
 	})
 }
 
-// SetTagInfo create the tag info in a space
+// ForumTaxonomySetTagInfoQuery are the optional query parameters of ForumTaxonomyService.SetTagInfo.
+type ForumTaxonomySetTagInfoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomySetTagInfoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetTagInfo set the tag info
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/tag-info
-func (s *ForumTaxonomyService) SetTagInfo(ctx context.Context, orgID string, spaceID string, body ForumTaxonomySetTagInfoParams, opts ...RequestOption) (*ForumTaxonomySetTagInfoResponse, error) {
+func (s *ForumTaxonomyService) SetTagInfo(ctx context.Context, orgID string, spaceID string, body ForumTaxonomySetTagInfoParams, query *ForumTaxonomySetTagInfoQuery, opts ...RequestOption) (*ForumTaxonomySetTagInfoResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomySetTagInfoResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-info", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-info", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTaxonomyRemoveTagInfoQuery are the optional query parameters of ForumTaxonomyService.RemoveTagInfo.
+type ForumTaxonomyRemoveTagInfoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomyRemoveTagInfoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveTagInfo delete the tag info
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/tag-info/{tag}
-func (s *ForumTaxonomyService) RemoveTagInfo(ctx context.Context, orgID string, spaceID string, tag string, opts ...RequestOption) (*ForumTaxonomyRemoveTagInfoResponse, error) {
+func (s *ForumTaxonomyService) RemoveTagInfo(ctx context.Context, orgID string, spaceID string, tag string, query *ForumTaxonomyRemoveTagInfoQuery, opts ...RequestOption) (*ForumTaxonomyRemoveTagInfoResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomyRemoveTagInfoResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-info/"+pathEscape(tag), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/tag-info/"+pathEscape(tag), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetTopicCategory create the category in a space
+// ForumTaxonomySetTopicCategoryQuery are the optional query parameters of ForumTaxonomyService.SetTopicCategory.
+type ForumTaxonomySetTopicCategoryQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTaxonomySetTopicCategoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetTopicCategory set the topic category
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/category
-func (s *ForumTaxonomyService) SetTopicCategory(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTaxonomySetTopicCategoryParams, opts ...RequestOption) (*ForumTaxonomySetTopicCategoryResponse, error) {
+func (s *ForumTaxonomyService) SetTopicCategory(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTaxonomySetTopicCategoryParams, query *ForumTaxonomySetTopicCategoryQuery, opts ...RequestOption) (*ForumTaxonomySetTopicCategoryResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTaxonomySetTopicCategoryResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/category", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/category", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1147,12 +1878,30 @@ type ForumToolsService struct {
 	c *Client
 }
 
-// Summarize create the summarize in a space
+// ForumToolsSummarizeQuery are the optional query parameters of ForumToolsService.Summarize.
+type ForumToolsSummarizeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSummarizeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Summarize summarize the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/summarize
-func (s *ForumToolsService) Summarize(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsSummarizeResponse, error) {
+func (s *ForumToolsService) Summarize(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsSummarizeQuery, opts ...RequestOption) (*ForumToolsSummarizeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSummarizeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/summarize", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/summarize", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1164,6 +1913,10 @@ type ForumToolsUnansweredExpertsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumToolsUnansweredExpertsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1176,6 +1929,12 @@ func (p *ForumToolsUnansweredExpertsQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1213,6 +1972,10 @@ type ForumToolsExpertsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumToolsExpertsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1225,6 +1988,12 @@ func (p *ForumToolsExpertsQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1256,12 +2025,30 @@ func (s *ForumToolsService) ExpertsAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
-// NotifyExperts create the notify in a space (experts)
+// ForumToolsNotifyExpertsQuery are the optional query parameters of ForumToolsService.NotifyExperts.
+type ForumToolsNotifyExpertsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsNotifyExpertsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// NotifyExperts notify the experts in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/experts/notify
-func (s *ForumToolsService) NotifyExperts(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsNotifyExpertsResponse, error) {
+func (s *ForumToolsService) NotifyExperts(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsNotifyExpertsQuery, opts ...RequestOption) (*ForumToolsNotifyExpertsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsNotifyExpertsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/experts/notify", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/experts/notify", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1278,122 +2065,320 @@ func (s *ForumToolsService) GetTimer(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
-// SetTimer create the timer in a space
+// ForumToolsSetTimerQuery are the optional query parameters of ForumToolsService.SetTimer.
+type ForumToolsSetTimerQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSetTimerQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetTimer set the timer of the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/timer
-func (s *ForumToolsService) SetTimer(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetTimerParams, opts ...RequestOption) (*ForumToolsSetTimerResponse, error) {
+func (s *ForumToolsService) SetTimer(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetTimerParams, query *ForumToolsSetTimerQuery, opts ...RequestOption) (*ForumToolsSetTimerResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSetTimerResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/timer", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/timer", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsClearTimerQuery are the optional query parameters of ForumToolsService.ClearTimer.
+type ForumToolsClearTimerQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsClearTimerQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ClearTimer delete the timer in a space
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/timer
-func (s *ForumToolsService) ClearTimer(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsClearTimerResponse, error) {
+func (s *ForumToolsService) ClearTimer(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsClearTimerQuery, opts ...RequestOption) (*ForumToolsClearTimerResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsClearTimerResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/timer", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/timer", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Recover create the recover in a space (forum)
+// ForumToolsRecoverQuery are the optional query parameters of ForumToolsService.Recover.
+type ForumToolsRecoverQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsRecoverQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Recover recover the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/recover
-func (s *ForumToolsService) Recover(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsRecoverResponse, error) {
+func (s *ForumToolsService) Recover(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsRecoverQuery, opts ...RequestOption) (*ForumToolsRecoverResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsRecoverResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/recover", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/recover", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Bump create the bump in a space
+// ForumToolsBumpQuery are the optional query parameters of ForumToolsService.Bump.
+type ForumToolsBumpQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsBumpQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Bump bump the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/bump
-func (s *ForumToolsService) Bump(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsBumpResponse, error) {
+func (s *ForumToolsService) Bump(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsBumpQuery, opts ...RequestOption) (*ForumToolsBumpResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsBumpResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bump", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bump", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsSplitQuery are the optional query parameters of ForumToolsService.Split.
+type ForumToolsSplitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSplitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Split split the forum
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/split
-func (s *ForumToolsService) Split(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSplitParams, opts ...RequestOption) (*ForumToolsSplitResponse, error) {
+func (s *ForumToolsService) Split(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSplitParams, query *ForumToolsSplitQuery, opts ...RequestOption) (*ForumToolsSplitResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSplitResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/split", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/split", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsMergeQuery are the optional query parameters of ForumToolsService.Merge.
+type ForumToolsMergeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsMergeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Merge merge the forum
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/merge
-func (s *ForumToolsService) Merge(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsMergeParams, opts ...RequestOption) (*ForumToolsMergeResponse, error) {
+func (s *ForumToolsService) Merge(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsMergeParams, query *ForumToolsMergeQuery, opts ...RequestOption) (*ForumToolsMergeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsMergeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/merge", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/merge", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsPromoteToDocsQuery are the optional query parameters of ForumToolsService.PromoteToDocs.
+type ForumToolsPromoteToDocsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsPromoteToDocsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // PromoteToDocs promote the forum
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/promote
-func (s *ForumToolsService) PromoteToDocs(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsPromoteToDocsParams, opts ...RequestOption) (*ForumToolsPromoteToDocsResponse, error) {
+func (s *ForumToolsService) PromoteToDocs(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsPromoteToDocsParams, query *ForumToolsPromoteToDocsQuery, opts ...RequestOption) (*ForumToolsPromoteToDocsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsPromoteToDocsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/promote", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/promote", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsMovePostsQuery are the optional query parameters of ForumToolsService.MovePosts.
+type ForumToolsMovePostsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsMovePostsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // MovePosts move the post
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/posts/move
-func (s *ForumToolsService) MovePosts(ctx context.Context, orgID string, spaceID string, body ForumToolsMovePostsParams, opts ...RequestOption) (*ForumToolsMovePostsResponse, error) {
+func (s *ForumToolsService) MovePosts(ctx context.Context, orgID string, spaceID string, body ForumToolsMovePostsParams, query *ForumToolsMovePostsQuery, opts ...RequestOption) (*ForumToolsMovePostsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsMovePostsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/move", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/move", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ChangeOwner create the change owner in a space
+// ForumToolsChangeOwnerQuery are the optional query parameters of ForumToolsService.ChangeOwner.
+type ForumToolsChangeOwnerQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsChangeOwnerQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ChangeOwner change the owner
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/change-owner
-func (s *ForumToolsService) ChangeOwner(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsChangeOwnerParams, opts ...RequestOption) (*ForumToolsChangeOwnerResponse, error) {
+func (s *ForumToolsService) ChangeOwner(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsChangeOwnerParams, query *ForumToolsChangeOwnerQuery, opts ...RequestOption) (*ForumToolsChangeOwnerResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsChangeOwnerResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/change-owner", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/change-owner", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsEditPostQuery are the optional query parameters of ForumToolsService.EditPost.
+type ForumToolsEditPostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsEditPostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // EditPost update the post (forum)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}
-func (s *ForumToolsService) EditPost(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsEditPostParams, opts ...RequestOption) (*ForumToolsEditPostResponse, error) {
+func (s *ForumToolsService) EditPost(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsEditPostBody, query *ForumToolsEditPostQuery, opts ...RequestOption) (*ForumToolsEditPostResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsEditPostResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumToolsDeletePostQuery are the optional query parameters of ForumToolsService.DeletePost.
+type ForumToolsDeletePostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsDeletePostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeletePost delete the post (forum)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}
-func (s *ForumToolsService) DeletePost(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*ForumToolsDeletePostResponse, error) {
+func (s *ForumToolsService) DeletePost(ctx context.Context, orgID string, spaceID string, postID string, query *ForumToolsDeletePostQuery, opts ...RequestOption) (*ForumToolsDeletePostResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsDeletePostResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1405,6 +2390,10 @@ type ForumToolsRevisionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumToolsRevisionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1417,6 +2406,12 @@ func (p *ForumToolsRevisionsQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1459,114 +2454,294 @@ func (s *ForumToolsService) RevisionDiff(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
-// Vote create the vote in a space (forum posts)
+// ForumToolsVoteQuery are the optional query parameters of ForumToolsService.Vote.
+type ForumToolsVoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsVoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Vote vote on the post (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/vote
-func (s *ForumToolsService) Vote(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*ForumToolsVoteResponse, error) {
+func (s *ForumToolsService) Vote(ctx context.Context, orgID string, spaceID string, postID string, query *ForumToolsVoteQuery, opts ...RequestOption) (*ForumToolsVoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsVoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/vote", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/vote", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsSetVoteQuery are the optional query parameters of ForumToolsService.SetVote.
+type ForumToolsSetVoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSetVoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetVote replace the vote in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/vote
-func (s *ForumToolsService) SetVote(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsSetVoteParams, opts ...RequestOption) (*ForumToolsSetVoteResponse, error) {
+func (s *ForumToolsService) SetVote(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsSetVoteParams, query *ForumToolsSetVoteQuery, opts ...RequestOption) (*ForumToolsSetVoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSetVoteResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/vote", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/vote", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// React create the react in a space (forum posts)
+// ForumToolsReactQuery are the optional query parameters of ForumToolsService.React.
+type ForumToolsReactQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsReactQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// React react to the post (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/react
-func (s *ForumToolsService) React(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsReactParams, opts ...RequestOption) (*ForumToolsReactResponse, error) {
+func (s *ForumToolsService) React(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsReactParams, query *ForumToolsReactQuery, opts ...RequestOption) (*ForumToolsReactResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsReactResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/react", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/react", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Bookmark create the bookmark in a space (forum)
+// ForumToolsBookmarkQuery are the optional query parameters of ForumToolsService.Bookmark.
+type ForumToolsBookmarkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsBookmarkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Bookmark bookmark the topic (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/bookmark
-func (s *ForumToolsService) Bookmark(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsBookmarkResponse, error) {
+func (s *ForumToolsService) Bookmark(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsBookmarkQuery, opts ...RequestOption) (*ForumToolsBookmarkResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsBookmarkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bookmark", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bookmark", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// BookmarkReminder replace the reminder in a space
+// ForumToolsBookmarkReminderQuery are the optional query parameters of ForumToolsService.BookmarkReminder.
+type ForumToolsBookmarkReminderQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsBookmarkReminderQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// BookmarkReminder bookmark the reminder
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/bookmark/reminder
-func (s *ForumToolsService) BookmarkReminder(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsBookmarkReminderParams, opts ...RequestOption) (*ForumToolsBookmarkReminderResponse, error) {
+func (s *ForumToolsService) BookmarkReminder(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsBookmarkReminderParams, query *ForumToolsBookmarkReminderQuery, opts ...RequestOption) (*ForumToolsBookmarkReminderResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsBookmarkReminderResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bookmark/reminder", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bookmark/reminder", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsFlagQuery are the optional query parameters of ForumToolsService.Flag.
+type ForumToolsFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Flag flag the post (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/flag
-func (s *ForumToolsService) Flag(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsFlagParams, opts ...RequestOption) (*ForumToolsFlagResponse, error) {
+func (s *ForumToolsService) Flag(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsFlagParams, query *ForumToolsFlagQuery, opts ...RequestOption) (*ForumToolsFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/flag", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/flag", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsFlagTopicQuery are the optional query parameters of ForumToolsService.FlagTopic.
+type ForumToolsFlagTopicQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsFlagTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // FlagTopic flag the forum
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/flag
-func (s *ForumToolsService) FlagTopic(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsFlagTopicParams, opts ...RequestOption) (*ForumToolsFlagTopicResponse, error) {
+func (s *ForumToolsService) FlagTopic(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsFlagTopicParams, query *ForumToolsFlagTopicQuery, opts ...RequestOption) (*ForumToolsFlagTopicResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsFlagTopicResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/flag", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/flag", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Answer create the answer in a space
+// ForumToolsAnswerQuery are the optional query parameters of ForumToolsService.Answer.
+type ForumToolsAnswerQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsAnswerQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Answer answer the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/answer
-func (s *ForumToolsService) Answer(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsAnswerParams, opts ...RequestOption) (*ForumToolsAnswerResponse, error) {
+func (s *ForumToolsService) Answer(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsAnswerParams, query *ForumToolsAnswerQuery, opts ...RequestOption) (*ForumToolsAnswerResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsAnswerResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/answer", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/answer", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// OfferBounty create the bounty in a space
+// ForumToolsOfferBountyQuery are the optional query parameters of ForumToolsService.OfferBounty.
+type ForumToolsOfferBountyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsOfferBountyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// OfferBounty offer the bounty
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/bounty
-func (s *ForumToolsService) OfferBounty(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsOfferBountyParams, opts ...RequestOption) (*ForumToolsOfferBountyResponse, error) {
+func (s *ForumToolsService) OfferBounty(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsOfferBountyParams, query *ForumToolsOfferBountyQuery, opts ...RequestOption) (*ForumToolsOfferBountyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsOfferBountyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bounty", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bounty", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// WithdrawBounty delete the bounty in a space
+// ForumToolsWithdrawBountyQuery are the optional query parameters of ForumToolsService.WithdrawBounty.
+type ForumToolsWithdrawBountyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsWithdrawBountyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// WithdrawBounty withdraw the bounty
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/bounty
-func (s *ForumToolsService) WithdrawBounty(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bounty", nil, nil, &out, opts); err != nil {
+func (s *ForumToolsService) WithdrawBounty(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsWithdrawBountyQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/bounty", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // ForumToolsBountyHistoryQuery are the optional query parameters of ForumToolsService.BountyHistory.
@@ -1575,6 +2750,10 @@ type ForumToolsBountyHistoryQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumToolsBountyHistoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1587,6 +2766,12 @@ func (p *ForumToolsBountyHistoryQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1618,89 +2803,233 @@ func (s *ForumToolsService) BountyHistoryAutoPaging(ctx context.Context, orgID s
 	})
 }
 
-// SetState create the state in a space (forum)
+// ForumToolsSetStateQuery are the optional query parameters of ForumToolsService.SetState.
+type ForumToolsSetStateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSetStateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetState set the state of the topic (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/state
-func (s *ForumToolsService) SetState(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetStateParams, opts ...RequestOption) (*ForumToolsSetStateResponse, error) {
+func (s *ForumToolsService) SetState(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetStateParams, query *ForumToolsSetStateQuery, opts ...RequestOption) (*ForumToolsSetStateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSetStateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/state", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/state", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetKind create the kind in a space
+// ForumToolsSetKindQuery are the optional query parameters of ForumToolsService.SetKind.
+type ForumToolsSetKindQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSetKindQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetKind set the kind of the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/kind
-func (s *ForumToolsService) SetKind(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetKindParams, opts ...RequestOption) (*ForumToolsSetKindResponse, error) {
+func (s *ForumToolsService) SetKind(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetKindParams, query *ForumToolsSetKindQuery, opts ...RequestOption) (*ForumToolsSetKindResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSetKindResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/kind", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/kind", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsPinQuery are the optional query parameters of ForumToolsService.Pin.
+type ForumToolsPinQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsPinQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Pin pin the forum
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/pin
-func (s *ForumToolsService) Pin(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsPinParams, opts ...RequestOption) (*ForumToolsPinResponse, error) {
+func (s *ForumToolsService) Pin(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsPinParams, query *ForumToolsPinQuery, opts ...RequestOption) (*ForumToolsPinResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsPinResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/pin", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/pin", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsPinAdvancedQuery are the optional query parameters of ForumToolsService.PinAdvanced.
+type ForumToolsPinAdvancedQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsPinAdvancedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // PinAdvanced pin advanced in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/pin-advanced
-func (s *ForumToolsService) PinAdvanced(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsPinAdvancedParams, opts ...RequestOption) (*ForumToolsPinAdvancedResponse, error) {
+func (s *ForumToolsService) PinAdvanced(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsPinAdvancedParams, query *ForumToolsPinAdvancedQuery, opts ...RequestOption) (*ForumToolsPinAdvancedResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsPinAdvancedResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/pin-advanced", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/pin-advanced", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SlowMode create the slow mode in a space
+// ForumToolsSlowModeQuery are the optional query parameters of ForumToolsService.SlowMode.
+type ForumToolsSlowModeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSlowModeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SlowMode set slow mode on a topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/slow-mode
-func (s *ForumToolsService) SlowMode(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSlowModeParams, opts ...RequestOption) (*ForumToolsSlowModeResponse, error) {
+func (s *ForumToolsService) SlowMode(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSlowModeParams, query *ForumToolsSlowModeQuery, opts ...RequestOption) (*ForumToolsSlowModeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSlowModeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/slow-mode", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/slow-mode", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumToolsDismissPinQuery are the optional query parameters of ForumToolsService.DismissPin.
+type ForumToolsDismissPinQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsDismissPinQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DismissPin dismiss pin in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/dismiss-pin
-func (s *ForumToolsService) DismissPin(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumToolsDismissPinResponse, error) {
+func (s *ForumToolsService) DismissPin(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumToolsDismissPinQuery, opts ...RequestOption) (*ForumToolsDismissPinResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsDismissPinResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/dismiss-pin", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/dismiss-pin", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetListed create the listed in a space
+// ForumToolsSetListedQuery are the optional query parameters of ForumToolsService.SetListed.
+type ForumToolsSetListedQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSetListedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetListed set the listed of the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/listed
-func (s *ForumToolsService) SetListed(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetListedParams, opts ...RequestOption) (*ForumToolsSetListedResponse, error) {
+func (s *ForumToolsService) SetListed(ctx context.Context, orgID string, spaceID string, topicID string, body ForumToolsSetListedParams, query *ForumToolsSetListedQuery, opts ...RequestOption) (*ForumToolsSetListedResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSetListedResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/listed", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/listed", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetPostStatus create the status in a space (forum posts)
+// ForumToolsSetPostStatusQuery are the optional query parameters of ForumToolsService.SetPostStatus.
+type ForumToolsSetPostStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumToolsSetPostStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetPostStatus set the post status (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/status
-func (s *ForumToolsService) SetPostStatus(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsSetPostStatusParams, opts ...RequestOption) (*ForumToolsSetPostStatusResponse, error) {
+func (s *ForumToolsService) SetPostStatus(ctx context.Context, orgID string, spaceID string, postID string, body ForumToolsSetPostStatusParams, query *ForumToolsSetPostStatusQuery, opts ...RequestOption) (*ForumToolsSetPostStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumToolsSetPostStatusResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/status", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/status", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1726,6 +3055,10 @@ type ForumTopicsListQuery struct {
 	Cursor   *string
 	Kind     *string
 	Sort     *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTopicsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1763,6 +3096,12 @@ func (p *ForumTopicsListQuery) encode(opts []RequestOption) (url.Values, []Reque
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
@@ -1793,12 +3132,30 @@ func (s *ForumTopicsService) ListAutoPaging(ctx context.Context, orgID string, s
 	})
 }
 
-// Create create the forum in a space
+// ForumTopicsCreateQuery are the optional query parameters of ForumTopicsService.Create.
+type ForumTopicsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Create start a forum topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum
-func (s *ForumTopicsService) Create(ctx context.Context, orgID string, spaceID string, body ForumTopicsCreateParams, opts ...RequestOption) (*ForumTopicsCreateResponse, error) {
+func (s *ForumTopicsService) Create(ctx context.Context, orgID string, spaceID string, body ForumTopicsCreateParams, query *ForumTopicsCreateQuery, opts ...RequestOption) (*ForumTopicsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1848,34 +3205,88 @@ func (s *ForumTopicsService) Timeline(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
-// ReplyAsLinkedTopic create the reply as linked topic in a space
+// ForumTopicsReplyAsLinkedTopicQuery are the optional query parameters of ForumTopicsService.ReplyAsLinkedTopic.
+type ForumTopicsReplyAsLinkedTopicQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsReplyAsLinkedTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReplyAsLinkedTopic reply as linked topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/posts/{postId}/reply-as-linked-topic
-func (s *ForumTopicsService) ReplyAsLinkedTopic(ctx context.Context, orgID string, spaceID string, topicID string, postID string, body ForumTopicsReplyAsLinkedTopicParams, opts ...RequestOption) (*ForumTopicsReplyAsLinkedTopicResponse, error) {
+func (s *ForumTopicsService) ReplyAsLinkedTopic(ctx context.Context, orgID string, spaceID string, topicID string, postID string, body ForumTopicsReplyAsLinkedTopicParams, query *ForumTopicsReplyAsLinkedTopicQuery, opts ...RequestOption) (*ForumTopicsReplyAsLinkedTopicResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsReplyAsLinkedTopicResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/posts/"+pathEscape(postID)+"/reply-as-linked-topic", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/posts/"+pathEscape(postID)+"/reply-as-linked-topic", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// AddPoll create the poll in a space
+// ForumTopicsAddPollQuery are the optional query parameters of ForumTopicsService.AddPoll.
+type ForumTopicsAddPollQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsAddPollQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// AddPoll add a poll to the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/poll
-func (s *ForumTopicsService) AddPoll(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsAddPollParams, opts ...RequestOption) (*ForumTopicsAddPollResponse, error) {
+func (s *ForumTopicsService) AddPoll(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsAddPollBody, query *ForumTopicsAddPollQuery, opts ...RequestOption) (*ForumTopicsAddPollResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsAddPollResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/poll", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/poll", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// VotePoll create the vote in a space (forum polls)
+// ForumTopicsVotePollQuery are the optional query parameters of ForumTopicsService.VotePoll.
+type ForumTopicsVotePollQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsVotePollQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// VotePoll vote on the poll (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/polls/{pollId}/vote
-func (s *ForumTopicsService) VotePoll(ctx context.Context, orgID string, spaceID string, pollID string, body ForumTopicsVotePollParams, opts ...RequestOption) (*ForumTopicsVotePollResponse, error) {
+func (s *ForumTopicsService) VotePoll(ctx context.Context, orgID string, spaceID string, pollID string, body ForumTopicsVotePollParams, query *ForumTopicsVotePollQuery, opts ...RequestOption) (*ForumTopicsVotePollResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsVotePollResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID)+"/vote", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID)+"/vote", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1892,78 +3303,204 @@ func (s *ForumTopicsService) PollVoters(ctx context.Context, orgID string, space
 	return &out, nil
 }
 
+// ForumTopicsClosePollQuery are the optional query parameters of ForumTopicsService.ClosePoll.
+type ForumTopicsClosePollQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsClosePollQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // ClosePoll close the poll
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/polls/{pollId}/close
-func (s *ForumTopicsService) ClosePoll(ctx context.Context, orgID string, spaceID string, pollID string, opts ...RequestOption) (*ForumTopicsClosePollResponse, error) {
+func (s *ForumTopicsService) ClosePoll(ctx context.Context, orgID string, spaceID string, pollID string, query *ForumTopicsClosePollQuery, opts ...RequestOption) (*ForumTopicsClosePollResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsClosePollResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID)+"/close", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID)+"/close", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTopicsReopenPollQuery are the optional query parameters of ForumTopicsService.ReopenPoll.
+type ForumTopicsReopenPollQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsReopenPollQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ReopenPoll reopen the poll
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/polls/{pollId}/reopen
-func (s *ForumTopicsService) ReopenPoll(ctx context.Context, orgID string, spaceID string, pollID string, opts ...RequestOption) (*ForumTopicsReopenPollResponse, error) {
+func (s *ForumTopicsService) ReopenPoll(ctx context.Context, orgID string, spaceID string, pollID string, query *ForumTopicsReopenPollQuery, opts ...RequestOption) (*ForumTopicsReopenPollResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsReopenPollResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID)+"/reopen", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID)+"/reopen", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTopicsRemovePollQuery are the optional query parameters of ForumTopicsService.RemovePoll.
+type ForumTopicsRemovePollQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsRemovePollQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemovePoll delete the poll
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/polls/{pollId}
-func (s *ForumTopicsService) RemovePoll(ctx context.Context, orgID string, spaceID string, pollID string, opts ...RequestOption) (*ForumTopicsRemovePollResponse, error) {
+func (s *ForumTopicsService) RemovePoll(ctx context.Context, orgID string, spaceID string, pollID string, query *ForumTopicsRemovePollQuery, opts ...RequestOption) (*ForumTopicsRemovePollResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsRemovePollResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/polls/"+pathEscape(pollID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTopicsReplyQuery are the optional query parameters of ForumTopicsService.Reply.
+type ForumTopicsReplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsReplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Reply create a reply in a space (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/replies
-func (s *ForumTopicsService) Reply(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsReplyParams, opts ...RequestOption) (*ForumTopicsReplyResponse, error) {
+func (s *ForumTopicsService) Reply(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsReplyParams, query *ForumTopicsReplyQuery, opts ...RequestOption) (*ForumTopicsReplyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsReplyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/replies", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/replies", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetWiki create the wiki in a space
+// ForumTopicsSetWikiQuery are the optional query parameters of ForumTopicsService.SetWiki.
+type ForumTopicsSetWikiQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsSetWikiQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetWiki set the wiki of the post
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/posts/{postId}/wiki
-func (s *ForumTopicsService) SetWiki(ctx context.Context, orgID string, spaceID string, postID string, body ForumTopicsSetWikiParams, opts ...RequestOption) (*ForumTopicsSetWikiResponse, error) {
+func (s *ForumTopicsService) SetWiki(ctx context.Context, orgID string, spaceID string, postID string, body ForumTopicsSetWikiParams, query *ForumTopicsSetWikiQuery, opts ...RequestOption) (*ForumTopicsSetWikiResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsSetWikiResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/wiki", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/posts/"+pathEscape(postID)+"/wiki", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTopicsUpdateQuery are the optional query parameters of ForumTopicsService.Update.
+type ForumTopicsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the forum
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}
-func (s *ForumTopicsService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsUpdateParams, opts ...RequestOption) (*ForumTopicsUpdateResponse, error) {
+func (s *ForumTopicsService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body ForumTopicsUpdateParams, query *ForumTopicsUpdateQuery, opts ...RequestOption) (*ForumTopicsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ForumTopicsRemoveQuery are the optional query parameters of ForumTopicsService.Remove.
+type ForumTopicsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the forum
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}
-func (s *ForumTopicsService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*ForumTopicsRemoveResponse, error) {
+func (s *ForumTopicsService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, query *ForumTopicsRemoveQuery, opts ...RequestOption) (*ForumTopicsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1974,7 +3511,7 @@ type ForumTranslationsService struct {
 	c *Client
 }
 
-// TranslateTopic create the translate in a space (public reader forum t)
+// TranslateTopic translate the topic
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/translate
 func (s *ForumTranslationsService) TranslateTopic(ctx context.Context, orgID string, spaceID string, slug string, body ForumTranslationsTranslateTopicParams, opts ...RequestOption) (*ForumTranslationsTranslateTopicResponse, error) {
@@ -1985,7 +3522,7 @@ func (s *ForumTranslationsService) TranslateTopic(ctx context.Context, orgID str
 	return &out, nil
 }
 
-// TranslatePost create the translate in a space (public reader forum t posts)
+// TranslatePost translate the post
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/forum/t/{slug}/posts/{postId}/translate
 func (s *ForumTranslationsService) TranslatePost(ctx context.Context, orgID string, spaceID string, slug string, postID string, body ForumTranslationsTranslatePostParams, opts ...RequestOption) (*ForumTranslationsTranslatePostResponse, error) {

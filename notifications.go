@@ -26,23 +26,59 @@ func (s *NotificationsService) GetDnd(ctx context.Context, orgID string, opts ..
 	return &out, nil
 }
 
+// NotificationsSetDndQuery are the optional query parameters of NotificationsService.SetDnd.
+type NotificationsSetDndQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsSetDndQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetDnd replace the dnd in an organization
 //
 // PUT /orgs/{orgId}/notifications/dnd
-func (s *NotificationsService) SetDnd(ctx context.Context, orgID string, body NotificationsSetDndParams, opts ...RequestOption) (*NotificationsSetDndResponse, error) {
+func (s *NotificationsService) SetDnd(ctx context.Context, orgID string, body NotificationsSetDndParams, query *NotificationsSetDndQuery, opts ...RequestOption) (*NotificationsSetDndResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsSetDndResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/notifications/dnd", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/notifications/dnd", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SnoozeDnd create the snooze in an organization
+// NotificationsSnoozeDndQuery are the optional query parameters of NotificationsService.SnoozeDnd.
+type NotificationsSnoozeDndQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsSnoozeDndQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SnoozeDnd snooze notifications (do not disturb) in an organization
 //
 // POST /orgs/{orgId}/notifications/dnd/snooze
-func (s *NotificationsService) SnoozeDnd(ctx context.Context, orgID string, body NotificationsSnoozeDndParams, opts ...RequestOption) (*NotificationsSnoozeDndResponse, error) {
+func (s *NotificationsService) SnoozeDnd(ctx context.Context, orgID string, body NotificationsSnoozeDndParams, query *NotificationsSnoozeDndQuery, opts ...RequestOption) (*NotificationsSnoozeDndResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsSnoozeDndResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/notifications/dnd/snooze", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/notifications/dnd/snooze", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -59,12 +95,30 @@ func (s *NotificationsService) GetSchedule(ctx context.Context, orgID string, op
 	return &out, nil
 }
 
+// NotificationsSetScheduleQuery are the optional query parameters of NotificationsService.SetSchedule.
+type NotificationsSetScheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsSetScheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetSchedule replace the schedule in an organization
 //
 // PUT /orgs/{orgId}/notifications/schedule
-func (s *NotificationsService) SetSchedule(ctx context.Context, orgID string, body NotificationsSetScheduleParams, opts ...RequestOption) (*NotificationsSetScheduleResponse, error) {
+func (s *NotificationsService) SetSchedule(ctx context.Context, orgID string, body NotificationsSetScheduleParams, query *NotificationsSetScheduleQuery, opts ...RequestOption) (*NotificationsSetScheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsSetScheduleResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/notifications/schedule", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/notifications/schedule", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -81,12 +135,30 @@ func (s *NotificationsService) GetTypePreferences(ctx context.Context, orgID str
 	return &out, nil
 }
 
+// NotificationsSetTypePreferencesQuery are the optional query parameters of NotificationsService.SetTypePreferences.
+type NotificationsSetTypePreferencesQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsSetTypePreferencesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetTypePreferences replace type preferences in an organization
 //
 // PUT /orgs/{orgId}/notifications/type-preferences
-func (s *NotificationsService) SetTypePreferences(ctx context.Context, orgID string, body NotificationsSetTypePreferencesParams, opts ...RequestOption) (any, error) {
+func (s *NotificationsService) SetTypePreferences(ctx context.Context, orgID string, body NotificationsSetTypePreferencesParams, query *NotificationsSetTypePreferencesQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/notifications/type-preferences", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/notifications/type-preferences", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -119,12 +191,30 @@ func (s *NotificationsService) GetPreferences(ctx context.Context, orgID string,
 	return &out, nil
 }
 
+// NotificationsSetPreferencesQuery are the optional query parameters of NotificationsService.SetPreferences.
+type NotificationsSetPreferencesQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsSetPreferencesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetPreferences update preferences in an organization
 //
 // PATCH /orgs/{orgId}/notifications/preferences
-func (s *NotificationsService) SetPreferences(ctx context.Context, orgID string, body NotificationsSetPreferencesParams, opts ...RequestOption) (*NotificationsSetPreferencesResponse, error) {
+func (s *NotificationsService) SetPreferences(ctx context.Context, orgID string, body NotificationsSetPreferencesParams, query *NotificationsSetPreferencesQuery, opts ...RequestOption) (*NotificationsSetPreferencesResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsSetPreferencesResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/notifications/preferences", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/notifications/preferences", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -137,6 +227,10 @@ type NotificationsListQuery struct {
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Unread *string
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *NotificationsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -152,6 +246,12 @@ func (p *NotificationsListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -183,23 +283,59 @@ func (s *NotificationsService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
-// Read create the read in an organization (notifications)
+// NotificationsReadQuery are the optional query parameters of NotificationsService.Read.
+type NotificationsReadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsReadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Read mark the notification read
 //
 // POST /orgs/{orgId}/notifications/{id}/read
-func (s *NotificationsService) Read(ctx context.Context, orgID string, id string, opts ...RequestOption) (*NotificationsReadResponse, error) {
+func (s *NotificationsService) Read(ctx context.Context, orgID string, id string, query *NotificationsReadQuery, opts ...RequestOption) (*NotificationsReadResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsReadResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/notifications/"+pathEscape(id)+"/read", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/notifications/"+pathEscape(id)+"/read", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ReadAll create the read all in an organization
+// NotificationsReadAllQuery are the optional query parameters of NotificationsService.ReadAll.
+type NotificationsReadAllQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsReadAllQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReadAll mark everything read in an organization
 //
 // POST /orgs/{orgId}/notifications/read-all
-func (s *NotificationsService) ReadAll(ctx context.Context, orgID string, opts ...RequestOption) (*NotificationsReadAllResponse, error) {
+func (s *NotificationsService) ReadAll(ctx context.Context, orgID string, query *NotificationsReadAllQuery, opts ...RequestOption) (*NotificationsReadAllResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsReadAllResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/notifications/read-all", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/notifications/read-all", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -232,23 +368,59 @@ func (s *NotificationsPushService) Status(ctx context.Context, opts ...RequestOp
 	return &out, nil
 }
 
+// NotificationsPushSubscribeQuery are the optional query parameters of NotificationsPushService.Subscribe.
+type NotificationsPushSubscribeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsPushSubscribeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Subscribe subscribe the push
 //
 // POST /push/subscribe
-func (s *NotificationsPushService) Subscribe(ctx context.Context, body NotificationsPushSubscribeParams, opts ...RequestOption) (*NotificationsPushSubscribeResponse, error) {
+func (s *NotificationsPushService) Subscribe(ctx context.Context, body NotificationsPushSubscribeParams, query *NotificationsPushSubscribeQuery, opts ...RequestOption) (*NotificationsPushSubscribeResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsPushSubscribeResponse
-	if err := s.c.do(ctx, "POST", "/push/subscribe", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/push/subscribe", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// NotificationsPushUnsubscribeQuery are the optional query parameters of NotificationsPushService.Unsubscribe.
+type NotificationsPushUnsubscribeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *NotificationsPushUnsubscribeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Unsubscribe unsubscribe the push
 //
 // POST /push/unsubscribe
-func (s *NotificationsPushService) Unsubscribe(ctx context.Context, body NotificationsPushUnsubscribeParams, opts ...RequestOption) (*NotificationsPushUnsubscribeResponse, error) {
+func (s *NotificationsPushService) Unsubscribe(ctx context.Context, body NotificationsPushUnsubscribeParams, query *NotificationsPushUnsubscribeQuery, opts ...RequestOption) (*NotificationsPushUnsubscribeResponse, error) {
+	v, opts := query.encode(opts)
 	var out NotificationsPushUnsubscribeResponse
-	if err := s.c.do(ctx, "POST", "/push/unsubscribe", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/push/unsubscribe", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

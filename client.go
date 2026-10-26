@@ -37,164 +37,332 @@ type Client struct {
 	UserAgent  string
 	headers    map[string]string
 
-	AI                    *AIService
-	Analytics             *AnalyticsService
-	APIActivity           *APIActivityService
-	AssetLibrary          *AssetLibraryService
-	Audit                 *AuditService
-	Auth                  *AuthService
-	Billing               *BillingService
-	Blog                  *BlogService
-	BlogComments          *BlogCommentsService
-	BlogPostTranslation   *BlogPostTranslationService
-	BlogTaxonomy          *BlogTaxonomyService
-	Careers               *CareersService
-	CareersAts            *CareersAtsService
-	CareersIndexing       *CareersIndexingService
-	Changelog             *ChangelogService
-	ChangelogImport       *ChangelogImportService
-	Chat                  *ChatService
-	Community             *CommunityService
-	Connectors            *ConnectorsService
-	Consent               *ConsentService
-	Contact               *ContactService
-	ContactBlock          *ContactBlockService
-	ContactPrivacy        *ContactPrivacyService
-	ContentAI             *ContentAIService
-	ContentEntryLocales   *ContentEntryLocalesService
-	ContentLibrary        *ContentLibraryService
-	ContentLocales        *ContentLocalesService
-	ContentModel          *ContentModelService
-	ContentStudio         *ContentStudioService
-	ContentWorkflow       *ContentWorkflowService
-	CourseAccess          *CourseAccessService
-	CourseCommerce        *CourseCommerceService
-	CourseLearnerExtras   *CourseLearnerExtrasService
-	CourseLearners        *CourseLearnersService
-	CoursePaths           *CoursePathsService
-	Courses               *CoursesService
-	CustomEmoji           *CustomEmojiService
-	CustomFields          *CustomFieldsService
-	DeliveryEntries       *DeliveryEntriesService
-	DeliveryKey           *DeliveryKeyService
-	DeliveryKeys          *DeliveryKeysService
-	DeliverySite          *DeliverySiteService
-	DeployStatus          *DeployStatusService
-	DeviceKeys            *DeviceKeysService
-	Docs                  *DocsService
-	Drafts                *DraftsService
-	EmbeddableHosts       *EmbeddableHostsService
-	EmbedFeeds            *EmbedFeedsService
-	EntryCard             *EntryCardService
-	EntryDeliveryPreview  *EntryDeliveryPreviewService
-	EntryFields           *EntryFieldsService
-	EntryUsage            *EntryUsageService
-	Environments          *EnvironmentsService
-	EventAgendaPublic     *EventAgendaPublicService
-	EventAttendees        *EventAttendeesService
-	EventAttendeesPublic  *EventAttendeesPublicService
-	EventMyAgenda         *EventMyAgendaService
-	EventNotices          *EventNoticesService
-	EventPromoCodes       *EventPromoCodesService
-	EventRsvpPrivacy      *EventRsvpPrivacyService
-	Events                *EventsService
-	EventSeriesPublic     *EventSeriesPublicService
-	EventSessions         *EventSessionsService
-	EventSpeakers         *EventSpeakersService
-	EventTickets          *EventTicketsService
-	EventTicketsPublic    *EventTicketsPublicService
-	EventTicketWebhook    *EventTicketWebhookService
-	Extensions            *ExtensionsService
-	Forms                 *FormsService
-	Forum                 *ForumService
-	ForumTopicTranslation *ForumTopicTranslationService
-	GoogleIndexing        *GoogleIndexingService
-	Groups                *GroupsService
-	Growth                *GrowthService
-	HostedOutput          *HostedOutputService
-	Icons                 *IconsService
-	Integrations          *IntegrationsService
-	Invites               *InvitesService
-	Items                 *ItemsService
-	LegalUpdates          *LegalUpdatesService
-	Library               *LibraryService
-	LibraryAsset          *LibraryAssetService
-	LibraryDomain         *LibraryDomainService
-	LibraryItem           *LibraryItemService
-	LibraryMedia          *LibraryMediaService
-	LibrarySDK            *LibrarySDKService
-	LibrarySite           *LibrarySiteService
-	LibraryUsage          *LibraryUsageService
-	Mail                  *MailService
-	MarkdownDialect       *MarkdownDialectService
-	MCP                   *MCPService
-	Members               *MembersService
-	Messages              *MessagesService
-	ModelIo               *ModelIoService
-	Moderation            *ModerationService
-	MyActivity            *MyActivityService
-	MyCoursePaths         *MyCoursePathsService
-	MyLearning            *MyLearningService
-	Newsletter            *NewsletterService
-	Notifications         *NotificationsService
-	Onboarding            *OnboardingService
-	OrgImportJob          *OrgImportJobService
-	OrgLanguageSwitcher   *OrgLanguageSwitcherService
-	OrgPayments           *OrgPaymentsService
-	Orgs                  *OrgsService
-	OrgSms                *OrgSmsService
-	PageTranslation       *PageTranslationService
-	PreviewExchange       *PreviewExchangeService
-	PreviewSessions       *PreviewSessionsService
-	PreviewStatus         *PreviewStatusService
-	Public                *PublicService
-	Questions             *QuestionsService
-	ReaderAuth            *ReaderAuthService
-	ReaderDomain          *ReaderDomainService
-	ReaderImageSign       *ReaderImageSignService
-	ReaderPolicy          *ReaderPolicyService
-	ReaderSignOut         *ReaderSignOutService
-	ReaderSignups         *ReaderSignupsService
-	ReferenceCandidates   *ReferenceCandidatesService
-	ReleaseReview         *ReleaseReviewService
-	Releases              *ReleasesService
-	ReleaseTranslation    *ReleaseTranslationService
-	Roadmap               *RoadmapService
-	Roles                 *RolesService
-	SCIM                  *SCIMService
-	Sdks                  *SdksService
-	Search                *SearchService
-	SecretScanning        *SecretScanningService
-	SectionLibrary        *SectionLibraryService
-	ServiceAccounts       *ServiceAccountsService
-	Sessions              *SessionsService
-	SiteFrontPage         *SiteFrontPageService
-	SiteLabels            *SiteLabelsService
-	SitePreview           *SitePreviewService
-	Sites                 *SitesService
-	SpaceAuthors          *SpaceAuthorsService
-	SpaceFrontPage        *SpaceFrontPageService
-	SpaceLabels           *SpaceLabelsService
-	SpacePiecePage        *SpacePiecePageService
-	Spaces                *SpacesService
-	SpaceTemplates        *SpaceTemplatesService
-	SpaceTypes            *SpaceTypesService
-	SSO                   *SSOService
-	Status                *StatusService
-	StatusAccess          *StatusAccessService
-	StatusIntegrations    *StatusIntegrationsService
-	StatusMetrics         *StatusMetricsService
-	StatusTemplates       *StatusTemplatesService
-	StatusTranslations    *StatusTranslationsService
-	Templates             *TemplatesService
-	Themes                *ThemesService
-	Tokens                *TokensService
-	TranslationCoverage   *TranslationCoverageService
-	Translations          *TranslationsService
-	Users                 *UsersService
-	Versioning            *VersioningService
-	Webhooks              *WebhooksService
-	WebhookSettings       *WebhookSettingsService
+	About                     *AboutService
+	Activitypub               *ActivitypubService
+	AI                        *AIService
+	Analytics                 *AnalyticsService
+	AnswerProvider            *AnswerProviderService
+	APIActivity               *APIActivityService
+	AssetLibrary              *AssetLibraryService
+	Audit                     *AuditService
+	AuditExport               *AuditExportService
+	Auth                      *AuthService
+	AutomationAccount         *AutomationAccountService
+	AutomationHooks           *AutomationHooksService
+	Away                      *AwayService
+	Billing                   *BillingService
+	Blog                      *BlogService
+	BlogComments              *BlogCommentsService
+	BlogEmailIn               *BlogEmailInService
+	BlogEngagement            *BlogEngagementService
+	BlogGithub                *BlogGithubService
+	BlogImport                *BlogImportService
+	BlogMediaSearch           *BlogMediaSearchService
+	BlogMembership            *BlogMembershipService
+	BlogNewsletterSettings    *BlogNewsletterSettingsService
+	BlogPodcast               *BlogPodcastService
+	BlogPostPassword          *BlogPostPasswordService
+	BlogPostTranslation       *BlogPostTranslationService
+	BlogPublishPings          *BlogPublishPingsService
+	BlogRecommendations       *BlogRecommendationsService
+	BlogReview                *BlogReviewService
+	BlogTaxonomy              *BlogTaxonomyService
+	Cache                     *CacheService
+	Careers                   *CareersService
+	CareersAts                *CareersAtsService
+	CareersHiring             *CareersHiringService
+	CareersIndexing           *CareersIndexingService
+	Changelog                 *ChangelogService
+	ChangelogChannels         *ChangelogChannelsService
+	ChangelogDuplicate        *ChangelogDuplicateService
+	ChangelogImport           *ChangelogImportService
+	ChangelogNotes            *ChangelogNotesService
+	ChangelogReleaseTemplates *ChangelogReleaseTemplatesService
+	ChangelogTours            *ChangelogToursService
+	ChangelogWidgetSecret     *ChangelogWidgetSecretService
+	Chat                      *ChatService
+	Community                 *CommunityService
+	ConnectorIdentityPublic   *ConnectorIdentityPublicService
+	ConnectorKnowledgeAdmin   *ConnectorKnowledgeAdminService
+	Connectors                *ConnectorsService
+	Consent                   *ConsentService
+	ConsentIdentity           *ConsentIdentityService
+	ConsentIdentityJwks       *ConsentIdentityJwksService
+	ConsentIdentitySetup      *ConsentIdentitySetupService
+	ConsentLink               *ConsentLinkService
+	ConsentLinkCodes          *ConsentLinkCodesService
+	ConsentPartners           *ConsentPartnersService
+	Contact                   *ContactService
+	ContactBlock              *ContactBlockService
+	ContactForm               *ContactFormService
+	ContactPrivacy            *ContactPrivacyService
+	ContentAI                 *ContentAIService
+	ContentEntryLocales       *ContentEntryLocalesService
+	ContentLibrary            *ContentLibraryService
+	ContentLocales            *ContentLocalesService
+	ContentModel              *ContentModelService
+	ContentStudio             *ContentStudioService
+	ContentWorkflow           *ContentWorkflowService
+	CourseAccess              *CourseAccessService
+	CourseBuilder             *CourseBuilderService
+	CourseCheckoutExtras      *CourseCheckoutExtrasService
+	CourseCohortLearner       *CourseCohortLearnerService
+	CourseCohorts             *CourseCohortsService
+	CourseCommerce            *CourseCommerceService
+	CourseCommunity           *CourseCommunityService
+	CourseCommunityAdmin      *CourseCommunityAdminService
+	CourseEmailSync           *CourseEmailSyncService
+	CourseFeed                *CourseFeedService
+	CourseLandingVariants     *CourseLandingVariantsService
+	CourseLearnerDepth        *CourseLearnerDepthService
+	CourseLearnerExtras       *CourseLearnerExtrasService
+	CourseLearners            *CourseLearnersService
+	CourseLessonKinds         *CourseLessonKindsService
+	CourseOffers              *CourseOffersService
+	CoursePackageFiles        *CoursePackageFilesService
+	CoursePackages            *CoursePackagesService
+	CoursePaths               *CoursePathsService
+	CourseQuizReview          *CourseQuizReviewService
+	CourseReports             *CourseReportsService
+	Courses                   *CoursesService
+	CourseScormExport         *CourseScormExportService
+	CourseStore               *CourseStoreService
+	CspReportsAdmin           *CspReportsAdminService
+	CustomEmoji               *CustomEmojiService
+	CustomFields              *CustomFieldsService
+	DeliveryEntries           *DeliveryEntriesService
+	DeliveryKey               *DeliveryKeyService
+	DeliveryKeys              *DeliveryKeysService
+	DeliverySite              *DeliverySiteService
+	DeployStatus              *DeployStatusService
+	DeviceKeys                *DeviceKeysService
+	Docs                      *DocsService
+	DocsRender                *DocsRenderService
+	DocusignConnect           *DocusignConnectService
+	DomainTags                *DomainTagsService
+	Drafts                    *DraftsService
+	EdgeProvider              *EdgeProviderService
+	EmbeddableHosts           *EmbeddableHostsService
+	EmbedFeeds                *EmbedFeedsService
+	Entitlements              *EntitlementsService
+	EntryCard                 *EntryCardService
+	EntryDeliveryPreview      *EntryDeliveryPreviewService
+	EntryFields               *EntryFieldsService
+	EntryUsage                *EntryUsageService
+	Environments              *EnvironmentsService
+	EscalationInbound         *EscalationInboundService
+	EscalationProviders       *EscalationProvidersService
+	EscalationReader          *EscalationReaderService
+	Esign                     *EsignService
+	EventAgendaPublic         *EventAgendaPublicService
+	EventAttendees            *EventAttendeesService
+	EventAttendeesPublic      *EventAttendeesPublicService
+	EventEngage               *EventEngageService
+	EventEngagePublic         *EventEngagePublicService
+	EventExtras               *EventExtrasService
+	EventExtrasPublic         *EventExtrasPublicService
+	EventMeetings             *EventMeetingsService
+	EventMeetingsPublic       *EventMeetingsPublicService
+	EventMyAgenda             *EventMyAgendaService
+	EventNetwork              *EventNetworkService
+	EventNotices              *EventNoticesService
+	EventProfile              *EventProfileService
+	EventPromoCodes           *EventPromoCodesService
+	EventRsvpPrivacy          *EventRsvpPrivacyService
+	Events                    *EventsService
+	EventSeriesPublic         *EventSeriesPublicService
+	EventSessions             *EventSessionsService
+	EventsNetworkAdmin        *EventsNetworkAdminService
+	EventsNetworkPublic       *EventsNetworkPublicService
+	EventsNetworkSettings     *EventsNetworkSettingsService
+	EventSpeakers             *EventSpeakersService
+	EventSuggestionsPublic    *EventSuggestionsPublicService
+	EventTicketExtras         *EventTicketExtrasService
+	EventTicketExtrasPublic   *EventTicketExtrasPublicService
+	EventTickets              *EventTicketsService
+	EventTicketsPublic        *EventTicketsPublicService
+	EventTicketWebhook        *EventTicketWebhookService
+	ExecutorAdmin             *ExecutorAdminService
+	ExecutorV2                *ExecutorV2Service
+	Extensions                *ExtensionsService
+	Federation                *FederationService
+	FormInsights              *FormInsightsService
+	Forms                     *FormsService
+	Forum                     *ForumService
+	ForumBehaviour            *ForumBehaviourService
+	ForumCategoryTools        *ForumCategoryToolsService
+	ForumEmbed                *ForumEmbedService
+	ForumImport               *ForumImportService
+	ForumLeaderboards         *ForumLeaderboardsService
+	ForumPaywall              *ForumPaywallService
+	ForumPaywallPublic        *ForumPaywallPublicService
+	ForumPlans                *ForumPlansService
+	ForumPromote              *ForumPromoteService
+	ForumStaff                *ForumStaffService
+	ForumTopicTranslation     *ForumTopicTranslationService
+	GoogleIndexing            *GoogleIndexingService
+	Groups                    *GroupsService
+	Growth                    *GrowthService
+	HostedOutput              *HostedOutputService
+	Icons                     *IconsService
+	IntegrationHealth         *IntegrationHealthService
+	Integrations              *IntegrationsService
+	IntegrationToken          *IntegrationTokenService
+	IntegratorPublic          *IntegratorPublicService
+	Invites                   *InvitesService
+	Items                     *ItemsService
+	Jobs                      *JobsService
+	Keys                      *KeysService
+	LegalPolicy               *LegalPolicyService
+	LegalTrust                *LegalTrustService
+	LegalUpdates              *LegalUpdatesService
+	Library                   *LibraryService
+	LibraryAsset              *LibraryAssetService
+	LibraryDomain             *LibraryDomainService
+	LibraryItem               *LibraryItemService
+	LibraryMedia              *LibraryMediaService
+	LibrarySDK                *LibrarySDKService
+	LibrarySite               *LibrarySiteService
+	LibraryUsage              *LibraryUsageService
+	LinkCheck                 *LinkCheckService
+	LiveRooms                 *LiveRoomsService
+	LiveRoomsMedia            *LiveRoomsMediaService
+	LiveRoomsPublic           *LiveRoomsPublicService
+	LogoutReceivers           *LogoutReceiversService
+	LTIDeepLink               *LTIDeepLinkService
+	Mail                      *MailService
+	ManagedEdge               *ManagedEdgeService
+	MarkdownDialect           *MarkdownDialectService
+	MCP                       *MCPService
+	MeetingOauthCallback      *MeetingOauthCallbackService
+	MemberMerge               *MemberMergeService
+	MemberRelink              *MemberRelinkService
+	Members                   *MembersService
+	MemberSegments            *MemberSegmentsService
+	Messages                  *MessagesService
+	ModelIo                   *ModelIoService
+	Moderation                *ModerationService
+	ModerationMessages        *ModerationMessagesService
+	MyActivity                *MyActivityService
+	MyCoursePaths             *MyCoursePathsService
+	MyLearning                *MyLearningService
+	MyTranscript              *MyTranscriptService
+	Newsletter                *NewsletterService
+	Newsroom                  *NewsroomService
+	Notifications             *NotificationsService
+	OauthToken                *OauthTokenService
+	ObjectSchema              *ObjectSchemaService
+	Onboarding                *OnboardingService
+	OperatorIssuers           *OperatorIssuersService
+	OrgBackup                 *OrgBackupService
+	OrgDelete                 *OrgDeleteService
+	OrgImportJob              *OrgImportJobService
+	OrgLanguageSwitcher       *OrgLanguageSwitcherService
+	OrgPayments               *OrgPaymentsService
+	OrgPaypal                 *OrgPaypalService
+	Orgs                      *OrgsService
+	OrgSms                    *OrgSmsService
+	PageAccess                *PageAccessService
+	PageTranslation           *PageTranslationService
+	PartnerLinks              *PartnerLinksService
+	PathCertificatePublic     *PathCertificatePublicService
+	PhoneOptins               *PhoneOptinsService
+	PlatformChangelog         *PlatformChangelogService
+	PolicyFeed                *PolicyFeedService
+	PolicyGate                *PolicyGateService
+	PolicyGateAdmin           *PolicyGateAdminService
+	PolicyGatePublic          *PolicyGatePublicService
+	PolicySources             *PolicySourcesService
+	PostMailTracking          *PostMailTrackingService
+	PreviewDeployment         *PreviewDeploymentService
+	PreviewExchange           *PreviewExchangeService
+	PreviewSessions           *PreviewSessionsService
+	PreviewStatus             *PreviewStatusService
+	Public                    *PublicService
+	PublishRun                *PublishRunService
+	Questions                 *QuestionsService
+	ReaderAuth                *ReaderAuthService
+	ReaderDomain              *ReaderDomainService
+	ReaderIdpPublic           *ReaderIdpPublicService
+	ReaderImageSign           *ReaderImageSignService
+	ReaderPolicy              *ReaderPolicyService
+	ReaderSignOut             *ReaderSignOutService
+	ReaderSignups             *ReaderSignupsService
+	RedirectManager           *RedirectManagerService
+	ReferenceCandidates       *ReferenceCandidatesService
+	Referrals                 *ReferralsService
+	ReferralsPublic           *ReferralsPublicService
+	ReleaseReview             *ReleaseReviewService
+	Releases                  *ReleasesService
+	ReleaseTranslation        *ReleaseTranslationService
+	Reports                   *ReportsService
+	ReputationSubject         *ReputationSubjectService
+	Resolve                   *ResolveService
+	Roadmap                   *RoadmapService
+	Roles                     *RolesService
+	SavedQueries              *SavedQueriesService
+	Schemas                   *SchemasService
+	SCIM                      *SCIMService
+	Sdks                      *SdksService
+	Search                    *SearchService
+	SecretScanning            *SecretScanningService
+	SectionLibrary            *SectionLibraryService
+	SecurityPolicy            *SecurityPolicyService
+	SeoReport                 *SeoReportService
+	ServiceAccounts           *ServiceAccountsService
+	ServiceConnectors         *ServiceConnectorsService
+	Sessions                  *SessionsService
+	Shop                      *ShopService
+	SiteBrand                 *SiteBrandService
+	SiteConsent               *SiteConsentService
+	SiteConsentPublic         *SiteConsentPublicService
+	SiteFrontPage             *SiteFrontPageService
+	SiteImport                *SiteImportService
+	SiteLabels                *SiteLabelsService
+	SitePreview               *SitePreviewService
+	SiteReaderAuth            *SiteReaderAuthService
+	SiteReaderPolicy          *SiteReaderPolicyService
+	Sites                     *SitesService
+	SiteSearch                *SiteSearchService
+	SiteSettings              *SiteSettingsService
+	SocialCardPreview         *SocialCardPreviewService
+	SpaceAnalytics            *SpaceAnalyticsService
+	SpaceAuthors              *SpaceAuthorsService
+	SpaceFeatureSettings      *SpaceFeatureSettingsService
+	SpaceFrontPage            *SpaceFrontPageService
+	SpaceLabels               *SpaceLabelsService
+	SpaceNetworkAccess        *SpaceNetworkAccessService
+	SpacePiecePage            *SpacePiecePageService
+	Spaces                    *SpacesService
+	SpaceSettingsWrite        *SpaceSettingsWriteService
+	SpaceTemplates            *SpaceTemplatesService
+	SpaceTypes                *SpaceTypesService
+	SSO                       *SSOService
+	Status                    *StatusService
+	StatusAccess              *StatusAccessService
+	StatusAuthoring           *StatusAuthoringService
+	StatusDepth               *StatusDepthService
+	StatusEventsIngest        *StatusEventsIngestService
+	StatusIntegrations        *StatusIntegrationsService
+	StatusMetrics             *StatusMetricsService
+	StatusOps                 *StatusOpsService
+	StatusSlack               *StatusSlackService
+	StatusSubscribers         *StatusSubscribersService
+	StatusTemplates           *StatusTemplatesService
+	StatusTranslations        *StatusTranslationsService
+	SuiteIntegrationHealth    *SuiteIntegrationHealthService
+	Templates                 *TemplatesService
+	Themes                    *ThemesService
+	TicketWallet              *TicketWalletService
+	Tokens                    *TokensService
+	TopicEscalation           *TopicEscalationService
+	TranslationCoverage       *TranslationCoverageService
+	Translations              *TranslationsService
+	Users                     *UsersService
+	Versioning                *VersioningService
+	WebhookRecovery           *WebhookRecoveryService
+	Webhooks                  *WebhooksService
+	WebhookSettings           *WebhookSettingsService
 }
 
 // Option configures a Client.
@@ -257,27 +425,54 @@ func NewClient(opts ...Option) *Client {
 	for _, opt := range opts {
 		opt(c)
 	}
+	c.About = &AboutService{c: c}
+	c.Activitypub = &ActivitypubService{c: c}
 	c.AI = &AIService{c: c}
 	c.AI.Provider = &AIProviderService{c: c}
 	c.Analytics = &AnalyticsService{c: c}
 	c.Analytics.Growth = &AnalyticsGrowthService{c: c}
+	c.AnswerProvider = &AnswerProviderService{c: c}
 	c.APIActivity = &APIActivityService{c: c}
 	c.AssetLibrary = &AssetLibraryService{c: c}
 	c.Audit = &AuditService{c: c}
+	c.AuditExport = &AuditExportService{c: c}
 	c.Auth = &AuthService{c: c}
+	c.AutomationAccount = &AutomationAccountService{c: c}
+	c.AutomationHooks = &AutomationHooksService{c: c}
+	c.Away = &AwayService{c: c}
 	c.Billing = &BillingService{c: c}
 	c.Blog = &BlogService{c: c}
 	c.Blog.Articles = &BlogArticlesService{c: c}
 	c.Blog.Moderation = &BlogModerationService{c: c}
 	c.Blog.Newsletter = &BlogNewsletterService{c: c}
 	c.BlogComments = &BlogCommentsService{c: c}
+	c.BlogEmailIn = &BlogEmailInService{c: c}
+	c.BlogEngagement = &BlogEngagementService{c: c}
+	c.BlogGithub = &BlogGithubService{c: c}
+	c.BlogImport = &BlogImportService{c: c}
+	c.BlogMediaSearch = &BlogMediaSearchService{c: c}
+	c.BlogMembership = &BlogMembershipService{c: c}
+	c.BlogNewsletterSettings = &BlogNewsletterSettingsService{c: c}
+	c.BlogPodcast = &BlogPodcastService{c: c}
+	c.BlogPostPassword = &BlogPostPasswordService{c: c}
 	c.BlogPostTranslation = &BlogPostTranslationService{c: c}
+	c.BlogPublishPings = &BlogPublishPingsService{c: c}
+	c.BlogRecommendations = &BlogRecommendationsService{c: c}
+	c.BlogReview = &BlogReviewService{c: c}
 	c.BlogTaxonomy = &BlogTaxonomyService{c: c}
+	c.Cache = &CacheService{c: c}
 	c.Careers = &CareersService{c: c}
 	c.CareersAts = &CareersAtsService{c: c}
+	c.CareersHiring = &CareersHiringService{c: c}
 	c.CareersIndexing = &CareersIndexingService{c: c}
 	c.Changelog = &ChangelogService{c: c}
+	c.ChangelogChannels = &ChangelogChannelsService{c: c}
+	c.ChangelogDuplicate = &ChangelogDuplicateService{c: c}
 	c.ChangelogImport = &ChangelogImportService{c: c}
+	c.ChangelogNotes = &ChangelogNotesService{c: c}
+	c.ChangelogReleaseTemplates = &ChangelogReleaseTemplatesService{c: c}
+	c.ChangelogTours = &ChangelogToursService{c: c}
+	c.ChangelogWidgetSecret = &ChangelogWidgetSecretService{c: c}
 	c.Chat = &ChatService{c: c}
 	c.Chat.IncomingWebhooks = &ChatIncomingWebhooksService{c: c}
 	c.Chat.Messages = &ChatMessagesService{c: c}
@@ -288,12 +483,21 @@ func NewClient(opts ...Option) *Client {
 	c.Community.Extras = &CommunityExtrasService{c: c}
 	c.Community.Relationships = &CommunityRelationshipsService{c: c}
 	c.Community.Reputation = &CommunityReputationService{c: c}
+	c.ConnectorIdentityPublic = &ConnectorIdentityPublicService{c: c}
+	c.ConnectorKnowledgeAdmin = &ConnectorKnowledgeAdminService{c: c}
 	c.Connectors = &ConnectorsService{c: c}
 	c.Connectors.Kb = &ConnectorsKbService{c: c}
 	c.Connectors.Providers = &ConnectorsProvidersService{c: c}
 	c.Consent = &ConsentService{c: c}
+	c.ConsentIdentity = &ConsentIdentityService{c: c}
+	c.ConsentIdentityJwks = &ConsentIdentityJwksService{c: c}
+	c.ConsentIdentitySetup = &ConsentIdentitySetupService{c: c}
+	c.ConsentLink = &ConsentLinkService{c: c}
+	c.ConsentLinkCodes = &ConsentLinkCodesService{c: c}
+	c.ConsentPartners = &ConsentPartnersService{c: c}
 	c.Contact = &ContactService{c: c}
 	c.ContactBlock = &ContactBlockService{c: c}
+	c.ContactForm = &ContactFormService{c: c}
 	c.ContactPrivacy = &ContactPrivacyService{c: c}
 	c.ContentAI = &ContentAIService{c: c}
 	c.ContentEntryLocales = &ContentEntryLocalesService{c: c}
@@ -303,12 +507,31 @@ func NewClient(opts ...Option) *Client {
 	c.ContentStudio = &ContentStudioService{c: c}
 	c.ContentWorkflow = &ContentWorkflowService{c: c}
 	c.CourseAccess = &CourseAccessService{c: c}
+	c.CourseBuilder = &CourseBuilderService{c: c}
+	c.CourseCheckoutExtras = &CourseCheckoutExtrasService{c: c}
+	c.CourseCohortLearner = &CourseCohortLearnerService{c: c}
+	c.CourseCohorts = &CourseCohortsService{c: c}
 	c.CourseCommerce = &CourseCommerceService{c: c}
+	c.CourseCommunity = &CourseCommunityService{c: c}
+	c.CourseCommunityAdmin = &CourseCommunityAdminService{c: c}
+	c.CourseEmailSync = &CourseEmailSyncService{c: c}
+	c.CourseFeed = &CourseFeedService{c: c}
+	c.CourseLandingVariants = &CourseLandingVariantsService{c: c}
+	c.CourseLearnerDepth = &CourseLearnerDepthService{c: c}
 	c.CourseLearnerExtras = &CourseLearnerExtrasService{c: c}
 	c.CourseLearners = &CourseLearnersService{c: c}
+	c.CourseLessonKinds = &CourseLessonKindsService{c: c}
+	c.CourseOffers = &CourseOffersService{c: c}
+	c.CoursePackageFiles = &CoursePackageFilesService{c: c}
+	c.CoursePackages = &CoursePackagesService{c: c}
 	c.CoursePaths = &CoursePathsService{c: c}
+	c.CourseQuizReview = &CourseQuizReviewService{c: c}
+	c.CourseReports = &CourseReportsService{c: c}
 	c.Courses = &CoursesService{c: c}
 	c.Courses.Quizzes = &CoursesQuizzesService{c: c}
+	c.CourseScormExport = &CourseScormExportService{c: c}
+	c.CourseStore = &CourseStoreService{c: c}
+	c.CspReportsAdmin = &CspReportsAdminService{c: c}
 	c.CustomEmoji = &CustomEmojiService{c: c}
 	c.CustomFields = &CustomFieldsService{c: c}
 	c.DeliveryEntries = &DeliveryEntriesService{c: c}
@@ -331,32 +554,59 @@ func NewClient(opts ...Option) *Client {
 	c.Docs.Templates = &DocsTemplatesService{c: c}
 	c.Docs.Translations = &DocsTranslationsService{c: c}
 	c.Docs.Versions = &DocsVersionsService{c: c}
+	c.DocsRender = &DocsRenderService{c: c}
+	c.DocusignConnect = &DocusignConnectService{c: c}
+	c.DomainTags = &DomainTagsService{c: c}
 	c.Drafts = &DraftsService{c: c}
+	c.EdgeProvider = &EdgeProviderService{c: c}
 	c.EmbeddableHosts = &EmbeddableHostsService{c: c}
 	c.EmbedFeeds = &EmbedFeedsService{c: c}
+	c.Entitlements = &EntitlementsService{c: c}
 	c.EntryCard = &EntryCardService{c: c}
 	c.EntryDeliveryPreview = &EntryDeliveryPreviewService{c: c}
 	c.EntryFields = &EntryFieldsService{c: c}
 	c.EntryUsage = &EntryUsageService{c: c}
 	c.Environments = &EnvironmentsService{c: c}
+	c.EscalationInbound = &EscalationInboundService{c: c}
+	c.EscalationProviders = &EscalationProvidersService{c: c}
+	c.EscalationReader = &EscalationReaderService{c: c}
+	c.Esign = &EsignService{c: c}
 	c.EventAgendaPublic = &EventAgendaPublicService{c: c}
 	c.EventAttendees = &EventAttendeesService{c: c}
 	c.EventAttendeesPublic = &EventAttendeesPublicService{c: c}
+	c.EventEngage = &EventEngageService{c: c}
+	c.EventEngagePublic = &EventEngagePublicService{c: c}
+	c.EventExtras = &EventExtrasService{c: c}
+	c.EventExtrasPublic = &EventExtrasPublicService{c: c}
+	c.EventMeetings = &EventMeetingsService{c: c}
+	c.EventMeetingsPublic = &EventMeetingsPublicService{c: c}
 	c.EventMyAgenda = &EventMyAgendaService{c: c}
+	c.EventNetwork = &EventNetworkService{c: c}
 	c.EventNotices = &EventNoticesService{c: c}
+	c.EventProfile = &EventProfileService{c: c}
 	c.EventPromoCodes = &EventPromoCodesService{c: c}
 	c.EventRsvpPrivacy = &EventRsvpPrivacyService{c: c}
 	c.Events = &EventsService{c: c}
 	c.EventSeriesPublic = &EventSeriesPublicService{c: c}
 	c.EventSessions = &EventSessionsService{c: c}
+	c.EventsNetworkAdmin = &EventsNetworkAdminService{c: c}
+	c.EventsNetworkPublic = &EventsNetworkPublicService{c: c}
+	c.EventsNetworkSettings = &EventsNetworkSettingsService{c: c}
 	c.EventSpeakers = &EventSpeakersService{c: c}
+	c.EventSuggestionsPublic = &EventSuggestionsPublicService{c: c}
+	c.EventTicketExtras = &EventTicketExtrasService{c: c}
+	c.EventTicketExtrasPublic = &EventTicketExtrasPublicService{c: c}
 	c.EventTickets = &EventTicketsService{c: c}
 	c.EventTicketsPublic = &EventTicketsPublicService{c: c}
 	c.EventTicketWebhook = &EventTicketWebhookService{c: c}
+	c.ExecutorAdmin = &ExecutorAdminService{c: c}
+	c.ExecutorV2 = &ExecutorV2Service{c: c}
 	c.Extensions = &ExtensionsService{c: c}
 	c.Extensions.API = &ExtensionsAPIService{c: c}
 	c.Extensions.Registry = &ExtensionsRegistryService{c: c}
 	c.Extensions.Render = &ExtensionsRenderService{c: c}
+	c.Federation = &FederationService{c: c}
+	c.FormInsights = &FormInsightsService{c: c}
 	c.Forms = &FormsService{c: c}
 	c.Forms.Submissions = &FormsSubmissionsService{c: c}
 	c.Forms.Templates = &FormsTemplatesService{c: c}
@@ -366,6 +616,16 @@ func NewClient(opts ...Option) *Client {
 	c.Forum.Tools = &ForumToolsService{c: c}
 	c.Forum.Topics = &ForumTopicsService{c: c}
 	c.Forum.Translations = &ForumTranslationsService{c: c}
+	c.ForumBehaviour = &ForumBehaviourService{c: c}
+	c.ForumCategoryTools = &ForumCategoryToolsService{c: c}
+	c.ForumEmbed = &ForumEmbedService{c: c}
+	c.ForumImport = &ForumImportService{c: c}
+	c.ForumLeaderboards = &ForumLeaderboardsService{c: c}
+	c.ForumPaywall = &ForumPaywallService{c: c}
+	c.ForumPaywallPublic = &ForumPaywallPublicService{c: c}
+	c.ForumPlans = &ForumPlansService{c: c}
+	c.ForumPromote = &ForumPromoteService{c: c}
+	c.ForumStaff = &ForumStaffService{c: c}
 	c.ForumTopicTranslation = &ForumTopicTranslationService{c: c}
 	c.GoogleIndexing = &GoogleIndexingService{c: c}
 	c.Groups = &GroupsService{c: c}
@@ -376,14 +636,21 @@ func NewClient(opts ...Option) *Client {
 	c.Growth = &GrowthService{c: c}
 	c.HostedOutput = &HostedOutputService{c: c}
 	c.Icons = &IconsService{c: c}
+	c.IntegrationHealth = &IntegrationHealthService{c: c}
 	c.Integrations = &IntegrationsService{c: c}
 	c.Integrations.Cloudflare = &IntegrationsCloudflareService{c: c}
 	c.Integrations.Deepl = &IntegrationsDeeplService{c: c}
 	c.Integrations.Github = &IntegrationsGithubService{c: c}
 	c.Integrations.GithubAgent = &IntegrationsGithubAgentService{c: c}
 	c.Integrations.Slack = &IntegrationsSlackService{c: c}
+	c.IntegrationToken = &IntegrationTokenService{c: c}
+	c.IntegratorPublic = &IntegratorPublicService{c: c}
 	c.Invites = &InvitesService{c: c}
 	c.Items = &ItemsService{c: c}
+	c.Jobs = &JobsService{c: c}
+	c.Keys = &KeysService{c: c}
+	c.LegalPolicy = &LegalPolicyService{c: c}
+	c.LegalTrust = &LegalTrustService{c: c}
 	c.LegalUpdates = &LegalUpdatesService{c: c}
 	c.Library = &LibraryService{c: c}
 	c.LibraryAsset = &LibraryAssetService{c: c}
@@ -393,57 +660,107 @@ func NewClient(opts ...Option) *Client {
 	c.LibrarySDK = &LibrarySDKService{c: c}
 	c.LibrarySite = &LibrarySiteService{c: c}
 	c.LibraryUsage = &LibraryUsageService{c: c}
+	c.LinkCheck = &LinkCheckService{c: c}
+	c.LiveRooms = &LiveRoomsService{c: c}
+	c.LiveRoomsMedia = &LiveRoomsMediaService{c: c}
+	c.LiveRoomsPublic = &LiveRoomsPublicService{c: c}
+	c.LogoutReceivers = &LogoutReceiversService{c: c}
+	c.LTIDeepLink = &LTIDeepLinkService{c: c}
 	c.Mail = &MailService{c: c}
 	c.Mail.Provider = &MailProviderService{c: c}
 	c.Mail.Templates = &MailTemplatesService{c: c}
 	c.Mail.Unsubscribe = &MailUnsubscribeService{c: c}
+	c.ManagedEdge = &ManagedEdgeService{c: c}
 	c.MarkdownDialect = &MarkdownDialectService{c: c}
 	c.MCP = &MCPService{c: c}
+	c.MeetingOauthCallback = &MeetingOauthCallbackService{c: c}
+	c.MemberMerge = &MemberMergeService{c: c}
+	c.MemberRelink = &MemberRelinkService{c: c}
 	c.Members = &MembersService{c: c}
+	c.MemberSegments = &MemberSegmentsService{c: c}
 	c.Messages = &MessagesService{c: c}
 	c.ModelIo = &ModelIoService{c: c}
 	c.Moderation = &ModerationService{c: c}
 	c.Moderation.ContentRules = &ModerationContentRulesService{c: c}
 	c.Moderation.FlagTypes = &ModerationFlagTypesService{c: c}
 	c.Moderation.Screening = &ModerationScreeningService{c: c}
+	c.ModerationMessages = &ModerationMessagesService{c: c}
 	c.MyActivity = &MyActivityService{c: c}
 	c.MyCoursePaths = &MyCoursePathsService{c: c}
 	c.MyLearning = &MyLearningService{c: c}
+	c.MyTranscript = &MyTranscriptService{c: c}
 	c.Newsletter = &NewsletterService{c: c}
+	c.Newsroom = &NewsroomService{c: c}
 	c.Notifications = &NotificationsService{c: c}
 	c.Notifications.Push = &NotificationsPushService{c: c}
+	c.OauthToken = &OauthTokenService{c: c}
+	c.ObjectSchema = &ObjectSchemaService{c: c}
 	c.Onboarding = &OnboardingService{c: c}
+	c.OperatorIssuers = &OperatorIssuersService{c: c}
+	c.OrgBackup = &OrgBackupService{c: c}
+	c.OrgDelete = &OrgDeleteService{c: c}
 	c.OrgImportJob = &OrgImportJobService{c: c}
 	c.OrgLanguageSwitcher = &OrgLanguageSwitcherService{c: c}
 	c.OrgPayments = &OrgPaymentsService{c: c}
+	c.OrgPaypal = &OrgPaypalService{c: c}
 	c.Orgs = &OrgsService{c: c}
 	c.Orgs.Captcha = &OrgsCaptchaService{c: c}
 	c.Orgs.Health = &OrgsHealthService{c: c}
 	c.Orgs.Settings = &OrgsSettingsService{c: c}
 	c.OrgSms = &OrgSmsService{c: c}
+	c.PageAccess = &PageAccessService{c: c}
 	c.PageTranslation = &PageTranslationService{c: c}
+	c.PartnerLinks = &PartnerLinksService{c: c}
+	c.PathCertificatePublic = &PathCertificatePublicService{c: c}
+	c.PhoneOptins = &PhoneOptinsService{c: c}
+	c.PlatformChangelog = &PlatformChangelogService{c: c}
+	c.PolicyFeed = &PolicyFeedService{c: c}
+	c.PolicyGate = &PolicyGateService{c: c}
+	c.PolicyGateAdmin = &PolicyGateAdminService{c: c}
+	c.PolicyGatePublic = &PolicyGatePublicService{c: c}
+	c.PolicySources = &PolicySourcesService{c: c}
+	c.PostMailTracking = &PostMailTrackingService{c: c}
+	c.PreviewDeployment = &PreviewDeploymentService{c: c}
 	c.PreviewExchange = &PreviewExchangeService{c: c}
 	c.PreviewSessions = &PreviewSessionsService{c: c}
 	c.PreviewStatus = &PreviewStatusService{c: c}
 	c.Public = &PublicService{c: c}
 	c.Public.Blog = &PublicBlogService{c: c}
+	c.Public.BlogBrowse = &PublicBlogBrowseService{c: c}
+	c.Public.BlogFeeds = &PublicBlogFeedsService{c: c}
 	c.Public.BlogMedia = &PublicBlogMediaService{c: c}
+	c.Public.BlogMembership = &PublicBlogMembershipService{c: c}
+	c.Public.BlogNewsletter = &PublicBlogNewsletterService{c: c}
+	c.Public.BlogNewsSitemap = &PublicBlogNewsSitemapService{c: c}
+	c.Public.BlogPodcast = &PublicBlogPodcastService{c: c}
+	c.Public.BlogPostPassword = &PublicBlogPostPasswordService{c: c}
+	c.Public.BlogRecommendations = &PublicBlogRecommendationsService{c: c}
+	c.Public.BlogReleases = &PublicBlogReleasesService{c: c}
 	c.Public.BlogTaxonomy = &PublicBlogTaxonomyService{c: c}
 	c.Public.Cards = &PublicCardsService{c: c}
 	c.Public.Careers = &PublicCareersService{c: c}
 	c.Public.Changelog = &PublicChangelogService{c: c}
+	c.Public.ChangelogFeeds = &PublicChangelogFeedsService{c: c}
 	c.Public.ChangelogMarkdown = &PublicChangelogMarkdownService{c: c}
 	c.Public.ChangelogWidget = &PublicChangelogWidgetService{c: c}
+	c.Public.ChangelogWidgetIdentity = &PublicChangelogWidgetIdentityService{c: c}
 	c.Public.Consent = &PublicConsentService{c: c}
 	c.Public.Contact = &PublicContactService{c: c}
 	c.Public.CourseCatalog = &PublicCourseCatalogService{c: c}
+	c.Public.CourseCohorts = &PublicCourseCohortsService{c: c}
 	c.Public.CourseCommerce = &PublicCourseCommerceService{c: c}
+	c.Public.CourseFeed = &PublicCourseFeedService{c: c}
+	c.Public.CourseLandingVariants = &PublicCourseLandingVariantsService{c: c}
+	c.Public.CourseReviews = &PublicCourseReviewsService{c: c}
 	c.Public.Courses = &PublicCoursesService{c: c}
+	c.Public.CourseStore = &PublicCourseStoreService{c: c}
 	c.Public.CustomEmoji = &PublicCustomEmojiService{c: c}
 	c.Public.Domains = &PublicDomainsService{c: c}
 	c.Public.Events = &PublicEventsService{c: c}
 	c.Public.ExtensionRegistry = &PublicExtensionRegistryService{c: c}
 	c.Public.FaqFollow = &PublicFaqFollowService{c: c}
+	c.Public.Federation = &PublicFederationService{c: c}
+	c.Public.FormFlow = &PublicFormFlowService{c: c}
 	c.Public.Forms = &PublicFormsService{c: c}
 	c.Public.Forum = &PublicForumService{c: c}
 	c.Public.Forum.Discovery = &PublicForumDiscoveryService{c: c}
@@ -453,29 +770,45 @@ func NewClient(opts ...Option) *Client {
 	c.Public.Forum.Threads = &PublicForumThreadsService{c: c}
 	c.Public.Forum.Topics = &PublicForumTopicsService{c: c}
 	c.Public.ForumAccount = &PublicForumAccountService{c: c}
+	c.Public.ForumAI = &PublicForumAIService{c: c}
+	c.Public.ForumBehaviour = &PublicForumBehaviourService{c: c}
 	c.Public.ForumBookmark = &PublicForumBookmarkService{c: c}
 	c.Public.ForumCategory = &PublicForumCategoryService{c: c}
+	c.Public.ForumLeaderboards = &PublicForumLeaderboardsService{c: c}
 	c.Public.ForumProfile = &PublicForumProfileService{c: c}
 	c.Public.ForumSearch = &PublicForumSearchService{c: c}
+	c.Public.ForumStaff = &PublicForumStaffService{c: c}
+	c.Public.Geo = &PublicGeoService{c: c}
 	c.Public.Growth = &PublicGrowthService{c: c}
 	c.Public.Identity = &PublicIdentityService{c: c}
 	c.Public.Interactions = &PublicInteractionsService{c: c}
 	c.Public.Legal = &PublicLegalService{c: c}
 	c.Public.LegalGate = &PublicLegalGateService{c: c}
 	c.Public.MCP = &PublicMCPService{c: c}
+	c.Public.MemberSegments = &PublicMemberSegmentsService{c: c}
+	c.Public.Network = &PublicNetworkService{c: c}
+	c.Public.Newsroom = &PublicNewsroomService{c: c}
+	c.Public.Oembed = &PublicOembedService{c: c}
 	c.Public.Onebox = &PublicOneboxService{c: c}
 	c.Public.Openapi = &PublicOpenapiService{c: c}
 	c.Public.Orgs = &PublicOrgsService{c: c}
+	c.Public.PageUnlock = &PublicPageUnlockService{c: c}
+	c.Public.PostEngagement = &PublicPostEngagementService{c: c}
 	c.Public.Preview = &PublicPreviewService{c: c}
+	c.Public.PreviewSummary = &PublicPreviewSummaryService{c: c}
+	c.Public.PublishPings = &PublicPublishPingsService{c: c}
 	c.Public.Reactions = &PublicReactionsService{c: c}
 	c.Public.ReaderAuth = &PublicReaderAuthService{c: c}
+	c.Public.ReaderMarks = &PublicReaderMarksService{c: c}
 	c.Public.ReaderPolicy = &PublicReaderPolicyService{c: c}
 	c.Public.Relations = &PublicRelationsService{c: c}
 	c.Public.Roadmap = &PublicRoadmapService{c: c}
 	c.Public.RoadmapItem = &PublicRoadmapItemService{c: c}
 	c.Public.RoadmapLanes = &PublicRoadmapLanesService{c: c}
+	c.Public.RoadmapReach = &PublicRoadmapReachService{c: c}
 	c.Public.RoadmapVote = &PublicRoadmapVoteService{c: c}
 	c.Public.RoadmapWrite = &PublicRoadmapWriteService{c: c}
+	c.Public.Shop = &PublicShopService{c: c}
 	c.Public.Sites = &PublicSitesService{c: c}
 	c.Public.SpaceAuthors = &PublicSpaceAuthorsService{c: c}
 	c.Public.Spaces = &PublicSpacesService{c: c}
@@ -485,26 +818,39 @@ func NewClient(opts ...Option) *Client {
 	c.Public.StatusEmbeds = &PublicStatusEmbedsService{c: c}
 	c.Public.StatusHooks = &PublicStatusHooksService{c: c}
 	c.Public.StatusIncidents = &PublicStatusIncidentsService{c: c}
+	c.Public.StatusOncall = &PublicStatusOncallService{c: c}
 	c.Public.Statuspage = &PublicStatuspageService{c: c}
 	c.Public.StatusSiblings = &PublicStatusSiblingsService{c: c}
+	c.Public.StatusSubscription = &PublicStatusSubscriptionService{c: c}
+	c.Public.Tags = &PublicTagsService{c: c}
 	c.Public.ThemeComponentRegistry = &PublicThemeComponentRegistryService{c: c}
 	c.Public.ThemeRegistry = &PublicThemeRegistryService{c: c}
 	c.Public.Translations = &PublicTranslationsService{c: c}
 	c.Public.VisitorAuth = &PublicVisitorAuthService{c: c}
+	c.PublishRun = &PublishRunService{c: c}
 	c.Questions = &QuestionsService{c: c}
 	c.ReaderAuth = &ReaderAuthService{c: c}
 	c.ReaderDomain = &ReaderDomainService{c: c}
+	c.ReaderIdpPublic = &ReaderIdpPublicService{c: c}
 	c.ReaderImageSign = &ReaderImageSignService{c: c}
 	c.ReaderPolicy = &ReaderPolicyService{c: c}
 	c.ReaderSignOut = &ReaderSignOutService{c: c}
 	c.ReaderSignups = &ReaderSignupsService{c: c}
+	c.RedirectManager = &RedirectManagerService{c: c}
 	c.ReferenceCandidates = &ReferenceCandidatesService{c: c}
+	c.Referrals = &ReferralsService{c: c}
+	c.ReferralsPublic = &ReferralsPublicService{c: c}
 	c.ReleaseReview = &ReleaseReviewService{c: c}
 	c.Releases = &ReleasesService{c: c}
 	c.ReleaseTranslation = &ReleaseTranslationService{c: c}
+	c.Reports = &ReportsService{c: c}
+	c.ReputationSubject = &ReputationSubjectService{c: c}
+	c.Resolve = &ResolveService{c: c}
 	c.Roadmap = &RoadmapService{c: c}
 	c.Roles = &RolesService{c: c}
 	c.Roles.Custom = &RolesCustomService{c: c}
+	c.SavedQueries = &SavedQueriesService{c: c}
+	c.Schemas = &SchemasService{c: c}
 	c.SCIM = &SCIMService{c: c}
 	c.SCIM.Groups = &SCIMGroupsService{c: c}
 	c.SCIM.Users = &SCIMUsersService{c: c}
@@ -513,15 +859,31 @@ func NewClient(opts ...Option) *Client {
 	c.Search.EmbeddingProvider = &SearchEmbeddingProviderService{c: c}
 	c.SecretScanning = &SecretScanningService{c: c}
 	c.SectionLibrary = &SectionLibraryService{c: c}
+	c.SecurityPolicy = &SecurityPolicyService{c: c}
+	c.SeoReport = &SeoReportService{c: c}
 	c.ServiceAccounts = &ServiceAccountsService{c: c}
+	c.ServiceConnectors = &ServiceConnectorsService{c: c}
 	c.Sessions = &SessionsService{c: c}
+	c.Shop = &ShopService{c: c}
+	c.SiteBrand = &SiteBrandService{c: c}
+	c.SiteConsent = &SiteConsentService{c: c}
+	c.SiteConsentPublic = &SiteConsentPublicService{c: c}
 	c.SiteFrontPage = &SiteFrontPageService{c: c}
+	c.SiteImport = &SiteImportService{c: c}
 	c.SiteLabels = &SiteLabelsService{c: c}
 	c.SitePreview = &SitePreviewService{c: c}
+	c.SiteReaderAuth = &SiteReaderAuthService{c: c}
+	c.SiteReaderPolicy = &SiteReaderPolicyService{c: c}
 	c.Sites = &SitesService{c: c}
+	c.SiteSearch = &SiteSearchService{c: c}
+	c.SiteSettings = &SiteSettingsService{c: c}
+	c.SocialCardPreview = &SocialCardPreviewService{c: c}
+	c.SpaceAnalytics = &SpaceAnalyticsService{c: c}
 	c.SpaceAuthors = &SpaceAuthorsService{c: c}
+	c.SpaceFeatureSettings = &SpaceFeatureSettingsService{c: c}
 	c.SpaceFrontPage = &SpaceFrontPageService{c: c}
 	c.SpaceLabels = &SpaceLabelsService{c: c}
+	c.SpaceNetworkAccess = &SpaceNetworkAccessService{c: c}
 	c.SpacePiecePage = &SpacePiecePageService{c: c}
 	c.Spaces = &SpacesService{c: c}
 	c.Spaces.Addresses = &SpacesAddressesService{c: c}
@@ -534,6 +896,7 @@ func NewClient(opts ...Option) *Client {
 	c.Spaces.ShareLinks = &SpacesShareLinksService{c: c}
 	c.Spaces.Snapshots = &SpacesSnapshotsService{c: c}
 	c.Spaces.ThemeOrigins = &SpacesThemeOriginsService{c: c}
+	c.SpaceSettingsWrite = &SpaceSettingsWriteService{c: c}
 	c.SpaceTemplates = &SpaceTemplatesService{c: c}
 	c.SpaceTypes = &SpaceTypesService{c: c}
 	c.SSO = &SSOService{c: c}
@@ -545,10 +908,17 @@ func NewClient(opts ...Option) *Client {
 	c.Status = &StatusService{c: c}
 	c.Status.Monitors = &StatusMonitorsService{c: c}
 	c.StatusAccess = &StatusAccessService{c: c}
+	c.StatusAuthoring = &StatusAuthoringService{c: c}
+	c.StatusDepth = &StatusDepthService{c: c}
+	c.StatusEventsIngest = &StatusEventsIngestService{c: c}
 	c.StatusIntegrations = &StatusIntegrationsService{c: c}
 	c.StatusMetrics = &StatusMetricsService{c: c}
+	c.StatusOps = &StatusOpsService{c: c}
+	c.StatusSlack = &StatusSlackService{c: c}
+	c.StatusSubscribers = &StatusSubscribersService{c: c}
 	c.StatusTemplates = &StatusTemplatesService{c: c}
 	c.StatusTranslations = &StatusTranslationsService{c: c}
+	c.SuiteIntegrationHealth = &SuiteIntegrationHealthService{c: c}
 	c.Templates = &TemplatesService{c: c}
 	c.Themes = &ThemesService{c: c}
 	c.Themes.Bundles = &ThemesBundlesService{c: c}
@@ -556,7 +926,9 @@ func NewClient(opts ...Option) *Client {
 	c.Themes.Components = &ThemesComponentsService{c: c}
 	c.Themes.Library = &ThemesLibraryService{c: c}
 	c.Themes.Marketplace = &ThemesMarketplaceService{c: c}
+	c.TicketWallet = &TicketWalletService{c: c}
 	c.Tokens = &TokensService{c: c}
+	c.TopicEscalation = &TopicEscalationService{c: c}
 	c.TranslationCoverage = &TranslationCoverageService{c: c}
 	c.Translations = &TranslationsService{c: c}
 	c.Translations.Overrides = &TranslationsOverridesService{c: c}
@@ -565,6 +937,7 @@ func NewClient(opts ...Option) *Client {
 	c.Users.Progression = &UsersProgressionService{c: c}
 	c.Users.Wallet = &UsersWalletService{c: c}
 	c.Versioning = &VersioningService{c: c}
+	c.WebhookRecovery = &WebhookRecoveryService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 	c.WebhookSettings = &WebhookSettingsService{c: c}
 	return c

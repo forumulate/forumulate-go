@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // OrgSmsService holds the operations under client.OrgSms.
@@ -22,23 +24,93 @@ func (s *OrgSmsService) Get(ctx context.Context, orgID string, opts ...RequestOp
 	return &out, nil
 }
 
+// OrgSmsSetQuery are the optional query parameters of OrgSmsService.Set.
+type OrgSmsSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *OrgSmsSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set set the organization’s Twilio account
 //
 // PUT /orgs/{orgId}/sms
-func (s *OrgSmsService) Set(ctx context.Context, orgID string, body OrgSmsSetParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sms", nil, body, &out, opts); err != nil {
+func (s *OrgSmsService) Set(ctx context.Context, orgID string, body OrgSmsSetParams, query *OrgSmsSetQuery, opts ...RequestOption) (*OrgSmsSetResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgSmsSetResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sms", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// OrgSmsPatchQuery are the optional query parameters of OrgSmsService.Patch.
+type OrgSmsPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *OrgSmsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch change the organization’s Twilio account
+//
+// PATCH /orgs/{orgId}/sms
+func (s *OrgSmsService) Patch(ctx context.Context, orgID string, body any, query *OrgSmsPatchQuery, opts ...RequestOption) (*OrgSmsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgSmsPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sms", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgSmsRemoveQuery are the optional query parameters of OrgSmsService.Remove.
+type OrgSmsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgSmsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove remove the organization’s SMS account
 //
 // DELETE /orgs/{orgId}/sms
-func (s *OrgSmsService) Remove(ctx context.Context, orgID string, opts ...RequestOption) (*OrgSmsRemoveResponse, error) {
+func (s *OrgSmsService) Remove(ctx context.Context, orgID string, query *OrgSmsRemoveQuery, opts ...RequestOption) (*OrgSmsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgSmsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sms", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sms", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

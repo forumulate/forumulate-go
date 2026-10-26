@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // EnvironmentsService holds the operations under client.Environments.
@@ -22,12 +24,30 @@ func (s *EnvironmentsService) List(ctx context.Context, orgID string, libraryID 
 	return &out, nil
 }
 
+// EnvironmentsForkQuery are the optional query parameters of EnvironmentsService.Fork.
+type EnvironmentsForkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EnvironmentsForkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Fork fork a library into a sandbox
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/environments
-func (s *EnvironmentsService) Fork(ctx context.Context, orgID string, libraryID string, body EnvironmentsForkParams, opts ...RequestOption) (*EnvironmentsForkResponse, error) {
+func (s *EnvironmentsService) Fork(ctx context.Context, orgID string, libraryID string, body EnvironmentsForkParams, query *EnvironmentsForkQuery, opts ...RequestOption) (*EnvironmentsForkResponse, error) {
+	v, opts := query.encode(opts)
 	var out EnvironmentsForkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/environments", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/environments", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -44,12 +64,30 @@ func (s *EnvironmentsService) Compare(ctx context.Context, orgID string, library
 	return &out, nil
 }
 
+// EnvironmentsPromoteQuery are the optional query parameters of EnvironmentsService.Promote.
+type EnvironmentsPromoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EnvironmentsPromoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Promote promote a sandbox’s model into its source
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/environment/promote
-func (s *EnvironmentsService) Promote(ctx context.Context, orgID string, libraryID string, opts ...RequestOption) (*EnvironmentsPromoteResponse, error) {
+func (s *EnvironmentsService) Promote(ctx context.Context, orgID string, libraryID string, query *EnvironmentsPromoteQuery, opts ...RequestOption) (*EnvironmentsPromoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out EnvironmentsPromoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/environment/promote", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/environment/promote", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

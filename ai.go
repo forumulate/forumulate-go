@@ -25,12 +25,44 @@ func (s *AIService) Insights(ctx context.Context, orgID string, opts ...RequestO
 	return &out, nil
 }
 
+// AIUsageReportQuery are the optional query parameters of AIService.UsageReport.
+type AIUsageReportQuery struct {
+	Days *float64
+}
+
+func (p *AIUsageReportQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Days != nil {
+		v.Set("days", strconv.FormatFloat(*p.Days, 'f', -1, 64))
+	}
+	return v, opts
+}
+
+// UsageReport get the usage in an organization
+//
+// GET /orgs/{orgId}/ai/usage
+func (s *AIService) UsageReport(ctx context.Context, orgID string, query *AIUsageReportQuery, opts ...RequestOption) (*AIUsageReport, error) {
+	v, opts := query.encode(opts)
+	var out AIUsageReport
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/ai/usage", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AIListSourcesQuery are the optional query parameters of AIService.ListSources.
 type AIListSourcesQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *AIListSourcesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -43,6 +75,12 @@ func (p *AIListSourcesQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -74,34 +112,88 @@ func (s *AIService) ListSourcesAutoPaging(ctx context.Context, orgID string, que
 	})
 }
 
+// AIAddSourceQuery are the optional query parameters of AIService.AddSource.
+type AIAddSourceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AIAddSourceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AddSource create a source in an organization
 //
 // POST /orgs/{orgId}/ai/sources
-func (s *AIService) AddSource(ctx context.Context, orgID string, body AIAddSourceParams, opts ...RequestOption) (*AIAddSourceResponse, error) {
+func (s *AIService) AddSource(ctx context.Context, orgID string, body AIAddSourceParams, query *AIAddSourceQuery, opts ...RequestOption) (*AIAddSourceResponse, error) {
+	v, opts := query.encode(opts)
 	var out AIAddSourceResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/ai/sources", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/ai/sources", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// AIRemoveSourceQuery are the optional query parameters of AIService.RemoveSource.
+type AIRemoveSourceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AIRemoveSourceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveSource delete the source
 //
 // DELETE /orgs/{orgId}/ai/sources/{id}
-func (s *AIService) RemoveSource(ctx context.Context, orgID string, id string, opts ...RequestOption) (*AIRemoveSourceResponse, error) {
+func (s *AIService) RemoveSource(ctx context.Context, orgID string, id string, query *AIRemoveSourceQuery, opts ...RequestOption) (*AIRemoveSourceResponse, error) {
+	v, opts := query.encode(opts)
 	var out AIRemoveSourceResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/ai/sources/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/ai/sources/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Ask create the ask in an organization
+// AIAskQuery are the optional query parameters of AIService.Ask.
+type AIAskQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AIAskQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Ask ask a question in an organization
 //
 // POST /orgs/{orgId}/ask
-func (s *AIService) Ask(ctx context.Context, orgID string, body AIAskParams, opts ...RequestOption) (*AIAskResponse, error) {
+func (s *AIService) Ask(ctx context.Context, orgID string, body AIAskParams, query *AIAskQuery, opts ...RequestOption) (*AIAskResponse, error) {
+	v, opts := query.encode(opts)
 	var out AIAskResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/ask", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/ask", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -123,34 +215,122 @@ func (s *AIProviderService) Status(ctx context.Context, orgID string, opts ...Re
 	return &out, nil
 }
 
-// Connect replace the provider in an organization (AI)
-//
-// PUT /orgs/{orgId}/ai/provider
-func (s *AIProviderService) Connect(ctx context.Context, orgID string, body AIProviderConnectParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/ai/provider", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
+// AIProviderConnectQuery are the optional query parameters of AIProviderService.Connect.
+type AIProviderConnectQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
 }
 
-// Disconnect delete the provider in an organization (AI)
+func (p *AIProviderConnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Connect connect the provider (AI)
 //
-// DELETE /orgs/{orgId}/ai/provider
-func (s *AIProviderService) Disconnect(ctx context.Context, orgID string, opts ...RequestOption) (*AIProviderDisconnectResponse, error) {
-	var out AIProviderDisconnectResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/ai/provider", nil, nil, &out, opts); err != nil {
+// PUT /orgs/{orgId}/ai/provider
+func (s *AIProviderService) Connect(ctx context.Context, orgID string, body AIProviderConnectParams, query *AIProviderConnectQuery, opts ...RequestOption) (*AIProviderConnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out AIProviderConnectResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/ai/provider", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// AIProviderPatchQuery are the optional query parameters of AIProviderService.Patch.
+type AIProviderPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *AIProviderPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the provider in an organization (AI)
+//
+// PATCH /orgs/{orgId}/ai/provider
+func (s *AIProviderService) Patch(ctx context.Context, orgID string, body AIProviderPatchParams, query *AIProviderPatchQuery, opts ...RequestOption) (*AIProviderConnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out AIProviderConnectResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/ai/provider", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AIProviderDisconnectQuery are the optional query parameters of AIProviderService.Disconnect.
+type AIProviderDisconnectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AIProviderDisconnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Disconnect disconnect the provider (AI)
+//
+// DELETE /orgs/{orgId}/ai/provider
+func (s *AIProviderService) Disconnect(ctx context.Context, orgID string, query *AIProviderDisconnectQuery, opts ...RequestOption) (*AIProviderDisconnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out AIProviderDisconnectResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/ai/provider", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AIProviderTestQuery are the optional query parameters of AIProviderService.Test.
+type AIProviderTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AIProviderTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Test test the provider (AI)
 //
 // POST /orgs/{orgId}/ai/provider/test
-func (s *AIProviderService) Test(ctx context.Context, orgID string, opts ...RequestOption) (*AIProviderTestResponse, error) {
+func (s *AIProviderService) Test(ctx context.Context, orgID string, query *AIProviderTestQuery, opts ...RequestOption) (*AIProviderTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out AIProviderTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/ai/provider/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/ai/provider/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

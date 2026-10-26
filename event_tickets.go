@@ -24,45 +24,162 @@ func (s *EventTicketsService) Tiers(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
+// EventTicketsCreateTierQuery are the optional query parameters of EventTicketsService.CreateTier.
+type EventTicketsCreateTierQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventTicketsCreateTierQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateTier create a tier in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/tiers
-func (s *EventTicketsService) CreateTier(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsCreateTierParams, opts ...RequestOption) (*EventTicketsCreateTierResponse, error) {
+func (s *EventTicketsService) CreateTier(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsCreateTierParams, query *EventTicketsCreateTierQuery, opts ...RequestOption) (*EventTicketsCreateTierResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventTicketsCreateTierResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tiers", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tiers", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// EventTicketsUpdateTierQuery are the optional query parameters of EventTicketsService.UpdateTier.
+type EventTicketsUpdateTierQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventTicketsUpdateTierQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // UpdateTier update the tier
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/events/{handle}/tiers/{tier}
-func (s *EventTicketsService) UpdateTier(ctx context.Context, orgID string, spaceID string, handle string, tier string, body EventTicketsUpdateTierParams, opts ...RequestOption) (*EventTicketsUpdateTierResponse, error) {
+func (s *EventTicketsService) UpdateTier(ctx context.Context, orgID string, spaceID string, handle string, tier string, body EventTicketsUpdateTierParams, query *EventTicketsUpdateTierQuery, opts ...RequestOption) (*EventTicketsUpdateTierResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventTicketsUpdateTierResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tiers/"+pathEscape(tier), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tiers/"+pathEscape(tier), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// EventTicketsDeleteTierQuery are the optional query parameters of EventTicketsService.DeleteTier.
+type EventTicketsDeleteTierQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventTicketsDeleteTierQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DeleteTier delete the tier
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/events/{handle}/tiers/{tier}
-func (s *EventTicketsService) DeleteTier(ctx context.Context, orgID string, spaceID string, handle string, tier string, opts ...RequestOption) (*EventTicketsDeleteTierResponse, error) {
+func (s *EventTicketsService) DeleteTier(ctx context.Context, orgID string, spaceID string, handle string, tier string, query *EventTicketsDeleteTierQuery, opts ...RequestOption) (*EventTicketsDeleteTierResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventTicketsDeleteTierResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tiers/"+pathEscape(tier), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tiers/"+pathEscape(tier), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// GetTicketing get the ticketing in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/events/{handle}/ticketing
+func (s *EventTicketsService) GetTicketing(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*EventTicketingView, error) {
+	var out EventTicketingView
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/ticketing", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// EventTicketsTicketingQuery are the optional query parameters of EventTicketsService.Ticketing.
+type EventTicketsTicketingQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *EventTicketsTicketingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Ticketing replace the ticketing in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/events/{handle}/ticketing
-func (s *EventTicketsService) Ticketing(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsTicketingParams, opts ...RequestOption) (*EventTicketsTicketingResponse, error) {
-	var out EventTicketsTicketingResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/ticketing", nil, body, &out, opts); err != nil {
+func (s *EventTicketsService) Ticketing(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsTicketingParams, query *EventTicketsTicketingQuery, opts ...RequestOption) (*EventTicketsPatchTicketingResponse, error) {
+	v, opts := query.encode(opts)
+	var out EventTicketsPatchTicketingResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/ticketing", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// EventTicketsPatchTicketingQuery are the optional query parameters of EventTicketsService.PatchTicketing.
+type EventTicketsPatchTicketingQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *EventTicketsPatchTicketingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchTicketing update the ticketing in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/events/{handle}/ticketing
+func (s *EventTicketsService) PatchTicketing(ctx context.Context, orgID string, spaceID string, handle string, body any, query *EventTicketsPatchTicketingQuery, opts ...RequestOption) (*EventTicketsPatchTicketingResponse, error) {
+	v, opts := query.encode(opts)
+	var out EventTicketsPatchTicketingResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/ticketing", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -74,6 +191,10 @@ type EventTicketsOrdersQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EventTicketsOrdersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -86,6 +207,12 @@ func (p *EventTicketsOrdersQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -117,23 +244,59 @@ func (s *EventTicketsService) OrdersAutoPaging(ctx context.Context, orgID string
 	})
 }
 
-// Refund create the refund in a space (events orders)
+// EventTicketsRefundQuery are the optional query parameters of EventTicketsService.Refund.
+type EventTicketsRefundQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventTicketsRefundQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Refund refund an order
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/orders/{order}/refund
-func (s *EventTicketsService) Refund(ctx context.Context, orgID string, spaceID string, handle string, order string, opts ...RequestOption) (*EventTicketsRefundResponse, error) {
+func (s *EventTicketsService) Refund(ctx context.Context, orgID string, spaceID string, handle string, order string, query *EventTicketsRefundQuery, opts ...RequestOption) (*EventTicketsRefundResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventTicketsRefundResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/orders/"+pathEscape(order)+"/refund", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/orders/"+pathEscape(order)+"/refund", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Checkout create the checkout in a space (events tickets)
+// EventTicketsCheckoutQuery are the optional query parameters of EventTicketsService.Checkout.
+type EventTicketsCheckoutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventTicketsCheckoutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Checkout start a checkout for a ticket
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/tickets/checkout
-func (s *EventTicketsService) Checkout(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsCheckoutParams, opts ...RequestOption) (any, error) {
+func (s *EventTicketsService) Checkout(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsCheckoutBody, query *EventTicketsCheckoutQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tickets/checkout", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tickets/checkout", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

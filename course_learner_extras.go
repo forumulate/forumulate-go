@@ -19,6 +19,10 @@ type CourseLearnerExtrasPositionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CourseLearnerExtrasPositionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *CourseLearnerExtrasPositionsQuery) encode(opts []RequestOption) (url.Va
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,12 +72,30 @@ func (s *CourseLearnerExtrasService) PositionsAutoPaging(ctx context.Context, or
 	})
 }
 
+// CourseLearnerExtrasSavePositionQuery are the optional query parameters of CourseLearnerExtrasService.SavePosition.
+type CourseLearnerExtrasSavePositionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseLearnerExtrasSavePositionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SavePosition replace the media in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/lessons/{slug}/media
-func (s *CourseLearnerExtrasService) SavePosition(ctx context.Context, orgID string, spaceID string, slug string, body CourseLearnerExtrasSavePositionParams, opts ...RequestOption) (*CourseLearnerExtrasSavePositionResponse, error) {
+func (s *CourseLearnerExtrasService) SavePosition(ctx context.Context, orgID string, spaceID string, slug string, body CourseLearnerExtrasSavePositionParams, query *CourseLearnerExtrasSavePositionQuery, opts ...RequestOption) (*CourseLearnerExtrasSavePositionResponse, error) {
+	v, opts := query.encode(opts)
 	var out CourseLearnerExtrasSavePositionResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/lessons/"+pathEscape(slug)+"/media", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/lessons/"+pathEscape(slug)+"/media", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -89,7 +117,7 @@ func (p *CourseLearnerExtrasStatsQuery) encode(opts []RequestOption) (url.Values
 	return v, opts
 }
 
-// Stats list stats in a space
+// Stats list stats in a space (course me)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/course/me/stats
 func (s *CourseLearnerExtrasService) Stats(ctx context.Context, orgID string, spaceID string, query *CourseLearnerExtrasStatsQuery, opts ...RequestOption) (*CourseLearnerStats, error) {
@@ -112,34 +140,88 @@ func (s *CourseLearnerExtrasService) Mine(ctx context.Context, orgID string, spa
 	return &out, nil
 }
 
-// Checkout create the checkout in a space (course)
+// CourseLearnerExtrasCheckoutQuery are the optional query parameters of CourseLearnerExtrasService.Checkout.
+type CourseLearnerExtrasCheckoutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseLearnerExtrasCheckoutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Checkout start a checkout for the course
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/checkout
-func (s *CourseLearnerExtrasService) Checkout(ctx context.Context, orgID string, spaceID string, body CourseLearnerExtrasCheckoutParams, opts ...RequestOption) (any, error) {
+func (s *CourseLearnerExtrasService) Checkout(ctx context.Context, orgID string, spaceID string, body CourseLearnerExtrasCheckoutParams, query *CourseLearnerExtrasCheckoutQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/checkout", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/checkout", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// CourseLearnerExtrasConfirmQuery are the optional query parameters of CourseLearnerExtrasService.Confirm.
+type CourseLearnerExtrasConfirmQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseLearnerExtrasConfirmQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Confirm confirm the checkout
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/checkout/confirm
-func (s *CourseLearnerExtrasService) Confirm(ctx context.Context, orgID string, spaceID string, body CourseLearnerExtrasConfirmParams, opts ...RequestOption) (any, error) {
+func (s *CourseLearnerExtrasService) Confirm(ctx context.Context, orgID string, spaceID string, body CourseLearnerExtrasConfirmParams, query *CourseLearnerExtrasConfirmQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/checkout/confirm", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/checkout/confirm", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Refund create the refund in a space (course purchase)
+// CourseLearnerExtrasRefundQuery are the optional query parameters of CourseLearnerExtrasService.Refund.
+type CourseLearnerExtrasRefundQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseLearnerExtrasRefundQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Refund refund the purchase (create)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/purchase/refund
-func (s *CourseLearnerExtrasService) Refund(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*MyCoursePurchase, error) {
+func (s *CourseLearnerExtrasService) Refund(ctx context.Context, orgID string, spaceID string, query *CourseLearnerExtrasRefundQuery, opts ...RequestOption) (*MyCoursePurchase, error) {
+	v, opts := query.encode(opts)
 	var out MyCoursePurchase
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchase/refund", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchase/refund", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

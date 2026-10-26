@@ -4,6 +4,7 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
 )
 
 // SpaceLabelsService holds the operations under client.SpaceLabels.
@@ -22,24 +23,76 @@ func (s *SpaceLabelsService) Strings(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// Labels list labels in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/i18n/labels
+func (s *SpaceLabelsService) Labels(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*LabelDictionaryAnswer, error) {
+	var out LabelDictionaryAnswer
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/i18n/labels", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SpaceLabelsReplaceQuery are the optional query parameters of SpaceLabelsService.Replace.
+type SpaceLabelsReplaceQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SpaceLabelsReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Replace replace labels in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/i18n/labels
-func (s *SpaceLabelsService) Replace(ctx context.Context, orgID string, spaceID string, body SpaceLabelsReplaceParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/i18n/labels", nil, body, &out, opts); err != nil {
+func (s *SpaceLabelsService) Replace(ctx context.Context, orgID string, spaceID string, body SpaceLabelsReplaceParams, query *SpaceLabelsReplaceQuery, opts ...RequestOption) (*SpaceLabelsReplaceResponse, error) {
+	v, opts := query.encode(opts)
+	var out SpaceLabelsReplaceResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/i18n/labels", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// SpaceLabelsMergeQuery are the optional query parameters of SpaceLabelsService.Merge.
+type SpaceLabelsMergeQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SpaceLabelsMergeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
 }
 
 // Merge update labels in a space
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/i18n/labels
-func (s *SpaceLabelsService) Merge(ctx context.Context, orgID string, spaceID string, body SpaceLabelsMergeParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/i18n/labels", nil, body, &out, opts); err != nil {
+func (s *SpaceLabelsService) Merge(ctx context.Context, orgID string, spaceID string, body SpaceLabelsMergeParams, query *SpaceLabelsMergeQuery, opts ...RequestOption) (*SpaceLabelsMergeResponse, error) {
+	v, opts := query.encode(opts)
+	var out SpaceLabelsMergeResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/i18n/labels", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
 }

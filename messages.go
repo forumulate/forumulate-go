@@ -20,6 +20,10 @@ type MessagesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MessagesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +39,12 @@ func (p *MessagesListQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -66,12 +76,30 @@ func (s *MessagesService) ListAutoPaging(ctx context.Context, orgID string, quer
 	})
 }
 
+// MessagesStartQuery are the optional query parameters of MessagesService.Start.
+type MessagesStartQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MessagesStartQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Start create a message in an organization
 //
 // POST /orgs/{orgId}/messages
-func (s *MessagesService) Start(ctx context.Context, orgID string, body MessagesStartParams, opts ...RequestOption) (*MessagesStartResponse, error) {
+func (s *MessagesService) Start(ctx context.Context, orgID string, body MessagesStartParams, query *MessagesStartQuery, opts ...RequestOption) (*MessagesStartResponse, error) {
+	v, opts := query.encode(opts)
 	var out MessagesStartResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -83,6 +111,10 @@ type MessagesRecipientsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MessagesRecipientsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -96,10 +128,16 @@ func (p *MessagesRecipientsQuery) encode(opts []RequestOption) (url.Values, []Re
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Recipients list recipients in an organization
+// Recipients list recipients in an organization (messages)
 //
 // GET /orgs/{orgId}/messages/recipients
 func (s *MessagesService) Recipients(ctx context.Context, orgID string, query *MessagesRecipientsQuery, opts ...RequestOption) (*MessagesRecipientsResponse, error) {
@@ -148,45 +186,117 @@ func (s *MessagesService) Get(ctx context.Context, orgID string, conversationID 
 	return &out, nil
 }
 
-// Reply create the reply in an organization
+// MessagesReplyQuery are the optional query parameters of MessagesService.Reply.
+type MessagesReplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MessagesReplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Reply reply to the conversation
 //
 // POST /orgs/{orgId}/messages/{conversationId}/reply
-func (s *MessagesService) Reply(ctx context.Context, orgID string, conversationID string, body MessagesReplyParams, opts ...RequestOption) (*MessagesReplyResponse, error) {
+func (s *MessagesService) Reply(ctx context.Context, orgID string, conversationID string, body MessagesReplyParams, query *MessagesReplyQuery, opts ...RequestOption) (*MessagesReplyResponse, error) {
+	v, opts := query.encode(opts)
 	var out MessagesReplyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/reply", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/reply", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// MessagesArchiveQuery are the optional query parameters of MessagesService.Archive.
+type MessagesArchiveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MessagesArchiveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Archive archive the message
 //
 // POST /orgs/{orgId}/messages/{conversationId}/archive
-func (s *MessagesService) Archive(ctx context.Context, orgID string, conversationID string, body MessagesArchiveParams, opts ...RequestOption) (*MessagesArchiveResponse, error) {
+func (s *MessagesService) Archive(ctx context.Context, orgID string, conversationID string, body MessagesArchiveParams, query *MessagesArchiveQuery, opts ...RequestOption) (*MessagesArchiveResponse, error) {
+	v, opts := query.encode(opts)
 	var out MessagesArchiveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/archive", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/archive", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// MessagesAddParticipantQuery are the optional query parameters of MessagesService.AddParticipant.
+type MessagesAddParticipantQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MessagesAddParticipantQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // AddParticipant create a participant in an organization
 //
 // POST /orgs/{orgId}/messages/{conversationId}/participants
-func (s *MessagesService) AddParticipant(ctx context.Context, orgID string, conversationID string, body MessagesAddParticipantParams, opts ...RequestOption) (*MessagesAddParticipantResponse, error) {
+func (s *MessagesService) AddParticipant(ctx context.Context, orgID string, conversationID string, body MessagesAddParticipantParams, query *MessagesAddParticipantQuery, opts ...RequestOption) (*MessagesAddParticipantResponse, error) {
+	v, opts := query.encode(opts)
 	var out MessagesAddParticipantResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/participants", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/participants", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// MessagesRemoveParticipantQuery are the optional query parameters of MessagesService.RemoveParticipant.
+type MessagesRemoveParticipantQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MessagesRemoveParticipantQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveParticipant delete the participant
 //
 // DELETE /orgs/{orgId}/messages/{conversationId}/participants/{userId}
-func (s *MessagesService) RemoveParticipant(ctx context.Context, orgID string, conversationID string, userID string, opts ...RequestOption) (*MessagesRemoveParticipantResponse, error) {
+func (s *MessagesService) RemoveParticipant(ctx context.Context, orgID string, conversationID string, userID string, query *MessagesRemoveParticipantQuery, opts ...RequestOption) (*MessagesRemoveParticipantResponse, error) {
+	v, opts := query.encode(opts)
 	var out MessagesRemoveParticipantResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/participants/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/messages/"+pathEscape(conversationID)+"/participants/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

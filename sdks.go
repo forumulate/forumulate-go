@@ -19,6 +19,10 @@ type SdksListRegistriesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SdksListRegistriesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *SdksListRegistriesQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,45 +72,162 @@ func (s *SdksService) ListRegistriesAutoPaging(ctx context.Context, orgID string
 	})
 }
 
-// SetRegistry replace the registry
+// GetRegistry get the registry
 //
-// PUT /orgs/{orgId}/sdk/registries/{registry}
-func (s *SdksService) SetRegistry(ctx context.Context, orgID string, registry string, body SdksSetRegistryParams, opts ...RequestOption) (*SdksSetRegistryResponse, error) {
-	var out SdksSetRegistryResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry), nil, body, &out, opts); err != nil {
+// GET /orgs/{orgId}/sdk/registries/{registry}
+func (s *SdksService) GetRegistry(ctx context.Context, orgID string, registry string, opts ...RequestOption) (*SdksGetRegistryResponse, error) {
+	var out SdksGetRegistryResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry), nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SdksSetRegistryQuery are the optional query parameters of SdksService.SetRegistry.
+type SdksSetRegistryQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SdksSetRegistryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// SetRegistry replace the registry
+//
+// PUT /orgs/{orgId}/sdk/registries/{registry}
+func (s *SdksService) SetRegistry(ctx context.Context, orgID string, registry string, body SdksSetRegistryParams, query *SdksSetRegistryQuery, opts ...RequestOption) (*SdksSetRegistryResponse, error) {
+	v, opts := query.encode(opts)
+	var out SdksSetRegistryResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry), v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SdksPatchRegistryQuery are the optional query parameters of SdksService.PatchRegistry.
+type SdksPatchRegistryQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SdksPatchRegistryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchRegistry update the registry
+//
+// PATCH /orgs/{orgId}/sdk/registries/{registry}
+func (s *SdksService) PatchRegistry(ctx context.Context, orgID string, registry string, body SdksPatchRegistryParams, query *SdksPatchRegistryQuery, opts ...RequestOption) (*SdksPatchRegistryResponse, error) {
+	v, opts := query.encode(opts)
+	var out SdksPatchRegistryResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry), v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SdksDeleteRegistryQuery are the optional query parameters of SdksService.DeleteRegistry.
+type SdksDeleteRegistryQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SdksDeleteRegistryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DeleteRegistry delete the registry
 //
 // DELETE /orgs/{orgId}/sdk/registries/{registry}
-func (s *SdksService) DeleteRegistry(ctx context.Context, orgID string, registry string, opts ...RequestOption) (*SdksDeleteRegistryResponse, error) {
+func (s *SdksService) DeleteRegistry(ctx context.Context, orgID string, registry string, query *SdksDeleteRegistryQuery, opts ...RequestOption) (*SdksDeleteRegistryResponse, error) {
+	v, opts := query.encode(opts)
 	var out SdksDeleteRegistryResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SdksTestRegistryQuery are the optional query parameters of SdksService.TestRegistry.
+type SdksTestRegistryQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SdksTestRegistryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // TestRegistry test the registry
 //
 // POST /orgs/{orgId}/sdk/registries/{registry}/test
-func (s *SdksService) TestRegistry(ctx context.Context, orgID string, registry string, opts ...RequestOption) (*SdksTestRegistryResponse, error) {
+func (s *SdksService) TestRegistry(ctx context.Context, orgID string, registry string, query *SdksTestRegistryQuery, opts ...RequestOption) (*SdksTestRegistryResponse, error) {
+	v, opts := query.encode(opts)
 	var out SdksTestRegistryResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry)+"/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sdk/registries/"+pathEscape(registry)+"/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RegisterPackage create the register in a space (docs OpenAPI specs SDK)
+// SdksRegisterPackageQuery are the optional query parameters of SdksService.RegisterPackage.
+type SdksRegisterPackageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SdksRegisterPackageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RegisterPackage register the package
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/docs/openapi/specs/{specId}/sdk/{language}/register
-func (s *SdksService) RegisterPackage(ctx context.Context, orgID string, spaceID string, specID string, language string, body SdksRegisterPackageParams, opts ...RequestOption) (*SdksRegisterPackageResponse, error) {
+func (s *SdksService) RegisterPackage(ctx context.Context, orgID string, spaceID string, specID string, language string, body SdksRegisterPackageParams, query *SdksRegisterPackageQuery, opts ...RequestOption) (*SdksRegisterPackageResponse, error) {
+	v, opts := query.encode(opts)
 	var out SdksRegisterPackageResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/openapi/specs/"+pathEscape(specID)+"/sdk/"+pathEscape(language)+"/register", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/openapi/specs/"+pathEscape(specID)+"/sdk/"+pathEscape(language)+"/register", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -112,6 +239,10 @@ type SdksListPackagesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SdksListPackagesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -124,6 +255,12 @@ func (p *SdksListPackagesQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -155,12 +292,30 @@ func (s *SdksService) ListPackagesAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
+// SdksPublishQuery are the optional query parameters of SdksService.Publish.
+type SdksPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SdksPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the package
 //
 // POST /orgs/{orgId}/sdk/packages/{packageId}/publish
-func (s *SdksService) Publish(ctx context.Context, orgID string, packageID string, body SdksPublishParams, opts ...RequestOption) (*SdksPublishResponse, error) {
+func (s *SdksService) Publish(ctx context.Context, orgID string, packageID string, body SdksPublishParams, query *SdksPublishQuery, opts ...RequestOption) (*SdksPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out SdksPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sdk/packages/"+pathEscape(packageID)+"/publish", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sdk/packages/"+pathEscape(packageID)+"/publish", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -172,6 +327,10 @@ type SdksListPublishesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SdksListPublishesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -184,6 +343,12 @@ func (p *SdksListPublishesQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

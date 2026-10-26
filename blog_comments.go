@@ -13,45 +13,117 @@ type BlogCommentsService struct {
 	c *Client
 }
 
-// Vote create the vote in a space (blog posts)
+// BlogCommentsVoteQuery are the optional query parameters of BlogCommentsService.Vote.
+type BlogCommentsVoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsVoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Vote vote on the post (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/vote
-func (s *BlogCommentsService) Vote(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*BlogCommentsVoteResponse, error) {
+func (s *BlogCommentsService) Vote(ctx context.Context, orgID string, spaceID string, postID string, query *BlogCommentsVoteQuery, opts ...RequestOption) (*BlogCommentsVoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsVoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/vote", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/vote", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// React create the react in a space (blog posts)
+// BlogCommentsReactQuery are the optional query parameters of BlogCommentsService.React.
+type BlogCommentsReactQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsReactQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// React react to the post (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/react
-func (s *BlogCommentsService) React(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsReactParams, opts ...RequestOption) (*BlogCommentsReactResponse, error) {
+func (s *BlogCommentsService) React(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsReactParams, query *BlogCommentsReactQuery, opts ...RequestOption) (*BlogCommentsReactResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsReactResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/react", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/react", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogCommentsEditPostQuery are the optional query parameters of BlogCommentsService.EditPost.
+type BlogCommentsEditPostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsEditPostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // EditPost update the post (blog)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}
-func (s *BlogCommentsService) EditPost(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsEditPostParams, opts ...RequestOption) (*BlogCommentsEditPostResponse, error) {
+func (s *BlogCommentsService) EditPost(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsEditPostBody, query *BlogCommentsEditPostQuery, opts ...RequestOption) (*BlogCommentsEditPostResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsEditPostResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// BlogCommentsDeletePostQuery are the optional query parameters of BlogCommentsService.DeletePost.
+type BlogCommentsDeletePostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsDeletePostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeletePost delete the post (blog)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}
-func (s *BlogCommentsService) DeletePost(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*BlogCommentsDeletePostResponse, error) {
+func (s *BlogCommentsService) DeletePost(ctx context.Context, orgID string, spaceID string, postID string, query *BlogCommentsDeletePostQuery, opts ...RequestOption) (*BlogCommentsDeletePostResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsDeletePostResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -63,6 +135,10 @@ type BlogCommentsRevisionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogCommentsRevisionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -75,6 +151,12 @@ func (p *BlogCommentsRevisionsQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -117,34 +199,88 @@ func (s *BlogCommentsService) RevisionDiff(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
+// BlogCommentsFlagQuery are the optional query parameters of BlogCommentsService.Flag.
+type BlogCommentsFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Flag flag the post (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/flag
-func (s *BlogCommentsService) Flag(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsFlagParams, opts ...RequestOption) (*BlogCommentsFlagResponse, error) {
+func (s *BlogCommentsService) Flag(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsFlagParams, query *BlogCommentsFlagQuery, opts ...RequestOption) (*BlogCommentsFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/flag", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/flag", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetPostStatus create the status in a space (blog posts)
+// BlogCommentsSetPostStatusQuery are the optional query parameters of BlogCommentsService.SetPostStatus.
+type BlogCommentsSetPostStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsSetPostStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetPostStatus set the post status (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/status
-func (s *BlogCommentsService) SetPostStatus(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsSetPostStatusParams, opts ...RequestOption) (*BlogCommentsSetPostStatusResponse, error) {
+func (s *BlogCommentsService) SetPostStatus(ctx context.Context, orgID string, spaceID string, postID string, body BlogCommentsSetPostStatusParams, query *BlogCommentsSetPostStatusQuery, opts ...RequestOption) (*BlogCommentsSetPostStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsSetPostStatusResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/status", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/status", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RecoverPost create the recover in a space (blog posts)
+// BlogCommentsRecoverPostQuery are the optional query parameters of BlogCommentsService.RecoverPost.
+type BlogCommentsRecoverPostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogCommentsRecoverPostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RecoverPost recover the post
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/posts/{postId}/recover
-func (s *BlogCommentsService) RecoverPost(ctx context.Context, orgID string, spaceID string, postID string, opts ...RequestOption) (*BlogCommentsRecoverPostResponse, error) {
+func (s *BlogCommentsService) RecoverPost(ctx context.Context, orgID string, spaceID string, postID string, query *BlogCommentsRecoverPostQuery, opts ...RequestOption) (*BlogCommentsRecoverPostResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogCommentsRecoverPostResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/recover", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/posts/"+pathEscape(postID)+"/recover", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

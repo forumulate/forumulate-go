@@ -24,6 +24,10 @@ type IntegrationsCatalogQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *IntegrationsCatalogQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -36,6 +40,12 @@ func (p *IntegrationsCatalogQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -73,6 +83,10 @@ type IntegrationsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *IntegrationsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -85,6 +99,12 @@ func (p *IntegrationsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -116,45 +136,117 @@ func (s *IntegrationsService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
-// Install create an integration in an organization
+// IntegrationsInstallQuery are the optional query parameters of IntegrationsService.Install.
+type IntegrationsInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Install install an integration
 //
 // POST /orgs/{orgId}/integrations
-func (s *IntegrationsService) Install(ctx context.Context, orgID string, body IntegrationsInstallParams, opts ...RequestOption) (*IntegrationsInstallResponse, error) {
+func (s *IntegrationsService) Install(ctx context.Context, orgID string, body IntegrationsInstallParams, query *IntegrationsInstallQuery, opts ...RequestOption) (*IntegrationsInstallResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsInstallResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/integrations", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/integrations", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// IntegrationsUpdateQuery are the optional query parameters of IntegrationsService.Update.
+type IntegrationsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the integration
 //
 // PATCH /orgs/{orgId}/integrations/{id}
-func (s *IntegrationsService) Update(ctx context.Context, orgID string, id string, body IntegrationsUpdateParams, opts ...RequestOption) (*IntegrationsUpdateResponse, error) {
+func (s *IntegrationsService) Update(ctx context.Context, orgID string, id string, body IntegrationsUpdateParams, query *IntegrationsUpdateQuery, opts ...RequestOption) (*IntegrationsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/integrations/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/integrations/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Uninstall delete the integration
+// IntegrationsUninstallQuery are the optional query parameters of IntegrationsService.Uninstall.
+type IntegrationsUninstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsUninstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Uninstall uninstall the integration
 //
 // DELETE /orgs/{orgId}/integrations/{id}
-func (s *IntegrationsService) Uninstall(ctx context.Context, orgID string, id string, opts ...RequestOption) (*IntegrationsUninstallResponse, error) {
+func (s *IntegrationsService) Uninstall(ctx context.Context, orgID string, id string, query *IntegrationsUninstallQuery, opts ...RequestOption) (*IntegrationsUninstallResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsUninstallResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/integrations/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/integrations/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// IntegrationsTestQuery are the optional query parameters of IntegrationsService.Test.
+type IntegrationsTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Test test the integration
 //
 // POST /orgs/{orgId}/integrations/{id}/test
-func (s *IntegrationsService) Test(ctx context.Context, orgID string, id string, opts ...RequestOption) (*IntegrationsTestResponse, error) {
+func (s *IntegrationsService) Test(ctx context.Context, orgID string, id string, query *IntegrationsTestQuery, opts ...RequestOption) (*IntegrationsTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/integrations/"+pathEscape(id)+"/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/integrations/"+pathEscape(id)+"/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -176,34 +268,122 @@ func (s *IntegrationsCloudflareService) Status(ctx context.Context, orgID string
 	return &out, nil
 }
 
+// IntegrationsCloudflareSetQuery are the optional query parameters of IntegrationsCloudflareService.Set.
+type IntegrationsCloudflareSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *IntegrationsCloudflareSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace the cloudflare in an organization
 //
 // PUT /orgs/{orgId}/integrations/cloudflare
-func (s *IntegrationsCloudflareService) Set(ctx context.Context, orgID string, body IntegrationsCloudflareSetParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Clear delete the cloudflare in an organization
-//
-// DELETE /orgs/{orgId}/integrations/cloudflare
-func (s *IntegrationsCloudflareService) Clear(ctx context.Context, orgID string, opts ...RequestOption) (*IntegrationsCloudflareClearResponse, error) {
-	var out IntegrationsCloudflareClearResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare", nil, nil, &out, opts); err != nil {
+func (s *IntegrationsCloudflareService) Set(ctx context.Context, orgID string, body IntegrationsCloudflareSetParams, query *IntegrationsCloudflareSetQuery, opts ...RequestOption) (*IntegrationsCloudflareSetResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsCloudflareSetResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// IntegrationsCloudflarePatchQuery are the optional query parameters of IntegrationsCloudflareService.Patch.
+type IntegrationsCloudflarePatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *IntegrationsCloudflarePatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the cloudflare in an organization
+//
+// PATCH /orgs/{orgId}/integrations/cloudflare
+func (s *IntegrationsCloudflareService) Patch(ctx context.Context, orgID string, body IntegrationsCloudflarePatchParams, query *IntegrationsCloudflarePatchQuery, opts ...RequestOption) (*IntegrationsCloudflarePatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsCloudflarePatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// IntegrationsCloudflareClearQuery are the optional query parameters of IntegrationsCloudflareService.Clear.
+type IntegrationsCloudflareClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsCloudflareClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Clear delete the cloudflare in an organization
+//
+// DELETE /orgs/{orgId}/integrations/cloudflare
+func (s *IntegrationsCloudflareService) Clear(ctx context.Context, orgID string, query *IntegrationsCloudflareClearQuery, opts ...RequestOption) (*IntegrationsCloudflareClearResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsCloudflareClearResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// IntegrationsCloudflareTestQuery are the optional query parameters of IntegrationsCloudflareService.Test.
+type IntegrationsCloudflareTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsCloudflareTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Test test the cloudflare
 //
 // POST /orgs/{orgId}/integrations/cloudflare/test
-func (s *IntegrationsCloudflareService) Test(ctx context.Context, orgID string, opts ...RequestOption) (*IntegrationsCloudflareTestResponse, error) {
+func (s *IntegrationsCloudflareService) Test(ctx context.Context, orgID string, query *IntegrationsCloudflareTestQuery, opts ...RequestOption) (*IntegrationsCloudflareTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsCloudflareTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/integrations/cloudflare/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -225,23 +405,59 @@ func (s *IntegrationsDeeplService) Status(ctx context.Context, orgID string, opt
 	return &out, nil
 }
 
+// IntegrationsDeeplSetKeyQuery are the optional query parameters of IntegrationsDeeplService.SetKey.
+type IntegrationsDeeplSetKeyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsDeeplSetKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetKey replace the deepl in an organization
 //
 // PUT /orgs/{orgId}/deepl
-func (s *IntegrationsDeeplService) SetKey(ctx context.Context, orgID string, body IntegrationsDeeplSetKeyParams, opts ...RequestOption) (*IntegrationsDeeplSetKeyResponse, error) {
+func (s *IntegrationsDeeplService) SetKey(ctx context.Context, orgID string, body IntegrationsDeeplSetKeyParams, query *IntegrationsDeeplSetKeyQuery, opts ...RequestOption) (*IntegrationsDeeplSetKeyResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsDeeplSetKeyResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/deepl", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/deepl", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// IntegrationsDeeplClearQuery are the optional query parameters of IntegrationsDeeplService.Clear.
+type IntegrationsDeeplClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsDeeplClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Clear delete the deepl in an organization
 //
 // DELETE /orgs/{orgId}/deepl
-func (s *IntegrationsDeeplService) Clear(ctx context.Context, orgID string, opts ...RequestOption) (*IntegrationsDeeplClearResponse, error) {
+func (s *IntegrationsDeeplService) Clear(ctx context.Context, orgID string, query *IntegrationsDeeplClearQuery, opts ...RequestOption) (*IntegrationsDeeplClearResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsDeeplClearResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/deepl", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/deepl", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -252,7 +468,7 @@ type IntegrationsGithubService struct {
 	c *Client
 }
 
-// Status get the GitHub in a space
+// Status get the GitHub connection in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/github
 func (s *IntegrationsGithubService) Status(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*IntegrationsGithubStatusResponse, error) {
@@ -263,12 +479,64 @@ func (s *IntegrationsGithubService) Status(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
-// Connect replace the GitHub in a space
+// IntegrationsGithubConnectQuery are the optional query parameters of IntegrationsGithubService.Connect.
+type IntegrationsGithubConnectQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *IntegrationsGithubConnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Connect connect to GitHub
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/github
-func (s *IntegrationsGithubService) Connect(ctx context.Context, orgID string, spaceID string, body IntegrationsGithubConnectParams, opts ...RequestOption) (*IntegrationsGithubConnectResponse, error) {
+func (s *IntegrationsGithubService) Connect(ctx context.Context, orgID string, spaceID string, body IntegrationsGithubConnectParams, query *IntegrationsGithubConnectQuery, opts ...RequestOption) (*IntegrationsGithubConnectResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubConnectResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// IntegrationsGithubPatchConnectionQuery are the optional query parameters of IntegrationsGithubService.PatchConnection.
+type IntegrationsGithubPatchConnectionQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *IntegrationsGithubPatchConnectionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchConnection update the GitHub connection in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/github
+func (s *IntegrationsGithubService) PatchConnection(ctx context.Context, orgID string, spaceID string, body IntegrationsGithubPatchConnectionParams, query *IntegrationsGithubPatchConnectionQuery, opts ...RequestOption) (*IntegrationsGithubPatchConnectionResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsGithubPatchConnectionResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -280,6 +548,10 @@ type IntegrationsGithubEgressIpsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *IntegrationsGithubEgressIpsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -292,6 +564,12 @@ func (p *IntegrationsGithubEgressIpsQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -323,45 +601,197 @@ func (s *IntegrationsGithubService) EgressIpsAutoPaging(ctx context.Context, org
 	})
 }
 
-// RotateSigningSecret create the signing secret in a space
+// IntegrationsGithubRotateSigningSecretQuery are the optional query parameters of IntegrationsGithubService.RotateSigningSecret.
+type IntegrationsGithubRotateSigningSecretQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsGithubRotateSigningSecretQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RotateSigningSecret rotate the signing secret
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/github/signing-secret
-func (s *IntegrationsGithubService) RotateSigningSecret(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*IntegrationsGithubRotateSigningSecretResponse, error) {
+func (s *IntegrationsGithubService) RotateSigningSecret(ctx context.Context, orgID string, spaceID string, query *IntegrationsGithubRotateSigningSecretQuery, opts ...RequestOption) (*IntegrationsGithubRotateSigningSecretResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubRotateSigningSecretResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/signing-secret", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/signing-secret", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Import import the GitHub
+// IntegrationsGithubImportQuery are the optional query parameters of IntegrationsGithubService.Import.
+type IntegrationsGithubImportQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsGithubImportQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Import import from GitHub
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/github/import
-func (s *IntegrationsGithubService) Import(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*IntegrationsGithubImportResponse, error) {
+func (s *IntegrationsGithubService) Import(ctx context.Context, orgID string, spaceID string, query *IntegrationsGithubImportQuery, opts ...RequestOption) (*IntegrationsGithubImportResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubImportResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/import", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/import", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Export export the GitHub
+// RunSync run the content sync of a connected repository
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/github/sync
+func (s *IntegrationsGithubService) RunSync(ctx context.Context, orgID string, spaceID string, body IntegrationsGithubRunSyncParams, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/sync", nil, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// IntegrationsGithubSyncRunsQuery are the optional query parameters of IntegrationsGithubService.SyncRuns.
+type IntegrationsGithubSyncRunsQuery struct {
+	// Runs.
+	Limit  *int64
+	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
+}
+
+func (p *IntegrationsGithubSyncRunsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Cursor != nil {
+		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
+	return v, opts
+}
+
+// SyncRuns list the content-sync runs in a space
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/github/sync-runs
+func (s *IntegrationsGithubService) SyncRuns(ctx context.Context, orgID string, spaceID string, query *IntegrationsGithubSyncRunsQuery, opts ...RequestOption) (*IntegrationsGithubSyncRunsResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsGithubSyncRunsResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/sync-runs", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SyncRunsAutoPaging walks every item of SyncRuns across all pages.
+func (s *IntegrationsGithubService) SyncRunsAutoPaging(ctx context.Context, orgID string, spaceID string, query *IntegrationsGithubSyncRunsQuery, opts ...RequestOption) *Iter[any] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
+		v, opts := query.encode(opts)
+		if cursor != "" {
+			v.Set("cursor", cursor)
+		}
+		raw, _, err := s.c.send(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/sync-runs", v, nil, opts)
+		if err != nil {
+			return nil, "", err
+		}
+		return decodePage[any](raw, "")
+	})
+}
+
+// SyncRun get a content-sync run, with its plan
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/github/sync-runs/{runId}
+func (s *IntegrationsGithubService) SyncRun(ctx context.Context, orgID string, spaceID string, runID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/sync-runs/"+pathEscape(runID), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// IntegrationsGithubExportQuery are the optional query parameters of IntegrationsGithubService.Export.
+type IntegrationsGithubExportQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsGithubExportQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Export export to GitHub
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/github/export
-func (s *IntegrationsGithubService) Export(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*IntegrationsGithubExportResponse, error) {
+func (s *IntegrationsGithubService) Export(ctx context.Context, orgID string, spaceID string, query *IntegrationsGithubExportQuery, opts ...RequestOption) (*IntegrationsGithubExportResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubExportResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/export", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/export", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// PullRequest create the pull request in a space
+// IntegrationsGithubPullRequestQuery are the optional query parameters of IntegrationsGithubService.PullRequest.
+type IntegrationsGithubPullRequestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsGithubPullRequestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PullRequest push a change request’s edits to GitHub for review
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/github/change-requests/{crId}/pull-request
-func (s *IntegrationsGithubService) PullRequest(ctx context.Context, orgID string, spaceID string, crID string, opts ...RequestOption) (*IntegrationsGithubPullRequestResponse, error) {
+func (s *IntegrationsGithubService) PullRequest(ctx context.Context, orgID string, spaceID string, crID string, query *IntegrationsGithubPullRequestQuery, opts ...RequestOption) (*IntegrationsGithubPullRequestResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubPullRequestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/change-requests/"+pathEscape(crID)+"/pull-request", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/github/change-requests/"+pathEscape(crID)+"/pull-request", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -383,23 +813,59 @@ func (s *IntegrationsGithubAgentService) Status(ctx context.Context, orgID strin
 	return &out, nil
 }
 
-// Connect create the GitHub agent in an organization
+// IntegrationsGithubAgentConnectQuery are the optional query parameters of IntegrationsGithubAgentService.Connect.
+type IntegrationsGithubAgentConnectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsGithubAgentConnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Connect connect the GitHub agent
 //
 // POST /orgs/{orgId}/github-agent
-func (s *IntegrationsGithubAgentService) Connect(ctx context.Context, orgID string, body IntegrationsGithubAgentConnectParams, opts ...RequestOption) (*IntegrationsGithubAgentConnectResponse, error) {
+func (s *IntegrationsGithubAgentService) Connect(ctx context.Context, orgID string, body IntegrationsGithubAgentConnectParams, query *IntegrationsGithubAgentConnectQuery, opts ...RequestOption) (*IntegrationsGithubAgentConnectResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubAgentConnectResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/github-agent", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/github-agent", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Disconnect delete the GitHub agent in an organization
+// IntegrationsGithubAgentDisconnectQuery are the optional query parameters of IntegrationsGithubAgentService.Disconnect.
+type IntegrationsGithubAgentDisconnectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsGithubAgentDisconnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Disconnect disconnect the GitHub agent
 //
 // DELETE /orgs/{orgId}/github-agent
-func (s *IntegrationsGithubAgentService) Disconnect(ctx context.Context, orgID string, opts ...RequestOption) (*IntegrationsGithubAgentDisconnectResponse, error) {
+func (s *IntegrationsGithubAgentService) Disconnect(ctx context.Context, orgID string, query *IntegrationsGithubAgentDisconnectQuery, opts ...RequestOption) (*IntegrationsGithubAgentDisconnectResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsGithubAgentDisconnectResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/github-agent", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/github-agent", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -421,23 +887,93 @@ func (s *IntegrationsSlackService) Status(ctx context.Context, orgID string, opt
 	return &out, nil
 }
 
-// Connect replace the slack in an organization
-//
-// PUT /orgs/{orgId}/slack
-func (s *IntegrationsSlackService) Connect(ctx context.Context, orgID string, body IntegrationsSlackConnectParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/slack", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
+// IntegrationsSlackConnectQuery are the optional query parameters of IntegrationsSlackService.Connect.
+type IntegrationsSlackConnectQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
 }
 
-// Disconnect delete the slack in an organization
+func (p *IntegrationsSlackConnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Connect connect the slack
+//
+// PUT /orgs/{orgId}/slack
+func (s *IntegrationsSlackService) Connect(ctx context.Context, orgID string, body IntegrationsSlackConnectParams, query *IntegrationsSlackConnectQuery, opts ...RequestOption) (*IntegrationsSlackConnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsSlackConnectResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/slack", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// IntegrationsSlackPatchConnectionQuery are the optional query parameters of IntegrationsSlackService.PatchConnection.
+type IntegrationsSlackPatchConnectionQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *IntegrationsSlackPatchConnectionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchConnection update the slack in an organization
+//
+// PATCH /orgs/{orgId}/slack
+func (s *IntegrationsSlackService) PatchConnection(ctx context.Context, orgID string, body IntegrationsSlackPatchConnectionParams, query *IntegrationsSlackPatchConnectionQuery, opts ...RequestOption) (*IntegrationsSlackPatchConnectionResponse, error) {
+	v, opts := query.encode(opts)
+	var out IntegrationsSlackPatchConnectionResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/slack", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// IntegrationsSlackDisconnectQuery are the optional query parameters of IntegrationsSlackService.Disconnect.
+type IntegrationsSlackDisconnectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *IntegrationsSlackDisconnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Disconnect disconnect the slack
 //
 // DELETE /orgs/{orgId}/slack
-func (s *IntegrationsSlackService) Disconnect(ctx context.Context, orgID string, opts ...RequestOption) (*IntegrationsSlackDisconnectResponse, error) {
+func (s *IntegrationsSlackService) Disconnect(ctx context.Context, orgID string, query *IntegrationsSlackDisconnectQuery, opts ...RequestOption) (*IntegrationsSlackDisconnectResponse, error) {
+	v, opts := query.encode(opts)
 	var out IntegrationsSlackDisconnectResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/slack", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/slack", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

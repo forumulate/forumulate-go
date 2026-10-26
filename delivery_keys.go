@@ -19,6 +19,10 @@ type DeliveryKeysListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *DeliveryKeysListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *DeliveryKeysListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,45 +72,117 @@ func (s *DeliveryKeysService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
+// DeliveryKeysCreateQuery are the optional query parameters of DeliveryKeysService.Create.
+type DeliveryKeysCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *DeliveryKeysCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a delivery key for a content library
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/keys
-func (s *DeliveryKeysService) Create(ctx context.Context, orgID string, libraryID string, body DeliveryKeysCreateParams, opts ...RequestOption) (any, error) {
+func (s *DeliveryKeysService) Create(ctx context.Context, orgID string, libraryID string, body DeliveryKeysCreateParams, query *DeliveryKeysCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// DeliveryKeysUpdateQuery are the optional query parameters of DeliveryKeysService.Update.
+type DeliveryKeysUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *DeliveryKeysUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update a delivery key
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/keys/{keyId}
-func (s *DeliveryKeysService) Update(ctx context.Context, orgID string, libraryID string, keyID string, body DeliveryKeysUpdateParams, opts ...RequestOption) (*DeliveryKeysUpdateResponse, error) {
+func (s *DeliveryKeysService) Update(ctx context.Context, orgID string, libraryID string, keyID string, body DeliveryKeysUpdateParams, query *DeliveryKeysUpdateQuery, opts ...RequestOption) (*DeliveryKeysUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out DeliveryKeysUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys/"+pathEscape(keyID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys/"+pathEscape(keyID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// DeliveryKeysRevokeQuery are the optional query parameters of DeliveryKeysService.Revoke.
+type DeliveryKeysRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *DeliveryKeysRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Revoke revoke a delivery key
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/keys/{keyId}
-func (s *DeliveryKeysService) Revoke(ctx context.Context, orgID string, libraryID string, keyID string, opts ...RequestOption) (*DeliveryKeysRevokeResponse, error) {
+func (s *DeliveryKeysService) Revoke(ctx context.Context, orgID string, libraryID string, keyID string, query *DeliveryKeysRevokeQuery, opts ...RequestOption) (*DeliveryKeysRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out DeliveryKeysRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys/"+pathEscape(keyID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys/"+pathEscape(keyID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// DeliveryKeysRotateQuery are the optional query parameters of DeliveryKeysService.Rotate.
+type DeliveryKeysRotateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *DeliveryKeysRotateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Rotate rotate a delivery key
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/keys/{keyId}/rotate
-func (s *DeliveryKeysService) Rotate(ctx context.Context, orgID string, libraryID string, keyID string, body DeliveryKeysRotateParams, opts ...RequestOption) (any, error) {
+func (s *DeliveryKeysService) Rotate(ctx context.Context, orgID string, libraryID string, keyID string, body DeliveryKeysRotateParams, query *DeliveryKeysRotateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys/"+pathEscape(keyID)+"/rotate", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/keys/"+pathEscape(keyID)+"/rotate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

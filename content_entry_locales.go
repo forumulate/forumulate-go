@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // ContentEntryLocalesService holds the operations under client.ContentEntryLocales.
@@ -48,12 +49,30 @@ func (s *ContentEntryLocalesService) Read(ctx context.Context, orgID string, lib
 	return out, nil
 }
 
+// ContentEntryLocalesWriteQuery are the optional query parameters of ContentEntryLocalesService.Write.
+type ContentEntryLocalesWriteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentEntryLocalesWriteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Write write an entry's localized fields in a locale
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/locales/{locale}
-func (s *ContentEntryLocalesService) Write(ctx context.Context, orgID string, libraryID string, entryID string, locale string, body ContentEntryLocalesWriteParams, opts ...RequestOption) (any, error) {
+func (s *ContentEntryLocalesService) Write(ctx context.Context, orgID string, libraryID string, entryID string, locale string, body ContentEntryLocalesWriteParams, query *ContentEntryLocalesWriteQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/locales/"+pathEscape(locale), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/locales/"+pathEscape(locale), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

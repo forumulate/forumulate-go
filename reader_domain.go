@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // ReaderDomainService holds the operations under client.ReaderDomain.
@@ -22,34 +24,88 @@ func (s *ReaderDomainService) Get(ctx context.Context, orgID string, opts ...Req
 	return &out, nil
 }
 
-// Configure replace the reader domain in an organization
+// ReaderDomainConfigureQuery are the optional query parameters of ReaderDomainService.Configure.
+type ReaderDomainConfigureQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderDomainConfigureQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Configure configure the reader domain
 //
 // PUT /orgs/{orgId}/reader-domain
-func (s *ReaderDomainService) Configure(ctx context.Context, orgID string, body ReaderDomainConfigureParams, opts ...RequestOption) (*ReaderDomainConfigureResponse, error) {
+func (s *ReaderDomainService) Configure(ctx context.Context, orgID string, body ReaderDomainConfigureParams, query *ReaderDomainConfigureQuery, opts ...RequestOption) (*ReaderDomainConfigureResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderDomainConfigureResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/reader-domain", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/reader-domain", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReaderDomainRemoveQuery are the optional query parameters of ReaderDomainService.Remove.
+type ReaderDomainRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderDomainRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the reader domain in an organization
 //
 // DELETE /orgs/{orgId}/reader-domain
-func (s *ReaderDomainService) Remove(ctx context.Context, orgID string, opts ...RequestOption) (*ReaderDomainRemoveResponse, error) {
+func (s *ReaderDomainService) Remove(ctx context.Context, orgID string, query *ReaderDomainRemoveQuery, opts ...RequestOption) (*ReaderDomainRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderDomainRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/reader-domain", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/reader-domain", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ReaderDomainVerifyQuery are the optional query parameters of ReaderDomainService.Verify.
+type ReaderDomainVerifyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderDomainVerifyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Verify verify the reader domain
 //
 // POST /orgs/{orgId}/reader-domain/verify
-func (s *ReaderDomainService) Verify(ctx context.Context, orgID string, opts ...RequestOption) (*ReaderDomainVerifyResponse, error) {
+func (s *ReaderDomainService) Verify(ctx context.Context, orgID string, query *ReaderDomainVerifyQuery, opts ...RequestOption) (*ReaderDomainVerifyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderDomainVerifyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/reader-domain/verify", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/reader-domain/verify", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

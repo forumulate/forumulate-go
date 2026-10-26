@@ -4,6 +4,7 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
 )
 
 // CourseAccessService holds the operations under client.CourseAccess.
@@ -11,7 +12,7 @@ type CourseAccessService struct {
 	c *Client
 }
 
-// Get get the access in a space
+// Get get the access in a space (course authoring)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/course/authoring/access
 func (s *CourseAccessService) Get(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CourseAccessGetResponse, error) {
@@ -22,12 +23,64 @@ func (s *CourseAccessService) Get(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
-// Set replace the access in a space
+// CourseAccessSetQuery are the optional query parameters of CourseAccessService.Set.
+type CourseAccessSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *CourseAccessSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Set replace the access in a space (course authoring)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/access
-func (s *CourseAccessService) Set(ctx context.Context, orgID string, spaceID string, body CourseAccessSetParams, opts ...RequestOption) (*CourseAccessSetResponse, error) {
-	var out CourseAccessSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/access", nil, body, &out, opts); err != nil {
+func (s *CourseAccessService) Set(ctx context.Context, orgID string, spaceID string, body CourseAccessSetParams, query *CourseAccessSetQuery, opts ...RequestOption) (*CourseAccessPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseAccessPatchResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/access", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CourseAccessPatchQuery are the optional query parameters of CourseAccessService.Patch.
+type CourseAccessPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *CourseAccessPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the access in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/course/authoring/access
+func (s *CourseAccessService) Patch(ctx context.Context, orgID string, spaceID string, body any, query *CourseAccessPatchQuery, opts ...RequestOption) (*CourseAccessPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseAccessPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/access", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

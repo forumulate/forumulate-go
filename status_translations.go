@@ -19,6 +19,10 @@ type StatusTranslationsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusTranslationsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *StatusTranslationsListQuery) encode(opts []RequestOption) (url.Values, 
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,45 +72,117 @@ func (s *StatusTranslationsService) ListAutoPaging(ctx context.Context, orgID st
 	})
 }
 
+// StatusTranslationsPutQuery are the optional query parameters of StatusTranslationsService.Put.
+type StatusTranslationsPutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTranslationsPutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Put write an incident’s translation
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}/translations/{locale}
-func (s *StatusTranslationsService) Put(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsPutParams, opts ...RequestOption) (*StatusTranslationsPutResponse, error) {
+func (s *StatusTranslationsService) Put(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsPutParams, query *StatusTranslationsPutQuery, opts ...RequestOption) (*StatusTranslationsPutResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTranslationsPutResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// StatusTranslationsRemoveQuery are the optional query parameters of StatusTranslationsService.Remove.
+type StatusTranslationsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTranslationsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove remove an incident’s translation
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}/translations/{locale}
-func (s *StatusTranslationsService) Remove(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, opts ...RequestOption) (*StatusTranslationsRemoveResponse, error) {
+func (s *StatusTranslationsService) Remove(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, query *StatusTranslationsRemoveQuery, opts ...RequestOption) (*StatusTranslationsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTranslationsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// StatusTranslationsMachineQuery are the optional query parameters of StatusTranslationsService.Machine.
+type StatusTranslationsMachineQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTranslationsMachineQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Machine machine-translate an incident
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}/translations/{locale}/machine
-func (s *StatusTranslationsService) Machine(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsMachineParams, opts ...RequestOption) (*StatusTranslationsMachineResponse, error) {
+func (s *StatusTranslationsService) Machine(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsMachineParams, query *StatusTranslationsMachineQuery, opts ...RequestOption) (*StatusTranslationsMachineResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTranslationsMachineResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale)+"/machine", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale)+"/machine", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// StatusTranslationsAutoQuery are the optional query parameters of StatusTranslationsService.Auto.
+type StatusTranslationsAutoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTranslationsAutoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Auto machine-translate an incident (canonical)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}/translations/{locale}/auto
-func (s *StatusTranslationsService) Auto(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsAutoParams, opts ...RequestOption) (*StatusTranslationsAutoResponse, error) {
+func (s *StatusTranslationsService) Auto(ctx context.Context, orgID string, spaceID string, incidentID string, locale string, body StatusTranslationsAutoParams, query *StatusTranslationsAutoQuery, opts ...RequestOption) (*StatusTranslationsAutoResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTranslationsAutoResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/translations/"+pathEscape(locale)+"/auto", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

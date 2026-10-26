@@ -19,6 +19,10 @@ type BlogPostTranslationListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogPostTranslationListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *BlogPostTranslationListQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -73,34 +83,88 @@ func (s *BlogPostTranslationService) Get(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
+// BlogPostTranslationPutQuery are the optional query parameters of BlogPostTranslationService.Put.
+type BlogPostTranslationPutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogPostTranslationPutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Put replace the translation (blog)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/translations/{locale}
-func (s *BlogPostTranslationService) Put(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body BlogPostTranslationPutParams, opts ...RequestOption) (*BlogPostTranslationPutResponse, error) {
+func (s *BlogPostTranslationService) Put(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body BlogPostTranslationPutBody, query *BlogPostTranslationPutQuery, opts ...RequestOption) (*BlogPostTranslationPutResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogPostTranslationPutResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogPostTranslationRemoveQuery are the optional query parameters of BlogPostTranslationService.Remove.
+type BlogPostTranslationRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogPostTranslationRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the translation (blog)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/translations/{locale}
-func (s *BlogPostTranslationService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, locale string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), nil, nil, &out, opts); err != nil {
+func (s *BlogPostTranslationService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, locale string, query *BlogPostTranslationRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
-// Auto create the auto in a space (blog)
+// BlogPostTranslationAutoQuery are the optional query parameters of BlogPostTranslationService.Auto.
+type BlogPostTranslationAutoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogPostTranslationAutoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Auto send an auto request in a space (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/translations/{locale}/auto
-func (s *BlogPostTranslationService) Auto(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body BlogPostTranslationAutoParams, opts ...RequestOption) (*BlogPostTranslationAutoResponse, error) {
+func (s *BlogPostTranslationService) Auto(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body BlogPostTranslationAutoParams, query *BlogPostTranslationAutoQuery, opts ...RequestOption) (*BlogPostTranslationAutoResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogPostTranslationAutoResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/translations/"+pathEscape(locale)+"/auto", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -13,12 +13,47 @@ type SitesService struct {
 	c *Client
 }
 
+// SitesRemoveDomainQuery are the optional query parameters of SitesService.RemoveDomain.
+type SitesRemoveDomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesRemoveDomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RemoveDomain delete the domain (sites)
+//
+// DELETE /orgs/{orgId}/sites/{siteId}/domains/{domainId}
+func (s *SitesService) RemoveDomain(ctx context.Context, orgID string, siteID string, domainID string, query *SitesRemoveDomainQuery, opts ...RequestOption) (*SitesRemoveDomainResponse, error) {
+	v, opts := query.encode(opts)
+	var out SitesRemoveDomainResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID), v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // SitesListQuery are the optional query parameters of SitesService.List.
 type SitesListQuery struct {
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SitesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -26,11 +61,20 @@ func (p *SitesListQuery) encode(opts []RequestOption) (url.Values, []RequestOpti
 	if p == nil {
 		return v, opts
 	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,12 +106,30 @@ func (s *SitesService) ListAutoPaging(ctx context.Context, orgID string, query *
 	})
 }
 
+// SitesCreateQuery are the optional query parameters of SitesService.Create.
+type SitesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a site in an organization
 //
 // POST /orgs/{orgId}/sites
-func (s *SitesService) Create(ctx context.Context, orgID string, body SitesCreateParams, opts ...RequestOption) (*SitesCreateResponse, error) {
+func (s *SitesService) Create(ctx context.Context, orgID string, body SitesCreateParams, query *SitesCreateQuery, opts ...RequestOption) (*SitesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -86,8 +148,12 @@ func (s *SitesService) Get(ctx context.Context, orgID string, siteID string, opt
 
 // SitesReplaceQuery are the optional query parameters of SitesService.Replace.
 type SitesReplaceQuery struct {
-	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
 	DryRun *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Strict *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
 }
 
 func (p *SitesReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -97,6 +163,12 @@ func (p *SitesReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.DryRun != nil {
 		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Strict != nil {
+		v.Set("strict", *p.Strict)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
 	}
 	return v, opts
 }
@@ -115,8 +187,10 @@ func (s *SitesService) Replace(ctx context.Context, orgID string, siteID string,
 
 // SitesUpdateQuery are the optional query parameters of SitesService.Update.
 type SitesUpdateQuery struct {
-	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
 	DryRun *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Strict *string
 }
 
 func (p *SitesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -126,6 +200,9 @@ func (p *SitesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	}
 	if p.DryRun != nil {
 		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Strict != nil {
+		v.Set("strict", *p.Strict)
 	}
 	return v, opts
 }
@@ -142,23 +219,59 @@ func (s *SitesService) Update(ctx context.Context, orgID string, siteID string, 
 	return out, nil
 }
 
+// SitesRemoveQuery are the optional query parameters of SitesService.Remove.
+type SitesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the site
 //
 // DELETE /orgs/{orgId}/sites/{siteId}
-func (s *SitesService) Remove(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*SitesRemoveResponse, error) {
+func (s *SitesService) Remove(ctx context.Context, orgID string, siteID string, query *SitesRemoveQuery, opts ...RequestOption) (*SitesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetStaging create the staging in an organization
+// SitesSetStagingQuery are the optional query parameters of SitesService.SetStaging.
+type SitesSetStagingQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesSetStagingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetStaging set the staging of the site
 //
 // POST /orgs/{orgId}/sites/{siteId}/staging
-func (s *SitesService) SetStaging(ctx context.Context, orgID string, siteID string, body SitesSetStagingParams, opts ...RequestOption) (*SitesSetStagingResponse, error) {
+func (s *SitesService) SetStaging(ctx context.Context, orgID string, siteID string, body SitesSetStagingParams, query *SitesSetStagingQuery, opts ...RequestOption) (*SitesSetStagingResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesSetStagingResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/staging", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/staging", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -170,6 +283,10 @@ type SitesListDomainsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SitesListDomainsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -183,10 +300,16 @@ func (p *SitesListDomainsQuery) encode(opts []RequestOption) (url.Values, []Requ
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// ListDomains list domains in an organization
+// ListDomains list a site’s domains
 //
 // GET /orgs/{orgId}/sites/{siteId}/domains
 func (s *SitesService) ListDomains(ctx context.Context, orgID string, siteID string, query *SitesListDomainsQuery, opts ...RequestOption) (*SitesListDomainsResponse, error) {
@@ -213,18 +336,36 @@ func (s *SitesService) ListDomainsAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
-// AddDomain create a domain in an organization
+// SitesAddDomainQuery are the optional query parameters of SitesService.AddDomain.
+type SitesAddDomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesAddDomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// AddDomain create a domain on a site
 //
 // POST /orgs/{orgId}/sites/{siteId}/domains
-func (s *SitesService) AddDomain(ctx context.Context, orgID string, siteID string, body SitesAddDomainParams, opts ...RequestOption) (*SitesAddDomainResponse, error) {
+func (s *SitesService) AddDomain(ctx context.Context, orgID string, siteID string, body DomainAddBody, query *SitesAddDomainQuery, opts ...RequestOption) (*SitesAddDomainResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesAddDomainResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DomainSetup get the setup in an organization
+// DomainSetup get the setup on a site
 //
 // GET /orgs/{orgId}/sites/{siteId}/domains/{domainId}/setup
 func (s *SitesService) DomainSetup(ctx context.Context, orgID string, siteID string, domainID string, opts ...RequestOption) (*DomainSetupDto, error) {
@@ -235,56 +376,117 @@ func (s *SitesService) DomainSetup(ctx context.Context, orgID string, siteID str
 	return &out, nil
 }
 
-// SetDomainWww replace the www in an organization
+// SitesSetDomainWwwQuery are the optional query parameters of SitesService.SetDomainWww.
+type SitesSetDomainWwwQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesSetDomainWwwQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetDomainWww replace the www on a site
 //
 // PUT /orgs/{orgId}/sites/{siteId}/domains/{domainId}/www
-func (s *SitesService) SetDomainWww(ctx context.Context, orgID string, siteID string, domainID string, body SitesSetDomainWwwParams, opts ...RequestOption) (any, error) {
+func (s *SitesService) SetDomainWww(ctx context.Context, orgID string, siteID string, domainID string, body SitesSetDomainWwwParams, query *SitesSetDomainWwwQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/www", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/www", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// AllocateSubdomain create the subdomain in an organization
+// SitesAllocateSubdomainQuery are the optional query parameters of SitesService.AllocateSubdomain.
+type SitesAllocateSubdomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesAllocateSubdomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// AllocateSubdomain allocate the subdomain (sites)
 //
 // POST /orgs/{orgId}/sites/{siteId}/domains/subdomain
-func (s *SitesService) AllocateSubdomain(ctx context.Context, orgID string, siteID string, body SitesAllocateSubdomainParams, opts ...RequestOption) (*SitesAllocateSubdomainResponse, error) {
+func (s *SitesService) AllocateSubdomain(ctx context.Context, orgID string, siteID string, body SitesAllocateSubdomainParams, query *SitesAllocateSubdomainQuery, opts ...RequestOption) (*SitesAllocateSubdomainResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesAllocateSubdomainResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/subdomain", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/subdomain", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SitesVerifyDomainQuery are the optional query parameters of SitesService.VerifyDomain.
+type SitesVerifyDomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesVerifyDomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // VerifyDomain verify the domain (sites)
 //
 // POST /orgs/{orgId}/sites/{siteId}/domains/{domainId}/verify
-func (s *SitesService) VerifyDomain(ctx context.Context, orgID string, siteID string, domainID string, body SitesVerifyDomainParams, opts ...RequestOption) (*SitesVerifyDomainResponse, error) {
+func (s *SitesService) VerifyDomain(ctx context.Context, orgID string, siteID string, domainID string, body SitesVerifyDomainParams, query *SitesVerifyDomainQuery, opts ...RequestOption) (*SitesVerifyDomainResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesVerifyDomainResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/verify", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/verify", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SitesActivateDomainQuery are the optional query parameters of SitesService.ActivateDomain.
+type SitesActivateDomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitesActivateDomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ActivateDomain activate the domain (sites)
 //
 // POST /orgs/{orgId}/sites/{siteId}/domains/{domainId}/activate
-func (s *SitesService) ActivateDomain(ctx context.Context, orgID string, siteID string, domainID string, opts ...RequestOption) (*SitesActivateDomainResponse, error) {
+func (s *SitesService) ActivateDomain(ctx context.Context, orgID string, siteID string, domainID string, query *SitesActivateDomainQuery, opts ...RequestOption) (*SitesActivateDomainResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitesActivateDomainResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/activate", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// RemoveDomain delete the domain (sites)
-//
-// DELETE /orgs/{orgId}/sites/{siteId}/domains/{domainId}
-func (s *SitesService) RemoveDomain(ctx context.Context, orgID string, siteID string, domainID string, opts ...RequestOption) (*SitesRemoveDomainResponse, error) {
-	var out SitesRemoveDomainResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/domains/"+pathEscape(domainID)+"/activate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

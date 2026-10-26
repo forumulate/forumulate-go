@@ -22,6 +22,10 @@ type ExtensionsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ExtensionsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -34,6 +38,12 @@ func (p *ExtensionsListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -71,6 +81,10 @@ type ExtensionsAvailableQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ExtensionsAvailableQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -83,6 +97,12 @@ func (p *ExtensionsAvailableQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -114,45 +134,117 @@ func (s *ExtensionsService) AvailableAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// ExtensionsInstallQuery are the optional query parameters of ExtensionsService.Install.
+type ExtensionsInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Install install the extension
 //
 // POST /orgs/{orgId}/extensions/install
-func (s *ExtensionsService) Install(ctx context.Context, orgID string, body ExtensionsInstallParams, opts ...RequestOption) (any, error) {
+func (s *ExtensionsService) Install(ctx context.Context, orgID string, body ExtensionsInstallParams, query *ExtensionsInstallQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/install", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/install", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// ExtensionsUpdateQuery are the optional query parameters of ExtensionsService.Update.
+type ExtensionsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the extension
 //
 // PATCH /orgs/{orgId}/extensions/{id}
-func (s *ExtensionsService) Update(ctx context.Context, orgID string, id string, body ExtensionsUpdateParams, opts ...RequestOption) (*ExtensionsUpdateResponse, error) {
+func (s *ExtensionsService) Update(ctx context.Context, orgID string, id string, body ExtensionsUpdateParams, query *ExtensionsUpdateQuery, opts ...RequestOption) (*ExtensionsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Uninstall delete the extension
+// ExtensionsUninstallQuery are the optional query parameters of ExtensionsService.Uninstall.
+type ExtensionsUninstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsUninstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Uninstall uninstall the extension
 //
 // DELETE /orgs/{orgId}/extensions/{id}
-func (s *ExtensionsService) Uninstall(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsUninstallResponse, error) {
+func (s *ExtensionsService) Uninstall(ctx context.Context, orgID string, id string, query *ExtensionsUninstallQuery, opts ...RequestOption) (*ExtensionsUninstallResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsUninstallResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ExtensionsTestQuery are the optional query parameters of ExtensionsService.Test.
+type ExtensionsTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Test test the extension
 //
 // POST /orgs/{orgId}/extensions/{id}/test
-func (s *ExtensionsService) Test(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsTestResponse, error) {
+func (s *ExtensionsService) Test(ctx context.Context, orgID string, id string, query *ExtensionsTestQuery, opts ...RequestOption) (*ExtensionsTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -164,6 +256,10 @@ type ExtensionsDeliveriesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ExtensionsDeliveriesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -176,6 +272,12 @@ func (p *ExtensionsDeliveriesQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -207,23 +309,59 @@ func (s *ExtensionsService) DeliveriesAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// ExtensionsRotateQuery are the optional query parameters of ExtensionsService.Rotate.
+type ExtensionsRotateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRotateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Rotate rotate the extension
 //
 // POST /orgs/{orgId}/extensions/{id}/rotate
-func (s *ExtensionsService) Rotate(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsRotateResponse, error) {
+func (s *ExtensionsService) Rotate(ctx context.Context, orgID string, id string, query *ExtensionsRotateQuery, opts ...RequestOption) (*ExtensionsRotateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRotateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/rotate", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/rotate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Upgrade create the upgrade in an organization
+// ExtensionsUpgradeQuery are the optional query parameters of ExtensionsService.Upgrade.
+type ExtensionsUpgradeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsUpgradeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Upgrade upgrade the extension
 //
 // POST /orgs/{orgId}/extensions/{id}/upgrade
-func (s *ExtensionsService) Upgrade(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsUpgradeResponse, error) {
+func (s *ExtensionsService) Upgrade(ctx context.Context, orgID string, id string, query *ExtensionsUpgradeQuery, opts ...RequestOption) (*ExtensionsUpgradeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsUpgradeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/upgrade", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/upgrade", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -262,6 +400,10 @@ type ExtensionsAPISpacePagesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ExtensionsAPISpacePagesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -274,6 +416,12 @@ func (p *ExtensionsAPISpacePagesQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -305,12 +453,30 @@ func (s *ExtensionsAPIService) SpacePagesAutoPaging(ctx context.Context, spaceID
 	})
 }
 
+// ExtensionsAPISaveDraftQuery are the optional query parameters of ExtensionsAPIService.SaveDraft.
+type ExtensionsAPISaveDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsAPISaveDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SaveDraft list draft pages
 //
 // POST /ext/v1/pages/{pageId}/draft
-func (s *ExtensionsAPIService) SaveDraft(ctx context.Context, pageID string, body ExtensionsAPISaveDraftParams, opts ...RequestOption) (*ExtensionsAPISaveDraftResponse, error) {
+func (s *ExtensionsAPIService) SaveDraft(ctx context.Context, pageID string, body ExtensionsAPISaveDraftParams, query *ExtensionsAPISaveDraftQuery, opts ...RequestOption) (*ExtensionsAPISaveDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsAPISaveDraftResponse
-	if err := s.c.do(ctx, "POST", "/ext/v1/pages/"+pathEscape(pageID)+"/draft", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/ext/v1/pages/"+pathEscape(pageID)+"/draft", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -322,6 +488,10 @@ type ExtensionsAPICommentsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ExtensionsAPICommentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -334,6 +504,12 @@ func (p *ExtensionsAPICommentsQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -365,12 +541,30 @@ func (s *ExtensionsAPIService) CommentsAutoPaging(ctx context.Context, pageID st
 	})
 }
 
+// ExtensionsAPIPostCommentQuery are the optional query parameters of ExtensionsAPIService.PostComment.
+type ExtensionsAPIPostCommentQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsAPIPostCommentQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PostComment create a comment
 //
 // POST /ext/v1/pages/{pageId}/comments
-func (s *ExtensionsAPIService) PostComment(ctx context.Context, pageID string, body ExtensionsAPIPostCommentParams, opts ...RequestOption) (*ExtensionsAPIPostCommentResponse, error) {
+func (s *ExtensionsAPIService) PostComment(ctx context.Context, pageID string, body ExtensionsAPIPostCommentParams, query *ExtensionsAPIPostCommentQuery, opts ...RequestOption) (*ExtensionsAPIPostCommentResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsAPIPostCommentResponse
-	if err := s.c.do(ctx, "POST", "/ext/v1/pages/"+pathEscape(pageID)+"/comments", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/ext/v1/pages/"+pathEscape(pageID)+"/comments", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -382,6 +576,10 @@ type ExtensionsAPIMembersQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ExtensionsAPIMembersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -394,6 +592,12 @@ func (p *ExtensionsAPIMembersQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -441,78 +645,204 @@ type ExtensionsRegistryService struct {
 	c *Client
 }
 
+// ExtensionsRegistryPublishQuery are the optional query parameters of ExtensionsRegistryService.Publish.
+type ExtensionsRegistryPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistryPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the extension
 //
 // POST /orgs/{orgId}/extensions/{id}/publish
-func (s *ExtensionsRegistryService) Publish(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsRegistryPublishResponse, error) {
+func (s *ExtensionsRegistryService) Publish(ctx context.Context, orgID string, id string, query *ExtensionsRegistryPublishQuery, opts ...RequestOption) (*ExtensionsRegistryPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRegistryPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/publish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/publish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ExtensionsRegistryUnpublishQuery are the optional query parameters of ExtensionsRegistryService.Unpublish.
+type ExtensionsRegistryUnpublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistryUnpublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Unpublish unpublish the extension
 //
 // POST /orgs/{orgId}/extensions/{id}/unpublish
-func (s *ExtensionsRegistryService) Unpublish(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsRegistryUnpublishResponse, error) {
+func (s *ExtensionsRegistryService) Unpublish(ctx context.Context, orgID string, id string, query *ExtensionsRegistryUnpublishQuery, opts ...RequestOption) (*ExtensionsRegistryUnpublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRegistryUnpublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/unpublish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/unpublish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ExtensionsRegistryInstallQuery are the optional query parameters of ExtensionsRegistryService.Install.
+type ExtensionsRegistryInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistryInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Install install registry in an organization
 //
 // POST /orgs/{orgId}/extensions/install-registry
-func (s *ExtensionsRegistryService) Install(ctx context.Context, orgID string, body ExtensionsRegistryInstallParams, opts ...RequestOption) (any, error) {
+func (s *ExtensionsRegistryService) Install(ctx context.Context, orgID string, body ExtensionsRegistryInstallParams, query *ExtensionsRegistryInstallQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/install-registry", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/install-registry", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Rate create the rate in an organization
+// ExtensionsRegistryRateQuery are the optional query parameters of ExtensionsRegistryService.Rate.
+type ExtensionsRegistryRateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistryRateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Rate rate an extension
 //
 // POST /orgs/{orgId}/extensions/rate
-func (s *ExtensionsRegistryService) Rate(ctx context.Context, orgID string, body ExtensionsRegistryRateParams, opts ...RequestOption) (*ExtensionsRegistryRateResponse, error) {
+func (s *ExtensionsRegistryService) Rate(ctx context.Context, orgID string, body ExtensionsRegistryRateParams, query *ExtensionsRegistryRateQuery, opts ...RequestOption) (*ExtensionsRegistryRateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRegistryRateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/rate", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/rate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ExtensionsRegistrySubmitQuery are the optional query parameters of ExtensionsRegistryService.Submit.
+type ExtensionsRegistrySubmitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistrySubmitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Submit submit review in an organization
 //
 // POST /orgs/{orgId}/extensions/{id}/submit-review
-func (s *ExtensionsRegistryService) Submit(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ExtensionsRegistrySubmitResponse, error) {
+func (s *ExtensionsRegistryService) Submit(ctx context.Context, orgID string, id string, query *ExtensionsRegistrySubmitQuery, opts ...RequestOption) (*ExtensionsRegistrySubmitResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRegistrySubmitResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/submit-review", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/submit-review", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Pricing create the pricing in an organization
+// ExtensionsRegistryPricingQuery are the optional query parameters of ExtensionsRegistryService.Pricing.
+type ExtensionsRegistryPricingQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistryPricingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Pricing send a pricing request in an organization
 //
 // POST /orgs/{orgId}/extensions/{id}/pricing
-func (s *ExtensionsRegistryService) Pricing(ctx context.Context, orgID string, id string, body ExtensionsRegistryPricingParams, opts ...RequestOption) (*ExtensionsRegistryPricingResponse, error) {
+func (s *ExtensionsRegistryService) Pricing(ctx context.Context, orgID string, id string, body ExtensionsRegistryPricingParams, query *ExtensionsRegistryPricingQuery, opts ...RequestOption) (*ExtensionsRegistryPricingResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRegistryPricingResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/pricing", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/"+pathEscape(id)+"/pricing", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Purchase create the purchase in an organization (extensions)
+// ExtensionsRegistryPurchaseQuery are the optional query parameters of ExtensionsRegistryService.Purchase.
+type ExtensionsRegistryPurchaseQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRegistryPurchaseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Purchase purchase an extension
 //
 // POST /orgs/{orgId}/extensions/purchase
-func (s *ExtensionsRegistryService) Purchase(ctx context.Context, orgID string, body ExtensionsRegistryPurchaseParams, opts ...RequestOption) (*ExtensionsRegistryPurchaseResponse, error) {
+func (s *ExtensionsRegistryService) Purchase(ctx context.Context, orgID string, body ExtensionsRegistryPurchaseParams, query *ExtensionsRegistryPurchaseQuery, opts ...RequestOption) (*ExtensionsRegistryPurchaseResponse, error) {
+	v, opts := query.encode(opts)
 	var out ExtensionsRegistryPurchaseResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/purchase", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/purchase", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -523,45 +853,117 @@ type ExtensionsRenderService struct {
 	c *Client
 }
 
+// ExtensionsRenderRenderBlockQuery are the optional query parameters of ExtensionsRenderService.RenderBlock.
+type ExtensionsRenderRenderBlockQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRenderRenderBlockQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RenderBlock render the extension
 //
 // POST /orgs/{orgId}/extensions/render
-func (s *ExtensionsRenderService) RenderBlock(ctx context.Context, orgID string, body ExtensionsRenderRenderBlockParams, opts ...RequestOption) (*ExtensionsRenderRenderBlockResponse, error) {
-	var out ExtensionsRenderRenderBlockResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/render", nil, body, &out, opts); err != nil {
+func (s *ExtensionsRenderService) RenderBlock(ctx context.Context, orgID string, body ExtensionsRenderRenderBlockParams, query *ExtensionsRenderRenderBlockQuery, opts ...RequestOption) (*RenderActionResponse, error) {
+	v, opts := query.encode(opts)
+	var out RenderActionResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/render", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Action create the action in an organization
+// ExtensionsRenderActionQuery are the optional query parameters of ExtensionsRenderService.Action.
+type ExtensionsRenderActionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRenderActionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Action send an action request in an organization
 //
 // POST /orgs/{orgId}/extensions/action
-func (s *ExtensionsRenderService) Action(ctx context.Context, orgID string, body ExtensionsRenderActionParams, opts ...RequestOption) (*ExtensionsRenderActionResponse, error) {
-	var out ExtensionsRenderActionResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/action", nil, body, &out, opts); err != nil {
+func (s *ExtensionsRenderService) Action(ctx context.Context, orgID string, body ExtensionsRenderActionParams, query *ExtensionsRenderActionQuery, opts ...RequestOption) (*RenderActionResponse, error) {
+	v, opts := query.encode(opts)
+	var out RenderActionResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/action", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RenderSurface create the surface in an organization
+// ExtensionsRenderRenderSurfaceQuery are the optional query parameters of ExtensionsRenderService.RenderSurface.
+type ExtensionsRenderRenderSurfaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRenderRenderSurfaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RenderSurface render the surface
 //
 // POST /orgs/{orgId}/extensions/surface
-func (s *ExtensionsRenderService) RenderSurface(ctx context.Context, orgID string, body ExtensionsRenderRenderSurfaceParams, opts ...RequestOption) (*ExtensionsRenderRenderSurfaceResponse, error) {
-	var out ExtensionsRenderRenderSurfaceResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/surface", nil, body, &out, opts); err != nil {
+func (s *ExtensionsRenderService) RenderSurface(ctx context.Context, orgID string, body ExtensionsRenderRenderSurfaceParams, query *ExtensionsRenderRenderSurfaceQuery, opts ...RequestOption) (*RenderActionResponse, error) {
+	v, opts := query.encode(opts)
+	var out RenderActionResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/surface", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SurfaceAction create the surface action in an organization
+// ExtensionsRenderSurfaceActionQuery are the optional query parameters of ExtensionsRenderService.SurfaceAction.
+type ExtensionsRenderSurfaceActionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ExtensionsRenderSurfaceActionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SurfaceAction send a surface action request in an organization
 //
 // POST /orgs/{orgId}/extensions/surface-action
-func (s *ExtensionsRenderService) SurfaceAction(ctx context.Context, orgID string, body ExtensionsRenderSurfaceActionParams, opts ...RequestOption) (*ExtensionsRenderSurfaceActionResponse, error) {
-	var out ExtensionsRenderSurfaceActionResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/surface-action", nil, body, &out, opts); err != nil {
+func (s *ExtensionsRenderService) SurfaceAction(ctx context.Context, orgID string, body ExtensionsRenderSurfaceActionParams, query *ExtensionsRenderSurfaceActionQuery, opts ...RequestOption) (*RenderActionResponse, error) {
+	v, opts := query.encode(opts)
+	var out RenderActionResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/extensions/surface-action", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

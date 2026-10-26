@@ -19,6 +19,10 @@ type StatusTemplatesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusTemplatesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *StatusTemplatesListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,45 +72,117 @@ func (s *StatusTemplatesService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// StatusTemplatesCreateQuery are the optional query parameters of StatusTemplatesService.Create.
+type StatusTemplatesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTemplatesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create save an incident template
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/templates
-func (s *StatusTemplatesService) Create(ctx context.Context, orgID string, spaceID string, body StatusTemplatesCreateParams, opts ...RequestOption) (*StatusTemplatesCreateResponse, error) {
+func (s *StatusTemplatesService) Create(ctx context.Context, orgID string, spaceID string, body StatusTemplatesCreateParams, query *StatusTemplatesCreateQuery, opts ...RequestOption) (*StatusTemplatesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTemplatesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// StatusTemplatesUpdateQuery are the optional query parameters of StatusTemplatesService.Update.
+type StatusTemplatesUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTemplatesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the template
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/status/templates/{templateId}
-func (s *StatusTemplatesService) Update(ctx context.Context, orgID string, spaceID string, templateID string, body StatusTemplatesUpdateParams, opts ...RequestOption) (*StatusTemplatesUpdateResponse, error) {
+func (s *StatusTemplatesService) Update(ctx context.Context, orgID string, spaceID string, templateID string, body StatusTemplatesUpdateParams, query *StatusTemplatesUpdateQuery, opts ...RequestOption) (*StatusTemplatesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTemplatesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates/"+pathEscape(templateID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates/"+pathEscape(templateID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// StatusTemplatesRemoveQuery are the optional query parameters of StatusTemplatesService.Remove.
+type StatusTemplatesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTemplatesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the template
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/templates/{templateId}
-func (s *StatusTemplatesService) Remove(ctx context.Context, orgID string, spaceID string, templateID string, opts ...RequestOption) (*StatusTemplatesRemoveResponse, error) {
+func (s *StatusTemplatesService) Remove(ctx context.Context, orgID string, spaceID string, templateID string, query *StatusTemplatesRemoveQuery, opts ...RequestOption) (*StatusTemplatesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTemplatesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates/"+pathEscape(templateID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates/"+pathEscape(templateID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// StatusTemplatesUseQuery are the optional query parameters of StatusTemplatesService.Use.
+type StatusTemplatesUseQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusTemplatesUseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Use open an incident from a template
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/templates/{templateId}/incidents
-func (s *StatusTemplatesService) Use(ctx context.Context, orgID string, spaceID string, templateID string, body StatusTemplatesUseParams, opts ...RequestOption) (*StatusTemplatesUseResponse, error) {
+func (s *StatusTemplatesService) Use(ctx context.Context, orgID string, spaceID string, templateID string, body StatusTemplatesUseParams, query *StatusTemplatesUseQuery, opts ...RequestOption) (*StatusTemplatesUseResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusTemplatesUseResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates/"+pathEscape(templateID)+"/incidents", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/templates/"+pathEscape(templateID)+"/incidents", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

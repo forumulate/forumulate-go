@@ -19,6 +19,10 @@ type EventSessionsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EventSessionsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *EventSessionsListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *EventSessionsService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// EventSessionsCreateQuery are the optional query parameters of EventSessionsService.Create.
+type EventSessionsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventSessionsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a session in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/sessions
-func (s *EventSessionsService) Create(ctx context.Context, orgID string, spaceID string, handle string, body EventSessionsCreateParams, opts ...RequestOption) (*EventSessionsCreateResponse, error) {
+func (s *EventSessionsService) Create(ctx context.Context, orgID string, spaceID string, handle string, body EventSessionsCreateParams, query *EventSessionsCreateQuery, opts ...RequestOption) (*EventSessionsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventSessionsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/sessions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/sessions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// EventSessionsUpdateQuery are the optional query parameters of EventSessionsService.Update.
+type EventSessionsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventSessionsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the session
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/events/{handle}/sessions/{session}
-func (s *EventSessionsService) Update(ctx context.Context, orgID string, spaceID string, handle string, session string, body EventSessionsUpdateParams, opts ...RequestOption) (any, error) {
+func (s *EventSessionsService) Update(ctx context.Context, orgID string, spaceID string, handle string, session string, body EventSessionsUpdateParams, query *EventSessionsUpdateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/sessions/"+pathEscape(session), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/sessions/"+pathEscape(session), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Remove delete the session (orgs spaces events)
+// EventSessionsRemoveQuery are the optional query parameters of EventSessionsService.Remove.
+type EventSessionsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventSessionsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Remove delete the session
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/events/{handle}/sessions/{session}
-func (s *EventSessionsService) Remove(ctx context.Context, orgID string, spaceID string, handle string, session string, opts ...RequestOption) (*EventSessionsRemoveResponse, error) {
+func (s *EventSessionsService) Remove(ctx context.Context, orgID string, spaceID string, handle string, session string, query *EventSessionsRemoveQuery, opts ...RequestOption) (*EventSessionsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventSessionsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/sessions/"+pathEscape(session), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/sessions/"+pathEscape(session), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

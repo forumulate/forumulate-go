@@ -53,13 +53,13 @@ func (p *NewsletterOneClickUnsubscribePageQuery) encode(opts []RequestOption) (u
 // OneClickUnsubscribePage get the one click unsubscribe
 //
 // GET /newsletter/one-click-unsubscribe
-func (s *NewsletterService) OneClickUnsubscribePage(ctx context.Context, query *NewsletterOneClickUnsubscribePageQuery, opts ...RequestOption) (*ErrorEnvelope, error) {
+func (s *NewsletterService) OneClickUnsubscribePage(ctx context.Context, query *NewsletterOneClickUnsubscribePageQuery, opts ...RequestOption) (any, error) {
 	v, opts := query.encode(opts)
-	var out ErrorEnvelope
+	var out any
 	if err := s.c.do(ctx, "GET", "/newsletter/one-click-unsubscribe", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // NewsletterOneClickUnsubscribeQuery are the optional query parameters of NewsletterService.OneClickUnsubscribe.
@@ -78,7 +78,7 @@ func (p *NewsletterOneClickUnsubscribeQuery) encode(opts []RequestOption) (url.V
 	return v, opts
 }
 
-// OneClickUnsubscribe create the one click unsubscribe
+// OneClickUnsubscribe one click unsubscribe
 //
 // POST /newsletter/one-click-unsubscribe
 func (s *NewsletterService) OneClickUnsubscribe(ctx context.Context, query *NewsletterOneClickUnsubscribeQuery, opts ...RequestOption) (*NewsletterOneClickUnsubscribeResponse, error) {
@@ -120,11 +120,11 @@ func (p *NewsletterClickQuery) encode(opts []RequestOption) (url.Values, []Reque
 // Click get the click
 //
 // GET /newsletter/click/{token}
-func (s *NewsletterService) Click(ctx context.Context, token string, query *NewsletterClickQuery, opts ...RequestOption) (*ErrorEnvelope, error) {
+func (s *NewsletterService) Click(ctx context.Context, token string, query *NewsletterClickQuery, opts ...RequestOption) (any, error) {
 	v, opts := query.encode(opts)
-	var out ErrorEnvelope
+	var out any
 	if err := s.c.do(ctx, "GET", "/newsletter/click/"+pathEscape(token), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

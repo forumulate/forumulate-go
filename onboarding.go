@@ -19,6 +19,10 @@ type OnboardingSurfacesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *OnboardingSurfacesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *OnboardingSurfacesQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -94,12 +104,30 @@ func (s *OnboardingService) Availability(ctx context.Context, query *OnboardingA
 	return &out, nil
 }
 
-// Provision create the onboarding
+// OnboardingProvisionQuery are the optional query parameters of OnboardingService.Provision.
+type OnboardingProvisionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OnboardingProvisionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Provision provision the onboarding
 //
 // POST /onboarding
-func (s *OnboardingService) Provision(ctx context.Context, body OnboardingProvisionParams, opts ...RequestOption) (any, error) {
+func (s *OnboardingService) Provision(ctx context.Context, body OnboardingProvisionParams, query *OnboardingProvisionQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/onboarding", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/onboarding", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

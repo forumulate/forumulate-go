@@ -137,12 +137,30 @@ func (s *SearchService) SemanticSearch(ctx context.Context, orgID string, query 
 	return &out, nil
 }
 
-// Reindex create the reindex in an organization
+// SearchReindexQuery are the optional query parameters of SearchService.Reindex.
+type SearchReindexQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SearchReindexQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Reindex reindex the search
 //
 // POST /orgs/{orgId}/search/reindex
-func (s *SearchService) Reindex(ctx context.Context, orgID string, opts ...RequestOption) (*SearchReindexResponse, error) {
+func (s *SearchService) Reindex(ctx context.Context, orgID string, query *SearchReindexQuery, opts ...RequestOption) (*SearchReindexResponse, error) {
+	v, opts := query.encode(opts)
 	var out SearchReindexResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search/reindex", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search/reindex", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -154,6 +172,10 @@ type SearchTagsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SearchTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -166,6 +188,12 @@ func (p *SearchTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -242,12 +270,30 @@ func (s *SearchService) Gaps(ctx context.Context, orgID string, query *SearchGap
 	return &out, nil
 }
 
-// Retrieve create the search in an organization
+// SearchRetrieveQuery are the optional query parameters of SearchService.Retrieve.
+type SearchRetrieveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SearchRetrieveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Retrieve retrieve the search
 //
 // POST /orgs/{orgId}/search
-func (s *SearchService) Retrieve(ctx context.Context, orgID string, body SearchRetrieveParams, opts ...RequestOption) (*SearchRetrieveResponse, error) {
+func (s *SearchService) Retrieve(ctx context.Context, orgID string, body SearchRetrieveParams, query *SearchRetrieveQuery, opts ...RequestOption) (*SearchRetrieveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SearchRetrieveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -269,45 +315,151 @@ func (s *SearchEmbeddingProviderService) Status(ctx context.Context, orgID strin
 	return &out, nil
 }
 
-// Connect replace the embedding provider in an organization
+// SearchEmbeddingProviderConnectQuery are the optional query parameters of SearchEmbeddingProviderService.Connect.
+type SearchEmbeddingProviderConnectQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SearchEmbeddingProviderConnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Connect connect the embedding provider
 //
 // PUT /orgs/{orgId}/search/embedding-provider
-func (s *SearchEmbeddingProviderService) Connect(ctx context.Context, orgID string, body SearchEmbeddingProviderConnectParams, opts ...RequestOption) (*SearchEmbeddingProviderConnectResponse, error) {
-	var out SearchEmbeddingProviderConnectResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider", nil, body, &out, opts); err != nil {
+func (s *SearchEmbeddingProviderService) Connect(ctx context.Context, orgID string, body SearchEmbeddingProviderConnectParams, query *SearchEmbeddingProviderConnectQuery, opts ...RequestOption) (*EmbeddingProviderConnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out EmbeddingProviderConnectResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Disconnect delete the embedding provider in an organization
+// SearchEmbeddingProviderPatchQuery are the optional query parameters of SearchEmbeddingProviderService.Patch.
+type SearchEmbeddingProviderPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SearchEmbeddingProviderPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the embedding provider in an organization
 //
-// DELETE /orgs/{orgId}/search/embedding-provider
-func (s *SearchEmbeddingProviderService) Disconnect(ctx context.Context, orgID string, opts ...RequestOption) (*SearchEmbeddingProviderDisconnectResponse, error) {
-	var out SearchEmbeddingProviderDisconnectResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider", nil, nil, &out, opts); err != nil {
+// PATCH /orgs/{orgId}/search/embedding-provider
+func (s *SearchEmbeddingProviderService) Patch(ctx context.Context, orgID string, body SearchEmbeddingProviderPatchParams, query *SearchEmbeddingProviderPatchQuery, opts ...RequestOption) (*EmbeddingProviderConnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out EmbeddingProviderConnectResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SearchEmbeddingProviderDisconnectQuery are the optional query parameters of SearchEmbeddingProviderService.Disconnect.
+type SearchEmbeddingProviderDisconnectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SearchEmbeddingProviderDisconnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Disconnect disconnect the embedding provider
+//
+// DELETE /orgs/{orgId}/search/embedding-provider
+func (s *SearchEmbeddingProviderService) Disconnect(ctx context.Context, orgID string, query *SearchEmbeddingProviderDisconnectQuery, opts ...RequestOption) (*SearchEmbeddingProviderDisconnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out SearchEmbeddingProviderDisconnectResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SearchEmbeddingProviderTestQuery are the optional query parameters of SearchEmbeddingProviderService.Test.
+type SearchEmbeddingProviderTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SearchEmbeddingProviderTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Test test the embedding provider
 //
 // POST /orgs/{orgId}/search/embedding-provider/test
-func (s *SearchEmbeddingProviderService) Test(ctx context.Context, orgID string, opts ...RequestOption) (*SearchEmbeddingProviderTestResponse, error) {
+func (s *SearchEmbeddingProviderService) Test(ctx context.Context, orgID string, query *SearchEmbeddingProviderTestQuery, opts ...RequestOption) (*SearchEmbeddingProviderTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out SearchEmbeddingProviderTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Reindex create the reindex in an organization (embedding provider)
+// SearchEmbeddingProviderReindexQuery are the optional query parameters of SearchEmbeddingProviderService.Reindex.
+type SearchEmbeddingProviderReindexQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SearchEmbeddingProviderReindexQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Reindex reindex the embedding provider
 //
 // POST /orgs/{orgId}/search/embedding-provider/reindex
-func (s *SearchEmbeddingProviderService) Reindex(ctx context.Context, orgID string, opts ...RequestOption) (*SearchEmbeddingProviderReindexResponse, error) {
+func (s *SearchEmbeddingProviderService) Reindex(ctx context.Context, orgID string, query *SearchEmbeddingProviderReindexQuery, opts ...RequestOption) (*SearchEmbeddingProviderReindexResponse, error) {
+	v, opts := query.encode(opts)
 	var out SearchEmbeddingProviderReindexResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider/reindex", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/search/embedding-provider/reindex", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

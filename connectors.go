@@ -17,10 +17,16 @@ type ConnectorsService struct {
 
 // ConnectorsListQuery are the optional query parameters of ConnectorsService.List.
 type ConnectorsListQuery struct {
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ConnectorsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -28,11 +34,20 @@ func (p *ConnectorsListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	if p == nil {
 		return v, opts
 	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -64,78 +79,204 @@ func (s *ConnectorsService) ListAutoPaging(ctx context.Context, orgID string, sp
 	})
 }
 
-// Install create a connector in a space
+// ConnectorsInstallQuery are the optional query parameters of ConnectorsService.Install.
+type ConnectorsInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Install install a connector
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/connectors
-func (s *ConnectorsService) Install(ctx context.Context, orgID string, spaceID string, body ConnectorsInstallParams, opts ...RequestOption) (*ConnectorsInstallResponse, error) {
+func (s *ConnectorsService) Install(ctx context.Context, orgID string, spaceID string, body ConnectorsInstallParams, query *ConnectorsInstallQuery, opts ...RequestOption) (*ConnectorsInstallResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorsInstallResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ConnectorsUpdateQuery are the optional query parameters of ConnectorsService.Update.
+type ConnectorsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the connector
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/connectors/{connectorId}
-func (s *ConnectorsService) Update(ctx context.Context, orgID string, spaceID string, connectorID string, body ConnectorsUpdateParams, opts ...RequestOption) (*ConnectorsUpdateResponse, error) {
+func (s *ConnectorsService) Update(ctx context.Context, orgID string, spaceID string, connectorID string, body ConnectorsUpdateParams, query *ConnectorsUpdateQuery, opts ...RequestOption) (*ConnectorsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ConnectorsRemoveQuery are the optional query parameters of ConnectorsService.Remove.
+type ConnectorsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the connector
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/connectors/{connectorId}
-func (s *ConnectorsService) Remove(ctx context.Context, orgID string, spaceID string, connectorID string, opts ...RequestOption) (*ConnectorsRemoveResponse, error) {
+func (s *ConnectorsService) Remove(ctx context.Context, orgID string, spaceID string, connectorID string, query *ConnectorsRemoveQuery, opts ...RequestOption) (*ConnectorsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// MintToken create the token in a space
+// ConnectorsMintTokenQuery are the optional query parameters of ConnectorsService.MintToken.
+type ConnectorsMintTokenQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsMintTokenQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// MintToken mint the token
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/connectors/{connectorId}/token
-func (s *ConnectorsService) MintToken(ctx context.Context, orgID string, spaceID string, connectorID string, opts ...RequestOption) (*ConnectorTokenMinted, error) {
+func (s *ConnectorsService) MintToken(ctx context.Context, orgID string, spaceID string, connectorID string, query *ConnectorsMintTokenQuery, opts ...RequestOption) (*ConnectorTokenMinted, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorTokenMinted
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/token", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/token", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RevokeToken delete the token in a space
+// ConnectorsRevokeTokenQuery are the optional query parameters of ConnectorsService.RevokeToken.
+type ConnectorsRevokeTokenQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsRevokeTokenQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeToken revoke a connector’s token
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/connectors/{connectorId}/token
-func (s *ConnectorsService) RevokeToken(ctx context.Context, orgID string, spaceID string, connectorID string, opts ...RequestOption) (*ConnectorsRevokeTokenResponse, error) {
+func (s *ConnectorsService) RevokeToken(ctx context.Context, orgID string, spaceID string, connectorID string, query *ConnectorsRevokeTokenQuery, opts ...RequestOption) (*ConnectorsRevokeTokenResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorsRevokeTokenResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/token", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/token", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ConnectorsTestQuery are the optional query parameters of ConnectorsService.Test.
+type ConnectorsTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Test test the connector
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/connectors/{connectorId}/test
-func (s *ConnectorsService) Test(ctx context.Context, orgID string, spaceID string, connectorID string, body ConnectorsTestParams, opts ...RequestOption) (any, error) {
+func (s *ConnectorsService) Test(ctx context.Context, orgID string, spaceID string, connectorID string, body ConnectorsTestParams, query *ConnectorsTestQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/test", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/test", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RegisterKnowledge create the register in a space (connectors knowledge)
+// ConnectorsRegisterKnowledgeQuery are the optional query parameters of ConnectorsService.RegisterKnowledge.
+type ConnectorsRegisterKnowledgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsRegisterKnowledgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RegisterKnowledge register the knowledge
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/connectors/{connectorId}/knowledge/register
-func (s *ConnectorsService) RegisterKnowledge(ctx context.Context, orgID string, spaceID string, connectorID string, opts ...RequestOption) (*KnowledgeRegistration, error) {
+func (s *ConnectorsService) RegisterKnowledge(ctx context.Context, orgID string, spaceID string, connectorID string, query *ConnectorsRegisterKnowledgeQuery, opts ...RequestOption) (*KnowledgeRegistration, error) {
+	v, opts := query.encode(opts)
 	var out KnowledgeRegistration
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/knowledge/register", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/connectors/"+pathEscape(connectorID)+"/knowledge/register", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -146,6 +287,10 @@ type ConnectorsActivityQuery struct {
 	// Activity entries.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ConnectorsActivityQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -158,6 +303,12 @@ func (p *ConnectorsActivityQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -194,12 +345,84 @@ type ConnectorsKbService struct {
 	c *Client
 }
 
+// ConnectorsKbManifestQuery are the optional query parameters of ConnectorsKbService.Manifest.
+type ConnectorsKbManifestQuery struct {
+	// For an integration token over several spaces: which one to read (its uuid or slug; must be one the token covers, else 403).
+	SpaceID *string
+}
+
+func (p *ConnectorsKbManifestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.SpaceID != nil {
+		v.Set("spaceId", *p.SpaceID)
+	}
+	return v, opts
+}
+
 // Manifest get the manifest
 //
 // GET /connector/kb/manifest
-func (s *ConnectorsKbService) Manifest(ctx context.Context, opts ...RequestOption) (*ConnectorManifest, error) {
+func (s *ConnectorsKbService) Manifest(ctx context.Context, query *ConnectorsKbManifestQuery, opts ...RequestOption) (*ConnectorManifest, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorManifest
-	if err := s.c.do(ctx, "GET", "/connector/kb/manifest", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/connector/kb/manifest", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ConnectorsKbPagesQuery are the optional query parameters of ConnectorsKbService.Pages.
+type ConnectorsKbPagesQuery struct {
+	// Pages per response.
+	Limit *int64
+	// `page.nextCursor` or `sync.checkpoint` from the previous response (store it verbatim), or an ISO-8601 timestamp.
+	Since *string
+	// For an integration token over several spaces: which one to read (its uuid or slug; must be one the token covers, else 403).
+	SpaceID *string
+	// Comma-separated space ids or slugs to read; each must be one the credential covers, else 403 `space_not_granted`.
+	SpaceIds []string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
+}
+
+func (p *ConnectorsKbPagesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Limit != nil {
+		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Since != nil {
+		v.Set("since", *p.Since)
+	}
+	if p.SpaceID != nil {
+		v.Set("spaceId", *p.SpaceID)
+	}
+	for _, x := range p.SpaceIds {
+		v.Add("spaceIds", x)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
+	return v, opts
+}
+
+// Pages sync published pages (knowledge-source feed)
+//
+// GET /connector/kb/pages
+func (s *ConnectorsKbService) Pages(ctx context.Context, query *ConnectorsKbPagesQuery, opts ...RequestOption) (*KbFeedAnswer, error) {
+	v, opts := query.encode(opts)
+	var out KbFeedAnswer
+	if err := s.c.do(ctx, "GET", "/connector/kb/pages", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -211,6 +434,12 @@ type ConnectorsKbChunksQuery struct {
 	Limit  *int64
 	Cursor *string
 	Since  *string
+	// For an integration token over several spaces: which one to read (its uuid or slug; must be one the token covers, else 403).
+	SpaceID *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ConnectorsKbChunksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -226,6 +455,15 @@ func (p *ConnectorsKbChunksQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Since != nil {
 		v.Set("since", *p.Since)
+	}
+	if p.SpaceID != nil {
+		v.Set("spaceId", *p.SpaceID)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -260,6 +498,8 @@ func (s *ConnectorsKbService) ChunksAutoPaging(ctx context.Context, query *Conne
 // ConnectorsKbSearchQuery are the optional query parameters of ConnectorsKbService.Search.
 type ConnectorsKbSearchQuery struct {
 	Q *string
+	// For an integration token over several spaces: which one to read (its uuid or slug; must be one the token covers, else 403).
+	SpaceID *string
 }
 
 func (p *ConnectorsKbSearchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -269,6 +509,9 @@ func (p *ConnectorsKbSearchQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Q != nil {
 		v.Set("q", *p.Q)
+	}
+	if p.SpaceID != nil {
+		v.Set("spaceId", *p.SpaceID)
 	}
 	return v, opts
 }
@@ -285,45 +528,117 @@ func (s *ConnectorsKbService) Search(ctx context.Context, query *ConnectorsKbSea
 	return &out, nil
 }
 
+// ConnectorsKbLlmsQuery are the optional query parameters of ConnectorsKbService.Llms.
+type ConnectorsKbLlmsQuery struct {
+	// For an integration token over several spaces: which one to read (its uuid or slug; must be one the token covers, else 403).
+	SpaceID *string
+}
+
+func (p *ConnectorsKbLlmsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.SpaceID != nil {
+		v.Set("spaceId", *p.SpaceID)
+	}
+	return v, opts
+}
+
 // Llms file of llms (connector kb)
 //
 // GET /connector/kb/llms.txt
-func (s *ConnectorsKbService) Llms(ctx context.Context, opts ...RequestOption) (*ConnectorsKbLlmsResponse, error) {
+func (s *ConnectorsKbService) Llms(ctx context.Context, query *ConnectorsKbLlmsQuery, opts ...RequestOption) (*ConnectorsKbLlmsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConnectorsKbLlmsResponse
-	if err := s.c.do(ctx, "GET", "/connector/kb/llms.txt", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/connector/kb/llms.txt", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Ask create the ask
+// ConnectorsKbAskQuery are the optional query parameters of ConnectorsKbService.Ask.
+type ConnectorsKbAskQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsKbAskQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Ask ask a question
 //
 // POST /connector/kb/ask
-func (s *ConnectorsKbService) Ask(ctx context.Context, body ConnectorsKbAskParams, opts ...RequestOption) (any, error) {
+func (s *ConnectorsKbService) Ask(ctx context.Context, body ConnectorsKbAskParams, query *ConnectorsKbAskQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/connector/kb/ask", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/connector/kb/ask", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ConnectorsKbQuestionsQuery are the optional query parameters of ConnectorsKbService.Questions.
+type ConnectorsKbQuestionsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsKbQuestionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Questions create a question
 //
 // POST /connector/kb/questions
-func (s *ConnectorsKbService) Questions(ctx context.Context, body ConnectorsKbQuestionsParams, opts ...RequestOption) (any, error) {
+func (s *ConnectorsKbService) Questions(ctx context.Context, body ConnectorsKbQuestionsParams, query *ConnectorsKbQuestionsQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/connector/kb/questions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/connector/kb/questions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// ConnectorsKbSuggestQuery are the optional query parameters of ConnectorsKbService.Suggest.
+type ConnectorsKbSuggestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConnectorsKbSuggestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Suggest create a suggestion
 //
 // POST /connector/kb/suggestions
-func (s *ConnectorsKbService) Suggest(ctx context.Context, body ConnectorsKbSuggestParams, opts ...RequestOption) (any, error) {
+func (s *ConnectorsKbService) Suggest(ctx context.Context, body ConnectorsKbSuggestParams, query *ConnectorsKbSuggestQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/connector/kb/suggestions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/connector/kb/suggestions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -340,6 +655,10 @@ type ConnectorsProvidersListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ConnectorsProvidersListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -352,6 +671,12 @@ func (p *ConnectorsProvidersListQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

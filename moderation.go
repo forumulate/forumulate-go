@@ -22,6 +22,10 @@ type ModerationReviewablesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationReviewablesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -34,6 +38,12 @@ func (p *ModerationReviewablesQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -65,100 +75,262 @@ func (s *ModerationService) ReviewablesAutoPaging(ctx context.Context, orgID str
 	})
 }
 
-// ReviewFlag create the flag
+// ModerationReviewFlagQuery are the optional query parameters of ModerationService.ReviewFlag.
+type ModerationReviewFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationReviewFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReviewFlag review a flag in the moderation queue
 //
 // POST /orgs/{orgId}/moderation/reviewables/flag/{flagId}
-func (s *ModerationService) ReviewFlag(ctx context.Context, orgID string, flagID string, body ModerationReviewFlagParams, opts ...RequestOption) (*ModerationReviewFlagResponse, error) {
+func (s *ModerationService) ReviewFlag(ctx context.Context, orgID string, flagID string, body ModerationReviewFlagParams, query *ModerationReviewFlagQuery, opts ...RequestOption) (*ModerationReviewFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationReviewFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ReviewFlagsBulk create the bulk in an organization (moderation reviewables flags)
+// ModerationReviewFlagsBulkQuery are the optional query parameters of ModerationService.ReviewFlagsBulk.
+type ModerationReviewFlagsBulkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationReviewFlagsBulkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReviewFlagsBulk review flags in bulk in an organization
 //
 // POST /orgs/{orgId}/moderation/reviewables/flags/bulk
-func (s *ModerationService) ReviewFlagsBulk(ctx context.Context, orgID string, body ModerationReviewFlagsBulkParams, opts ...RequestOption) (*ModerationReviewFlagsBulkResponse, error) {
+func (s *ModerationService) ReviewFlagsBulk(ctx context.Context, orgID string, body ModerationReviewFlagsBulkParams, query *ModerationReviewFlagsBulkQuery, opts ...RequestOption) (*ModerationReviewFlagsBulkResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationReviewFlagsBulkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flags/bulk", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flags/bulk", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ReviewPost create the post
+// ModerationReviewPostQuery are the optional query parameters of ModerationService.ReviewPost.
+type ModerationReviewPostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationReviewPostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReviewPost review the post
 //
 // POST /orgs/{orgId}/moderation/reviewables/post/{postId}
-func (s *ModerationService) ReviewPost(ctx context.Context, orgID string, postID string, body ModerationReviewPostParams, opts ...RequestOption) (*ModerationReviewPostResponse, error) {
+func (s *ModerationService) ReviewPost(ctx context.Context, orgID string, postID string, body ModerationReviewPostParams, query *ModerationReviewPostQuery, opts ...RequestOption) (*ModerationReviewPostResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationReviewPostResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/post/"+pathEscape(postID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/post/"+pathEscape(postID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ModerationClaimFlagQuery are the optional query parameters of ModerationService.ClaimFlag.
+type ModerationClaimFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationClaimFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ClaimFlag claim the flag
 //
 // POST /orgs/{orgId}/moderation/reviewables/flag/{flagId}/claim
-func (s *ModerationService) ClaimFlag(ctx context.Context, orgID string, flagID string, opts ...RequestOption) (*ModerationClaimFlagResponse, error) {
+func (s *ModerationService) ClaimFlag(ctx context.Context, orgID string, flagID string, query *ModerationClaimFlagQuery, opts ...RequestOption) (*ModerationClaimFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationClaimFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/claim", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/claim", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// UnclaimFlag claim the flag (delete)
+// ModerationUnclaimFlagQuery are the optional query parameters of ModerationService.UnclaimFlag.
+type ModerationUnclaimFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationUnclaimFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UnclaimFlag unclaim the flag
 //
 // DELETE /orgs/{orgId}/moderation/reviewables/flag/{flagId}/claim
-func (s *ModerationService) UnclaimFlag(ctx context.Context, orgID string, flagID string, opts ...RequestOption) (*ModerationUnclaimFlagResponse, error) {
+func (s *ModerationService) UnclaimFlag(ctx context.Context, orgID string, flagID string, query *ModerationUnclaimFlagQuery, opts ...RequestOption) (*ModerationUnclaimFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationUnclaimFlagResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/claim", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/claim", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetPriority create the priority in an organization
+// ModerationSetPriorityQuery are the optional query parameters of ModerationService.SetPriority.
+type ModerationSetPriorityQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationSetPriorityQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetPriority set the priority of the flag
 //
 // POST /orgs/{orgId}/moderation/reviewables/flag/{flagId}/priority
-func (s *ModerationService) SetPriority(ctx context.Context, orgID string, flagID string, body ModerationSetPriorityParams, opts ...RequestOption) (*ModerationSetPriorityResponse, error) {
+func (s *ModerationService) SetPriority(ctx context.Context, orgID string, flagID string, body ModerationSetPriorityParams, query *ModerationSetPriorityQuery, opts ...RequestOption) (*ModerationSetPriorityResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationSetPriorityResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/priority", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/priority", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeleteAndBlock create the delete and block in an organization
+// ModerationDeleteAndBlockQuery are the optional query parameters of ModerationService.DeleteAndBlock.
+type ModerationDeleteAndBlockQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationDeleteAndBlockQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// DeleteAndBlock delete and block
 //
 // POST /orgs/{orgId}/moderation/reviewables/flag/{flagId}/delete-and-block
-func (s *ModerationService) DeleteAndBlock(ctx context.Context, orgID string, flagID string, body ModerationDeleteAndBlockParams, opts ...RequestOption) (*ModerationDeleteAndBlockResponse, error) {
+func (s *ModerationService) DeleteAndBlock(ctx context.Context, orgID string, flagID string, body ModerationDeleteAndBlockParams, query *ModerationDeleteAndBlockQuery, opts ...RequestOption) (*ModerationDeleteAndBlockResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationDeleteAndBlockResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/delete-and-block", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/reviewables/flag/"+pathEscape(flagID)+"/delete-and-block", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// HardDeletePost delete the permanent in an organization (posts)
+// ModerationHardDeletePostQuery are the optional query parameters of ModerationService.HardDeletePost.
+type ModerationHardDeletePostQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationHardDeletePostQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// HardDeletePost permanently delete the post
 //
 // DELETE /orgs/{orgId}/moderation/posts/{postId}/permanent
-func (s *ModerationService) HardDeletePost(ctx context.Context, orgID string, postID string, opts ...RequestOption) (*ModerationHardDeletePostResponse, error) {
+func (s *ModerationService) HardDeletePost(ctx context.Context, orgID string, postID string, query *ModerationHardDeletePostQuery, opts ...RequestOption) (*ModerationHardDeletePostResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationHardDeletePostResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/posts/"+pathEscape(postID)+"/permanent", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/posts/"+pathEscape(postID)+"/permanent", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// HardDeleteTopic delete the permanent in an organization (topics)
+// ModerationHardDeleteTopicQuery are the optional query parameters of ModerationService.HardDeleteTopic.
+type ModerationHardDeleteTopicQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationHardDeleteTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// HardDeleteTopic permanently delete the topic
 //
 // DELETE /orgs/{orgId}/moderation/topics/{topicId}/permanent
-func (s *ModerationService) HardDeleteTopic(ctx context.Context, orgID string, topicID string, opts ...RequestOption) (*ModerationHardDeleteTopicResponse, error) {
+func (s *ModerationService) HardDeleteTopic(ctx context.Context, orgID string, topicID string, query *ModerationHardDeleteTopicQuery, opts ...RequestOption) (*ModerationHardDeleteTopicResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationHardDeleteTopicResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/topics/"+pathEscape(topicID)+"/permanent", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/topics/"+pathEscape(topicID)+"/permanent", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -170,6 +342,10 @@ type ModerationFlagHistoryQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationFlagHistoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -182,6 +358,12 @@ func (p *ModerationFlagHistoryQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -219,6 +401,10 @@ type ModerationListWordsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationListWordsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -231,6 +417,12 @@ func (p *ModerationListWordsQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -262,23 +454,59 @@ func (s *ModerationService) ListWordsAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// ModerationAddWordQuery are the optional query parameters of ModerationService.AddWord.
+type ModerationAddWordQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationAddWordQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AddWord create a word in an organization
 //
 // POST /orgs/{orgId}/moderation/words
-func (s *ModerationService) AddWord(ctx context.Context, orgID string, body ModerationAddWordParams, opts ...RequestOption) (*ModerationAddWordResponse, error) {
+func (s *ModerationService) AddWord(ctx context.Context, orgID string, body ModerationAddWordParams, query *ModerationAddWordQuery, opts ...RequestOption) (*ModerationAddWordResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationAddWordResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/words", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/words", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ModerationRemoveWordQuery are the optional query parameters of ModerationService.RemoveWord.
+type ModerationRemoveWordQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationRemoveWordQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveWord delete the word
 //
 // DELETE /orgs/{orgId}/moderation/words/{wordId}
-func (s *ModerationService) RemoveWord(ctx context.Context, orgID string, wordID string, opts ...RequestOption) (*ModerationRemoveWordResponse, error) {
+func (s *ModerationService) RemoveWord(ctx context.Context, orgID string, wordID string, query *ModerationRemoveWordQuery, opts ...RequestOption) (*ModerationRemoveWordResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationRemoveWordResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/words/"+pathEscape(wordID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/words/"+pathEscape(wordID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -290,6 +518,10 @@ type ModerationListSuspensionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationListSuspensionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -302,6 +534,12 @@ func (p *ModerationListSuspensionsQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -333,45 +571,117 @@ func (s *ModerationService) ListSuspensionsAutoPaging(ctx context.Context, orgID
 	})
 }
 
-// Suspend create the suspension
+// ModerationSuspendQuery are the optional query parameters of ModerationService.Suspend.
+type ModerationSuspendQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationSuspendQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Suspend suspend the user
 //
 // POST /orgs/{orgId}/moderation/suspensions/{userId}
-func (s *ModerationService) Suspend(ctx context.Context, orgID string, userID string, body ModerationSuspendParams, opts ...RequestOption) (*ModerationSuspendResponse, error) {
+func (s *ModerationService) Suspend(ctx context.Context, orgID string, userID string, body ModerationSuspendParams, query *ModerationSuspendQuery, opts ...RequestOption) (*ModerationSuspendResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationSuspendResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/suspensions/"+pathEscape(userID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/suspensions/"+pathEscape(userID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Lift delete the suspension
+// ModerationLiftQuery are the optional query parameters of ModerationService.Lift.
+type ModerationLiftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationLiftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Lift lift the suspension
 //
 // DELETE /orgs/{orgId}/moderation/suspensions/{userId}
-func (s *ModerationService) Lift(ctx context.Context, orgID string, userID string, opts ...RequestOption) (*ModerationLiftResponse, error) {
+func (s *ModerationService) Lift(ctx context.Context, orgID string, userID string, query *ModerationLiftQuery, opts ...RequestOption) (*ModerationLiftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationLiftResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/suspensions/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/suspensions/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Anonymize create the anonymize
+// ModerationAnonymizeQuery are the optional query parameters of ModerationService.Anonymize.
+type ModerationAnonymizeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationAnonymizeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Anonymize anonymize the user
 //
 // POST /orgs/{orgId}/moderation/anonymize/{userId}
-func (s *ModerationService) Anonymize(ctx context.Context, orgID string, userID string, opts ...RequestOption) (*ModerationAnonymizeResponse, error) {
+func (s *ModerationService) Anonymize(ctx context.Context, orgID string, userID string, query *ModerationAnonymizeQuery, opts ...RequestOption) (*ModerationAnonymizeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationAnonymizeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/anonymize/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/anonymize/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SelfAnonymize create the anonymize in an organization
+// ModerationSelfAnonymizeQuery are the optional query parameters of ModerationService.SelfAnonymize.
+type ModerationSelfAnonymizeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationSelfAnonymizeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SelfAnonymize anonymize your own account
 //
 // POST /orgs/{orgId}/moderation/me/anonymize
-func (s *ModerationService) SelfAnonymize(ctx context.Context, orgID string, opts ...RequestOption) (*ModerationSelfAnonymizeResponse, error) {
+func (s *ModerationService) SelfAnonymize(ctx context.Context, orgID string, query *ModerationSelfAnonymizeQuery, opts ...RequestOption) (*ModerationSelfAnonymizeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationSelfAnonymizeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/me/anonymize", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/me/anonymize", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -383,6 +693,10 @@ type ModerationListWatchedUsersQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationListWatchedUsersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -395,6 +709,12 @@ func (p *ModerationListWatchedUsersQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -426,23 +746,59 @@ func (s *ModerationService) ListWatchedUsersAutoPaging(ctx context.Context, orgI
 	})
 }
 
-// WatchUser create the watched user
+// ModerationWatchUserQuery are the optional query parameters of ModerationService.WatchUser.
+type ModerationWatchUserQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationWatchUserQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// WatchUser watch the user
 //
 // POST /orgs/{orgId}/moderation/watched-users/{userId}
-func (s *ModerationService) WatchUser(ctx context.Context, orgID string, userID string, body ModerationWatchUserParams, opts ...RequestOption) (*ModerationWatchUserResponse, error) {
+func (s *ModerationService) WatchUser(ctx context.Context, orgID string, userID string, body ModerationWatchUserParams, query *ModerationWatchUserQuery, opts ...RequestOption) (*ModerationWatchUserResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationWatchUserResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/watched-users/"+pathEscape(userID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/watched-users/"+pathEscape(userID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// UnwatchUser delete the watched user
+// ModerationUnwatchUserQuery are the optional query parameters of ModerationService.UnwatchUser.
+type ModerationUnwatchUserQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationUnwatchUserQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UnwatchUser stop watching the user
 //
 // DELETE /orgs/{orgId}/moderation/watched-users/{userId}
-func (s *ModerationService) UnwatchUser(ctx context.Context, orgID string, userID string, opts ...RequestOption) (*ModerationUnwatchUserResponse, error) {
+func (s *ModerationService) UnwatchUser(ctx context.Context, orgID string, userID string, query *ModerationUnwatchUserQuery, opts ...RequestOption) (*ModerationUnwatchUserResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationUnwatchUserResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/watched-users/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/watched-users/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -453,6 +809,10 @@ type ModerationLogQuery struct {
 	// Actions listed, newest first.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationLogQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -465,6 +825,12 @@ func (p *ModerationLogQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -507,6 +873,10 @@ type ModerationContentRulesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationContentRulesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -519,6 +889,12 @@ func (p *ModerationContentRulesListQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -550,23 +926,59 @@ func (s *ModerationContentRulesService) ListAutoPaging(ctx context.Context, orgI
 	})
 }
 
+// ModerationContentRulesCreateQuery are the optional query parameters of ModerationContentRulesService.Create.
+type ModerationContentRulesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationContentRulesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a content rule in an organization
 //
 // POST /orgs/{orgId}/content-rules
-func (s *ModerationContentRulesService) Create(ctx context.Context, orgID string, body ModerationContentRulesCreateParams, opts ...RequestOption) (*ModerationContentRulesCreateResponse, error) {
+func (s *ModerationContentRulesService) Create(ctx context.Context, orgID string, body ModerationContentRulesCreateParams, query *ModerationContentRulesCreateQuery, opts ...RequestOption) (*ModerationContentRulesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationContentRulesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content-rules", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content-rules", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ModerationContentRulesRemoveQuery are the optional query parameters of ModerationContentRulesService.Remove.
+type ModerationContentRulesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationContentRulesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the content rule
 //
 // DELETE /orgs/{orgId}/content-rules/{id}
-func (s *ModerationContentRulesService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ModerationContentRulesRemoveResponse, error) {
+func (s *ModerationContentRulesService) Remove(ctx context.Context, orgID string, id string, query *ModerationContentRulesRemoveQuery, opts ...RequestOption) (*ModerationContentRulesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationContentRulesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content-rules/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content-rules/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -588,12 +1000,30 @@ func (s *ModerationFlagTypesService) List(ctx context.Context, orgID string, opt
 	return &out, nil
 }
 
+// ModerationFlagTypesAddQuery are the optional query parameters of ModerationFlagTypesService.Add.
+type ModerationFlagTypesAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationFlagTypesAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add create a flag type in an organization
 //
 // POST /orgs/{orgId}/moderation/flag-types
-func (s *ModerationFlagTypesService) Add(ctx context.Context, orgID string, body ModerationFlagTypesAddParams, opts ...RequestOption) (*ModerationFlagTypesAddResponse, error) {
+func (s *ModerationFlagTypesService) Add(ctx context.Context, orgID string, body ModerationFlagTypesAddParams, query *ModerationFlagTypesAddQuery, opts ...RequestOption) (*ModerationFlagTypesAddResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationFlagTypesAddResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/flag-types", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/moderation/flag-types", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -606,6 +1036,10 @@ type ModerationFlagTypesCatalogueQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationFlagTypesCatalogueQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -621,6 +1055,12 @@ func (p *ModerationFlagTypesCatalogueQuery) encode(opts []RequestOption) (url.Va
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -652,23 +1092,59 @@ func (s *ModerationFlagTypesService) CatalogueAutoPaging(ctx context.Context, or
 	})
 }
 
+// ModerationFlagTypesUpdateQuery are the optional query parameters of ModerationFlagTypesService.Update.
+type ModerationFlagTypesUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationFlagTypesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the flag type
 //
 // PATCH /orgs/{orgId}/moderation/flag-types/{id}
-func (s *ModerationFlagTypesService) Update(ctx context.Context, orgID string, id string, body ModerationFlagTypesUpdateParams, opts ...RequestOption) (*ModerationFlagTypesUpdateResponse, error) {
+func (s *ModerationFlagTypesService) Update(ctx context.Context, orgID string, id string, body ModerationFlagTypesUpdateParams, query *ModerationFlagTypesUpdateQuery, opts ...RequestOption) (*ModerationFlagTypesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationFlagTypesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/moderation/flag-types/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/moderation/flag-types/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ModerationFlagTypesRemoveQuery are the optional query parameters of ModerationFlagTypesService.Remove.
+type ModerationFlagTypesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationFlagTypesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the flag type
 //
 // DELETE /orgs/{orgId}/moderation/flag-types/{id}
-func (s *ModerationFlagTypesService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ModerationFlagTypesRemoveResponse, error) {
+func (s *ModerationFlagTypesService) Remove(ctx context.Context, orgID string, id string, query *ModerationFlagTypesRemoveQuery, opts ...RequestOption) (*ModerationFlagTypesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationFlagTypesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/flag-types/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/moderation/flag-types/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -685,6 +1161,10 @@ type ModerationScreeningListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ModerationScreeningListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -697,6 +1177,12 @@ func (p *ModerationScreeningListQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -728,23 +1214,59 @@ func (s *ModerationScreeningService) ListAutoPaging(ctx context.Context, orgID s
 	})
 }
 
+// ModerationScreeningAddQuery are the optional query parameters of ModerationScreeningService.Add.
+type ModerationScreeningAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationScreeningAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add create an email in an organization
 //
 // POST /orgs/{orgId}/screening/emails
-func (s *ModerationScreeningService) Add(ctx context.Context, orgID string, body ModerationScreeningAddParams, opts ...RequestOption) (*ModerationScreeningAddResponse, error) {
+func (s *ModerationScreeningService) Add(ctx context.Context, orgID string, body ModerationScreeningAddParams, query *ModerationScreeningAddQuery, opts ...RequestOption) (*ModerationScreeningAddResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationScreeningAddResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/screening/emails", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/screening/emails", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ModerationScreeningRemoveQuery are the optional query parameters of ModerationScreeningService.Remove.
+type ModerationScreeningRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ModerationScreeningRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the email
 //
 // DELETE /orgs/{orgId}/screening/emails/{id}
-func (s *ModerationScreeningService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ModerationScreeningRemoveResponse, error) {
+func (s *ModerationScreeningService) Remove(ctx context.Context, orgID string, id string, query *ModerationScreeningRemoveQuery, opts ...RequestOption) (*ModerationScreeningRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ModerationScreeningRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/screening/emails/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/screening/emails/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

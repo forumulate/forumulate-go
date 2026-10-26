@@ -46,12 +46,30 @@ func (s *GrowthService) Conversions(ctx context.Context, orgID string, query *Gr
 	return &out, nil
 }
 
-// Settle replace the experiment
+// GrowthSettleQuery are the optional query parameters of GrowthService.Settle.
+type GrowthSettleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GrowthSettleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Settle settle the experiment
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/pages/{pageId}/experiments/{key}
-func (s *GrowthService) Settle(ctx context.Context, orgID string, spaceID string, pageID string, key string, body GrowthSettleParams, opts ...RequestOption) (*GrowthSettleResponse, error) {
+func (s *GrowthService) Settle(ctx context.Context, orgID string, spaceID string, pageID string, key string, body GrowthSettleParams, query *GrowthSettleQuery, opts ...RequestOption) (*GrowthSettleResponse, error) {
+	v, opts := query.encode(opts)
 	var out GrowthSettleResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/experiments/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/experiments/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

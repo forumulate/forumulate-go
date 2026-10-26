@@ -19,6 +19,10 @@ type SitePreviewListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SitePreviewListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *SitePreviewListQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *SitePreviewService) ListAutoPaging(ctx context.Context, orgID string, s
 	})
 }
 
+// SitePreviewMintQuery are the optional query parameters of SitePreviewService.Mint.
+type SitePreviewMintQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitePreviewMintQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Mint mint a site preview link
 //
 // POST /orgs/{orgId}/sites/{siteId}/preview-tokens
-func (s *SitePreviewService) Mint(ctx context.Context, orgID string, siteID string, body SitePreviewMintParams, opts ...RequestOption) (*SitePreviewMintResponse, error) {
+func (s *SitePreviewService) Mint(ctx context.Context, orgID string, siteID string, body SitePreviewMintParams, query *SitePreviewMintQuery, opts ...RequestOption) (*SitePreviewMintResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitePreviewMintResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/preview-tokens", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/preview-tokens", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SitePreviewRotateQuery are the optional query parameters of SitePreviewService.Rotate.
+type SitePreviewRotateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitePreviewRotateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Rotate rotate a site preview link
 //
 // POST /orgs/{orgId}/sites/{siteId}/preview-tokens/{tokenId}/rotate
-func (s *SitePreviewService) Rotate(ctx context.Context, orgID string, siteID string, tokenID string, opts ...RequestOption) (*SitePreviewRotateResponse, error) {
+func (s *SitePreviewService) Rotate(ctx context.Context, orgID string, siteID string, tokenID string, query *SitePreviewRotateQuery, opts ...RequestOption) (*SitePreviewRotateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitePreviewRotateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/preview-tokens/"+pathEscape(tokenID)+"/rotate", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/preview-tokens/"+pathEscape(tokenID)+"/rotate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SitePreviewRevokeQuery are the optional query parameters of SitePreviewService.Revoke.
+type SitePreviewRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SitePreviewRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Revoke revoke a site preview link
 //
 // DELETE /orgs/{orgId}/sites/{siteId}/preview-tokens/{tokenId}
-func (s *SitePreviewService) Revoke(ctx context.Context, orgID string, siteID string, tokenID string, opts ...RequestOption) (*SitePreviewRevokeResponse, error) {
+func (s *SitePreviewService) Revoke(ctx context.Context, orgID string, siteID string, tokenID string, query *SitePreviewRevokeQuery, opts ...RequestOption) (*SitePreviewRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SitePreviewRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/preview-tokens/"+pathEscape(tokenID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/preview-tokens/"+pathEscape(tokenID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

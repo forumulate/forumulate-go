@@ -18,6 +18,10 @@ type DeviceKeysListQuery struct {
 	// Device keys per page.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *DeviceKeysListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -30,6 +34,12 @@ func (p *DeviceKeysListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -61,23 +71,59 @@ func (s *DeviceKeysService) ListAutoPaging(ctx context.Context, query *DeviceKey
 	})
 }
 
+// DeviceKeysCreateQuery are the optional query parameters of DeviceKeysService.Create.
+type DeviceKeysCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *DeviceKeysCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a device key
 //
 // POST /device-keys
-func (s *DeviceKeysService) Create(ctx context.Context, body CreateDeviceKeyDto, opts ...RequestOption) (any, error) {
+func (s *DeviceKeysService) Create(ctx context.Context, body CreateDeviceKeyDto, query *DeviceKeysCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/device-keys", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/device-keys", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Revoke delete the device key
+// DeviceKeysRevokeQuery are the optional query parameters of DeviceKeysService.Revoke.
+type DeviceKeysRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *DeviceKeysRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the device key
 //
 // DELETE /device-keys/{id}
-func (s *DeviceKeysService) Revoke(ctx context.Context, id string, opts ...RequestOption) (*DeviceKeysRevokeResponse, error) {
+func (s *DeviceKeysService) Revoke(ctx context.Context, id string, query *DeviceKeysRevokeQuery, opts ...RequestOption) (*DeviceKeysRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out DeviceKeysRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/device-keys/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/device-keys/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

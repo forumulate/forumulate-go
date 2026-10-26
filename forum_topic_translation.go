@@ -19,6 +19,10 @@ type ForumTopicTranslationListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ForumTopicTranslationListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *ForumTopicTranslationListQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -73,34 +83,88 @@ func (s *ForumTopicTranslationService) Get(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
+// ForumTopicTranslationPutQuery are the optional query parameters of ForumTopicTranslationService.Put.
+type ForumTopicTranslationPutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicTranslationPutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Put replace the translation (forum)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/translations/{locale}
-func (s *ForumTopicTranslationService) Put(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body ForumTopicTranslationPutParams, opts ...RequestOption) (*ForumTopicTranslationPutResponse, error) {
+func (s *ForumTopicTranslationService) Put(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body BlogPostTranslationPutBody, query *ForumTopicTranslationPutQuery, opts ...RequestOption) (*ForumTopicTranslationPutResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicTranslationPutResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ForumTopicTranslationRemoveQuery are the optional query parameters of ForumTopicTranslationService.Remove.
+type ForumTopicTranslationRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicTranslationRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the translation (forum)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/translations/{locale}
-func (s *ForumTopicTranslationService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, locale string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), nil, nil, &out, opts); err != nil {
+func (s *ForumTopicTranslationService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, locale string, query *ForumTopicTranslationRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/translations/"+pathEscape(locale), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
-// Auto create the auto in a space (forum)
+// ForumTopicTranslationAutoQuery are the optional query parameters of ForumTopicTranslationService.Auto.
+type ForumTopicTranslationAutoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ForumTopicTranslationAutoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Auto send an auto request in a space (forum)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/forum/{topicId}/translations/{locale}/auto
-func (s *ForumTopicTranslationService) Auto(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body ForumTopicTranslationAutoParams, opts ...RequestOption) (*ForumTopicTranslationAutoResponse, error) {
+func (s *ForumTopicTranslationService) Auto(ctx context.Context, orgID string, spaceID string, topicID string, locale string, body ForumTopicTranslationAutoParams, query *ForumTopicTranslationAutoQuery, opts ...RequestOption) (*ForumTopicTranslationAutoResponse, error) {
+	v, opts := query.encode(opts)
 	var out ForumTopicTranslationAutoResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/forum/"+pathEscape(topicID)+"/translations/"+pathEscape(locale)+"/auto", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

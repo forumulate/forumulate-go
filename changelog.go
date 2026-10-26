@@ -21,6 +21,10 @@ type ChangelogListQuery struct {
 	Offset *int64
 	Cursor *string
 	Review *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChangelogListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -39,6 +43,12 @@ func (p *ChangelogListQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Review != nil {
 		v.Set("review", *p.Review)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -70,12 +80,30 @@ func (s *ChangelogService) ListAutoPaging(ctx context.Context, orgID string, spa
 	})
 }
 
-// Create create the changelog in a space
+// ChangelogCreateQuery are the optional query parameters of ChangelogService.Create.
+type ChangelogCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChangelogCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Create create a changelog release
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog
-func (s *ChangelogService) Create(ctx context.Context, orgID string, spaceID string, body ChangelogCreateParams, opts ...RequestOption) (*ChangelogCreateResponse, error) {
+func (s *ChangelogService) Create(ctx context.Context, orgID string, spaceID string, body ChangelogCreateParams, query *ChangelogCreateQuery, opts ...RequestOption) (*ChangelogCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChangelogCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -138,12 +166,35 @@ func (s *ChangelogService) WidgetStats(ctx context.Context, orgID string, spaceI
 	return &out, nil
 }
 
+// ChangelogPublishQuery are the optional query parameters of ChangelogService.Publish.
+type ChangelogPublishQuery struct {
+	// `true` holds the answer (up to 60 s) until the reader SERVES the published version — read through the reader past the edge — and adds `live` `{live, url, version, servedAt, waitedMs, retryAfter, reaso
+	Wait *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChangelogPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Wait != nil {
+		v.Set("wait", *p.Wait)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the changelog
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/publish
-func (s *ChangelogService) Publish(ctx context.Context, orgID string, spaceID string, releaseID string, opts ...RequestOption) (*ChangelogPublishResponse, error) {
+func (s *ChangelogService) Publish(ctx context.Context, orgID string, spaceID string, releaseID string, query *ChangelogPublishQuery, opts ...RequestOption) (*ChangelogPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChangelogPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/publish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/publish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -160,45 +211,117 @@ func (s *ChangelogService) Get(ctx context.Context, orgID string, spaceID string
 	return &out, nil
 }
 
+// ChangelogUpdateQuery are the optional query parameters of ChangelogService.Update.
+type ChangelogUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChangelogUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the changelog
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}
-func (s *ChangelogService) Update(ctx context.Context, orgID string, spaceID string, releaseID string, body ChangelogUpdateParams, opts ...RequestOption) (*ChangelogUpdateResponse, error) {
+func (s *ChangelogService) Update(ctx context.Context, orgID string, spaceID string, releaseID string, body ChangelogUpdateParams, query *ChangelogUpdateQuery, opts ...RequestOption) (*ChangelogUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChangelogUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChangelogRemoveQuery are the optional query parameters of ChangelogService.Remove.
+type ChangelogRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChangelogRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the changelog
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}
-func (s *ChangelogService) Remove(ctx context.Context, orgID string, spaceID string, releaseID string, opts ...RequestOption) (*ChangelogRemoveResponse, error) {
+func (s *ChangelogService) Remove(ctx context.Context, orgID string, spaceID string, releaseID string, query *ChangelogRemoveQuery, opts ...RequestOption) (*ChangelogRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChangelogRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Schedule create the schedule in a space (changelog)
+// ChangelogScheduleQuery are the optional query parameters of ChangelogService.Schedule.
+type ChangelogScheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChangelogScheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Schedule schedule the release
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/schedule
-func (s *ChangelogService) Schedule(ctx context.Context, orgID string, spaceID string, releaseID string, body ChangelogScheduleParams, opts ...RequestOption) (*ChangelogScheduleResponse, error) {
+func (s *ChangelogService) Schedule(ctx context.Context, orgID string, spaceID string, releaseID string, body ChangelogScheduleParams, query *ChangelogScheduleQuery, opts ...RequestOption) (*ChangelogScheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChangelogScheduleResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/schedule", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/schedule", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Unschedule delete the schedule in a space (changelog)
+// ChangelogUnscheduleQuery are the optional query parameters of ChangelogService.Unschedule.
+type ChangelogUnscheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChangelogUnscheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Unschedule unschedule the release
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/schedule
-func (s *ChangelogService) Unschedule(ctx context.Context, orgID string, spaceID string, releaseID string, opts ...RequestOption) (*ChangelogUnscheduleResponse, error) {
+func (s *ChangelogService) Unschedule(ctx context.Context, orgID string, spaceID string, releaseID string, query *ChangelogUnscheduleQuery, opts ...RequestOption) (*ChangelogUnscheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChangelogUnscheduleResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/schedule", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/schedule", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -19,6 +19,10 @@ type CustomEmojiListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CustomEmojiListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *CustomEmojiListQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,23 +72,59 @@ func (s *CustomEmojiService) ListAutoPaging(ctx context.Context, orgID string, q
 	})
 }
 
-// Upload create the custom emoji in an organization
+// CustomEmojiUploadQuery are the optional query parameters of CustomEmojiService.Upload.
+type CustomEmojiUploadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CustomEmojiUploadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Upload upload the custom emoji
 //
 // POST /orgs/{orgId}/custom-emoji
-func (s *CustomEmojiService) Upload(ctx context.Context, orgID string, body CustomEmojiUploadParams, opts ...RequestOption) (*CustomEmojiUploadResponse, error) {
+func (s *CustomEmojiService) Upload(ctx context.Context, orgID string, body CustomEmojiUploadParams, query *CustomEmojiUploadQuery, opts ...RequestOption) (*CustomEmojiUploadResponse, error) {
+	v, opts := query.encode(opts)
 	var out CustomEmojiUploadResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-emoji", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-emoji", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CustomEmojiRemoveQuery are the optional query parameters of CustomEmojiService.Remove.
+type CustomEmojiRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CustomEmojiRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the custom emoji
 //
 // DELETE /orgs/{orgId}/custom-emoji/{shortcode}
-func (s *CustomEmojiService) Remove(ctx context.Context, orgID string, shortcode string, opts ...RequestOption) (*CustomEmojiRemoveResponse, error) {
+func (s *CustomEmojiService) Remove(ctx context.Context, orgID string, shortcode string, query *CustomEmojiRemoveQuery, opts ...RequestOption) (*CustomEmojiRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out CustomEmojiRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-emoji/"+pathEscape(shortcode), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-emoji/"+pathEscape(shortcode), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // CareersIndexingService holds the operations under client.CareersIndexing.
@@ -22,24 +24,60 @@ func (s *CareersIndexingService) View(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
+// CareersIndexingTestQuery are the optional query parameters of CareersIndexingService.Test.
+type CareersIndexingTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersIndexingTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Test test the indexing
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/careers/indexing/test
-func (s *CareersIndexingService) Test(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CareersIndexingTestResult, error) {
+func (s *CareersIndexingService) Test(ctx context.Context, orgID string, spaceID string, query *CareersIndexingTestQuery, opts ...RequestOption) (*CareersIndexingTestResult, error) {
+	v, opts := query.encode(opts)
 	var out CareersIndexingTestResult
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/indexing/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/indexing/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CareersIndexingSubmitQuery are the optional query parameters of CareersIndexingService.Submit.
+type CareersIndexingSubmitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersIndexingSubmitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Submit submit the indexing
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/careers/indexing/submit
-func (s *CareersIndexingService) Submit(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/indexing/submit", nil, nil, &out, opts); err != nil {
+func (s *CareersIndexingService) Submit(ctx context.Context, orgID string, spaceID string, query *CareersIndexingSubmitQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/indexing/submit", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

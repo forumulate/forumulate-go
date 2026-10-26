@@ -19,6 +19,10 @@ type SessionsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SessionsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *SessionsListQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,23 +72,59 @@ func (s *SessionsService) ListAutoPaging(ctx context.Context, query *SessionsLis
 	})
 }
 
-// Revoke delete the session (auth)
+// SessionsRevokeQuery are the optional query parameters of SessionsService.Revoke.
+type SessionsRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SessionsRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke sign out one of your sessions
 //
 // DELETE /auth/sessions/{id}
-func (s *SessionsService) Revoke(ctx context.Context, id string, opts ...RequestOption) (*SessionsRevokeResponse, error) {
+func (s *SessionsService) Revoke(ctx context.Context, id string, query *SessionsRevokeQuery, opts ...RequestOption) (*SessionsRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SessionsRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/auth/sessions/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/auth/sessions/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RevokeOthers create a revoke other
+// SessionsRevokeOthersQuery are the optional query parameters of SessionsService.RevokeOthers.
+type SessionsRevokeOthersQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SessionsRevokeOthersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeOthers sign out every other session
 //
 // POST /auth/sessions/revoke-others
-func (s *SessionsService) RevokeOthers(ctx context.Context, opts ...RequestOption) (*SessionsRevokeOthersResponse, error) {
+func (s *SessionsService) RevokeOthers(ctx context.Context, query *SessionsRevokeOthersQuery, opts ...RequestOption) (*SessionsRevokeOthersResponse, error) {
+	v, opts := query.encode(opts)
 	var out SessionsRevokeOthersResponse
-	if err := s.c.do(ctx, "POST", "/auth/sessions/revoke-others", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/auth/sessions/revoke-others", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -20,6 +20,10 @@ type LibraryAssetListQuery struct {
 	Search *string
 	Type   *string
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibraryAssetListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -38,6 +42,12 @@ func (p *LibraryAssetListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

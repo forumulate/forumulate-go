@@ -13,6 +13,35 @@ type RoadmapService struct {
 	c *Client
 }
 
+// RoadmapSetLaneOrderQuery are the optional query parameters of RoadmapService.SetLaneOrder.
+type RoadmapSetLaneOrderQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapSetLaneOrderQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetLaneOrder replace the order in a space
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/roadmap/lanes/{status}/order
+func (s *RoadmapService) SetLaneOrder(ctx context.Context, orgID string, spaceID string, status string, body RoadmapSetLaneOrderParams, query *RoadmapSetLaneOrderQuery, opts ...RequestOption) (*RoadmapSetLaneOrderResponse, error) {
+	v, opts := query.encode(opts)
+	var out RoadmapSetLaneOrderResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/lanes/"+pathEscape(status)+"/order", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // RoadmapBoardQuery are the optional query parameters of RoadmapService.Board.
 type RoadmapBoardQuery struct {
 	// Items per LANE — not lanes.
@@ -20,6 +49,11 @@ type RoadmapBoardQuery struct {
 	Cursor *string
 	// Which page of results to return, 1-based.
 	Page *int64
+	Sort *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *RoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +69,15 @@ func (p *RoadmapBoardQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Page != nil {
 		v.Set("page", strconv.FormatInt(*p.Page, 10))
+	}
+	if p.Sort != nil {
+		v.Set("sort", *p.Sort)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -66,12 +109,30 @@ func (s *RoadmapService) BoardAutoPaging(ctx context.Context, orgID string, spac
 	})
 }
 
-// Submit create the roadmap in a space
+// RoadmapSubmitQuery are the optional query parameters of RoadmapService.Submit.
+type RoadmapSubmitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapSubmitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Submit submit an item to the roadmap
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/roadmap
-func (s *RoadmapService) Submit(ctx context.Context, orgID string, spaceID string, body RoadmapSubmitParams, opts ...RequestOption) (*RoadmapSubmitResponse, error) {
+func (s *RoadmapService) Submit(ctx context.Context, orgID string, spaceID string, body RoadmapSubmitParams, query *RoadmapSubmitQuery, opts ...RequestOption) (*RoadmapSubmitResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapSubmitResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -88,34 +149,88 @@ func (s *RoadmapService) Get(ctx context.Context, orgID string, spaceID string, 
 	return &out, nil
 }
 
+// RoadmapUpdateQuery are the optional query parameters of RoadmapService.Update.
+type RoadmapUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the roadmap
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}
-func (s *RoadmapService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapUpdateParams, opts ...RequestOption) (*RoadmapUpdateResponse, error) {
+func (s *RoadmapService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapUpdateParams, query *RoadmapUpdateQuery, opts ...RequestOption) (*RoadmapUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Vote create the vote in a space (roadmap)
+// RoadmapVoteQuery are the optional query parameters of RoadmapService.Vote.
+type RoadmapVoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapVoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Vote vote on the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/vote
-func (s *RoadmapService) Vote(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*RoadmapVoteResponse, error) {
+func (s *RoadmapService) Vote(ctx context.Context, orgID string, spaceID string, topicID string, query *RoadmapVoteQuery, opts ...RequestOption) (*RoadmapVoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapVoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/vote", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/vote", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// RoadmapCommentQuery are the optional query parameters of RoadmapService.Comment.
+type RoadmapCommentQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapCommentQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Comment create a comment in a space (roadmap)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/comments
-func (s *RoadmapService) Comment(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapCommentParams, opts ...RequestOption) (*RoadmapCommentResponse, error) {
+func (s *RoadmapService) Comment(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapCommentParams, query *RoadmapCommentQuery, opts ...RequestOption) (*RoadmapCommentResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapCommentResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/comments", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/comments", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -127,6 +242,10 @@ type RoadmapProxyVotesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *RoadmapProxyVotesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -139,6 +258,12 @@ func (p *RoadmapProxyVotesQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -170,45 +295,117 @@ func (s *RoadmapService) ProxyVotesAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
-// RecordProxyVote create a proxy vote in a space
+// RoadmapRecordProxyVoteQuery are the optional query parameters of RoadmapService.RecordProxyVote.
+type RoadmapRecordProxyVoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapRecordProxyVoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RecordProxyVote record the proxy vote
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/proxy-votes
-func (s *RoadmapService) RecordProxyVote(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapRecordProxyVoteParams, opts ...RequestOption) (*RoadmapRecordProxyVoteResponse, error) {
+func (s *RoadmapService) RecordProxyVote(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapRecordProxyVoteParams, query *RoadmapRecordProxyVoteQuery, opts ...RequestOption) (*RoadmapRecordProxyVoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapRecordProxyVoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// RoadmapRemoveProxyVoteQuery are the optional query parameters of RoadmapService.RemoveProxyVote.
+type RoadmapRemoveProxyVoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapRemoveProxyVoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveProxyVote delete the proxy vote
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/proxy-votes/{voteId}
-func (s *RoadmapService) RemoveProxyVote(ctx context.Context, orgID string, spaceID string, topicID string, voteID string, opts ...RequestOption) (*RoadmapRemoveProxyVoteResponse, error) {
+func (s *RoadmapService) RemoveProxyVote(ctx context.Context, orgID string, spaceID string, topicID string, voteID string, query *RoadmapRemoveProxyVoteQuery, opts ...RequestOption) (*RoadmapRemoveProxyVoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapRemoveProxyVoteResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes/"+pathEscape(voteID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/proxy-votes/"+pathEscape(voteID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// RoadmapMergeQuery are the optional query parameters of RoadmapService.Merge.
+type RoadmapMergeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapMergeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Merge merge the roadmap
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/merge
-func (s *RoadmapService) Merge(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapMergeParams, opts ...RequestOption) (*RoadmapMergeResponse, error) {
+func (s *RoadmapService) Merge(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapMergeParams, query *RoadmapMergeQuery, opts ...RequestOption) (*RoadmapMergeResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapMergeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/merge", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/merge", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetStatus create the status in a space (roadmap)
+// RoadmapSetStatusQuery are the optional query parameters of RoadmapService.SetStatus.
+type RoadmapSetStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *RoadmapSetStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetStatus set the status of the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/roadmap/{topicId}/status
-func (s *RoadmapService) SetStatus(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapSetStatusParams, opts ...RequestOption) (*RoadmapSetStatusResponse, error) {
+func (s *RoadmapService) SetStatus(ctx context.Context, orgID string, spaceID string, topicID string, body RoadmapSetStatusParams, query *RoadmapSetStatusQuery, opts ...RequestOption) (*RoadmapSetStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out RoadmapSetStatusResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/status", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap/"+pathEscape(topicID)+"/status", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -22,6 +22,10 @@ type MailListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MailListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -34,6 +38,12 @@ func (p *MailListQuery) encode(opts []RequestOption) (url.Values, []RequestOptio
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -65,23 +75,59 @@ func (s *MailService) ListAutoPaging(ctx context.Context, orgID string, query *M
 	})
 }
 
+// MailSuppressQuery are the optional query parameters of MailService.Suppress.
+type MailSuppressQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailSuppressQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Suppress create a suppression in an organization
 //
 // POST /orgs/{orgId}/mail/suppressions
-func (s *MailService) Suppress(ctx context.Context, orgID string, body MailSuppressParams, opts ...RequestOption) (*MailSuppressResponse, error) {
+func (s *MailService) Suppress(ctx context.Context, orgID string, body MailSuppressParams, query *MailSuppressQuery, opts ...RequestOption) (*MailSuppressResponse, error) {
+	v, opts := query.encode(opts)
 	var out MailSuppressResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mail/suppressions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mail/suppressions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Unsuppress delete suppressions in an organization
+// MailUnsuppressQuery are the optional query parameters of MailService.Unsuppress.
+type MailUnsuppressQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailUnsuppressQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Unsuppress take addresses off the suppression list in an organization
 //
 // DELETE /orgs/{orgId}/mail/suppressions
-func (s *MailService) Unsuppress(ctx context.Context, orgID string, opts ...RequestOption) (*MailUnsuppressResponse, error) {
+func (s *MailService) Unsuppress(ctx context.Context, orgID string, query *MailUnsuppressQuery, opts ...RequestOption) (*MailUnsuppressResponse, error) {
+	v, opts := query.encode(opts)
 	var out MailUnsuppressResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/mail/suppressions", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/mail/suppressions", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -93,6 +139,10 @@ type MailLogQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MailLogQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -105,6 +155,12 @@ func (p *MailLogQuery) encode(opts []RequestOption) (url.Values, []RequestOption
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -180,34 +236,122 @@ func (s *MailProviderService) Status(ctx context.Context, orgID string, opts ...
 	return &out, nil
 }
 
-// Connect replace the provider in an organization (mail)
+// MailProviderConnectQuery are the optional query parameters of MailProviderService.Connect.
+type MailProviderConnectQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *MailProviderConnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Connect connect the provider (mail)
 //
 // PUT /orgs/{orgId}/mail/provider
-func (s *MailProviderService) Connect(ctx context.Context, orgID string, body MailProviderConnectParams, opts ...RequestOption) (*MailProviderConnectResponse, error) {
+func (s *MailProviderService) Connect(ctx context.Context, orgID string, body MailProviderConnectParams, query *MailProviderConnectQuery, opts ...RequestOption) (*MailProviderConnectResponse, error) {
+	v, opts := query.encode(opts)
 	var out MailProviderConnectResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/mail/provider", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/mail/provider", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Disconnect delete the provider in an organization (mail)
+// MailProviderPatchQuery are the optional query parameters of MailProviderService.Patch.
+type MailProviderPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *MailProviderPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the provider in an organization (mail)
 //
-// DELETE /orgs/{orgId}/mail/provider
-func (s *MailProviderService) Disconnect(ctx context.Context, orgID string, opts ...RequestOption) (*MailProviderDisconnectResponse, error) {
-	var out MailProviderDisconnectResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/mail/provider", nil, nil, &out, opts); err != nil {
+// PATCH /orgs/{orgId}/mail/provider
+func (s *MailProviderService) Patch(ctx context.Context, orgID string, body MailProviderPatchParams, query *MailProviderPatchQuery, opts ...RequestOption) (*MailProviderPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out MailProviderPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/mail/provider", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// MailProviderDisconnectQuery are the optional query parameters of MailProviderService.Disconnect.
+type MailProviderDisconnectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailProviderDisconnectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Disconnect disconnect the provider (mail)
+//
+// DELETE /orgs/{orgId}/mail/provider
+func (s *MailProviderService) Disconnect(ctx context.Context, orgID string, query *MailProviderDisconnectQuery, opts ...RequestOption) (*MailProviderDisconnectResponse, error) {
+	v, opts := query.encode(opts)
+	var out MailProviderDisconnectResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/mail/provider", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// MailProviderTestQuery are the optional query parameters of MailProviderService.Test.
+type MailProviderTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailProviderTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Test test the provider (mail)
 //
 // POST /orgs/{orgId}/mail/provider/test
-func (s *MailProviderService) Test(ctx context.Context, orgID string, body MailProviderTestParams, opts ...RequestOption) (*MailProviderTestResponse, error) {
+func (s *MailProviderService) Test(ctx context.Context, orgID string, body MailProviderTestParams, query *MailProviderTestQuery, opts ...RequestOption) (*MailProviderTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out MailProviderTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mail/provider/test", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mail/provider/test", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -224,6 +368,10 @@ type MailTemplatesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MailTemplatesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -236,6 +384,12 @@ func (p *MailTemplatesListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -278,12 +432,30 @@ func (s *MailTemplatesService) Get(ctx context.Context, orgID string, key string
 	return &out, nil
 }
 
+// MailTemplatesSaveQuery are the optional query parameters of MailTemplatesService.Save.
+type MailTemplatesSaveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailTemplatesSaveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Save replace the email template
 //
 // PUT /orgs/{orgId}/email-templates/{key}
-func (s *MailTemplatesService) Save(ctx context.Context, orgID string, key string, body MailTemplatesSaveParams, opts ...RequestOption) (*MailTemplatesSaveResponse, error) {
+func (s *MailTemplatesService) Save(ctx context.Context, orgID string, key string, body MailTemplatesSaveParams, query *MailTemplatesSaveQuery, opts ...RequestOption) (*MailTemplatesSaveResponse, error) {
+	v, opts := query.encode(opts)
 	var out MailTemplatesSaveResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/email-templates/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/email-templates/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -291,8 +463,11 @@ func (s *MailTemplatesService) Save(ctx context.Context, orgID string, key strin
 
 // MailTemplatesResetQuery are the optional query parameters of MailTemplatesService.Reset.
 type MailTemplatesResetQuery struct {
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
 	SpaceID *string
 	Locale  *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *MailTemplatesResetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -306,10 +481,13 @@ func (p *MailTemplatesResetQuery) encode(opts []RequestOption) (url.Values, []Re
 	if p.Locale != nil {
 		v.Set("locale", *p.Locale)
 	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
 	return v, opts
 }
 
-// Reset delete the email template
+// Reset reset the email template
 //
 // DELETE /orgs/{orgId}/email-templates/{key}
 func (s *MailTemplatesService) Reset(ctx context.Context, orgID string, key string, query *MailTemplatesResetQuery, opts ...RequestOption) (*MailTemplatesResetResponse, error) {
@@ -321,23 +499,59 @@ func (s *MailTemplatesService) Reset(ctx context.Context, orgID string, key stri
 	return &out, nil
 }
 
+// MailTemplatesPreviewQuery are the optional query parameters of MailTemplatesService.Preview.
+type MailTemplatesPreviewQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailTemplatesPreviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Preview preview the email template
 //
 // POST /orgs/{orgId}/email-templates/{key}/preview
-func (s *MailTemplatesService) Preview(ctx context.Context, orgID string, key string, body MailTemplatesPreviewParams, opts ...RequestOption) (any, error) {
+func (s *MailTemplatesService) Preview(ctx context.Context, orgID string, key string, body MailTemplatesPreviewParams, query *MailTemplatesPreviewQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/email-templates/"+pathEscape(key)+"/preview", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/email-templates/"+pathEscape(key)+"/preview", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// MailTemplatesTestQuery are the optional query parameters of MailTemplatesService.Test.
+type MailTemplatesTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MailTemplatesTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Test test the email template
 //
 // POST /orgs/{orgId}/email-templates/{key}/test
-func (s *MailTemplatesService) Test(ctx context.Context, orgID string, key string, body MailTemplatesTestParams, opts ...RequestOption) (*MailTemplatesTestResponse, error) {
+func (s *MailTemplatesService) Test(ctx context.Context, orgID string, key string, body MailTemplatesTestParams, query *MailTemplatesTestQuery, opts ...RequestOption) (*MailTemplatesTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out MailTemplatesTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/email-templates/"+pathEscape(key)+"/test", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/email-templates/"+pathEscape(key)+"/test", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

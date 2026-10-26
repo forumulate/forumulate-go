@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // ReaderAuthService holds the operations under client.ReaderAuth.
@@ -15,31 +16,72 @@ type ReaderAuthService struct {
 // GetOrg the organization's reader sign-in registry
 //
 // GET /orgs/{orgId}/reader-auth
-func (s *ReaderAuthService) GetOrg(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
-	var out any
+func (s *ReaderAuthService) GetOrg(ctx context.Context, orgID string, opts ...RequestOption) (*ReaderAuthGetOrgResponse, error) {
+	var out ReaderAuthGetOrgResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/reader-auth", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// ReaderAuthSetOrgQuery are the optional query parameters of ReaderAuthService.SetOrg.
+type ReaderAuthSetOrgQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *ReaderAuthSetOrgQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
 }
 
 // SetOrg replace the organization's reader sign-in registry
 //
 // PUT /orgs/{orgId}/reader-auth
-func (s *ReaderAuthService) SetOrg(ctx context.Context, orgID string, body ReaderAuthSetOrgParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/reader-auth", nil, body, &out, opts); err != nil {
+func (s *ReaderAuthService) SetOrg(ctx context.Context, orgID string, body ReaderAuthSetOrgBody, query *ReaderAuthSetOrgQuery, opts ...RequestOption) (*ReaderAuthSetOrgResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderAuthSetOrgResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/reader-auth", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// ReaderAuthPatchOrgQuery are the optional query parameters of ReaderAuthService.PatchOrg.
+type ReaderAuthPatchOrgQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ReaderAuthPatchOrgQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
 }
 
 // PatchOrg change part of the organization's reader sign-in registry
 //
 // PATCH /orgs/{orgId}/reader-auth
-func (s *ReaderAuthService) PatchOrg(ctx context.Context, orgID string, body ReaderAuthPatchOrgParams, opts ...RequestOption) (*ReaderAuthPatchOrgResponse, error) {
+func (s *ReaderAuthService) PatchOrg(ctx context.Context, orgID string, body ReaderAuthPatchOrgBody, query *ReaderAuthPatchOrgQuery, opts ...RequestOption) (*ReaderAuthPatchOrgResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderAuthPatchOrgResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/reader-auth", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/reader-auth", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -112,34 +154,93 @@ func (s *ReaderAuthService) GetSpace(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// ReaderAuthSetSpaceQuery are the optional query parameters of ReaderAuthService.SetSpace.
+type ReaderAuthSetSpaceQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *ReaderAuthSetSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetSpace replace one space's reader sign-in override
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/reader-auth
-func (s *ReaderAuthService) SetSpace(ctx context.Context, orgID string, spaceID string, body ReaderAuthSetSpaceParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", nil, body, &out, opts); err != nil {
+func (s *ReaderAuthService) SetSpace(ctx context.Context, orgID string, spaceID string, body ReaderAuthSetOrgBody, query *ReaderAuthSetSpaceQuery, opts ...RequestOption) (*ReaderAuthPatchSpaceResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderAuthPatchSpaceResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// ReaderAuthPatchSpaceQuery are the optional query parameters of ReaderAuthService.PatchSpace.
+type ReaderAuthPatchSpaceQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ReaderAuthPatchSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
 }
 
 // PatchSpace change part of one space's reader sign-in override
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/reader-auth
-func (s *ReaderAuthService) PatchSpace(ctx context.Context, orgID string, spaceID string, body ReaderAuthPatchSpaceParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", nil, body, &out, opts); err != nil {
+func (s *ReaderAuthService) PatchSpace(ctx context.Context, orgID string, spaceID string, body ReaderAuthPatchOrgBody, query *ReaderAuthPatchSpaceQuery, opts ...RequestOption) (*ReaderAuthPatchSpaceResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderAuthPatchSpaceResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// ReaderAuthDeleteSpaceQuery are the optional query parameters of ReaderAuthService.DeleteSpace.
+type ReaderAuthDeleteSpaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderAuthDeleteSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DeleteSpace remove one space's reader sign-in override
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/reader-auth
-func (s *ReaderAuthService) DeleteSpace(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ReaderAuthDeleteSpaceResponse, error) {
+func (s *ReaderAuthService) DeleteSpace(ctx context.Context, orgID string, spaceID string, query *ReaderAuthDeleteSpaceQuery, opts ...RequestOption) (*ReaderAuthDeleteSpaceResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderAuthDeleteSpaceResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-auth", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

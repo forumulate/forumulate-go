@@ -19,6 +19,10 @@ type EmbeddableHostsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EmbeddableHostsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *EmbeddableHostsListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,23 +72,59 @@ func (s *EmbeddableHostsService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// EmbeddableHostsAddQuery are the optional query parameters of EmbeddableHostsService.Add.
+type EmbeddableHostsAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EmbeddableHostsAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add create an embeddable host in an organization
 //
 // POST /orgs/{orgId}/embeddable-hosts
-func (s *EmbeddableHostsService) Add(ctx context.Context, orgID string, body EmbeddableHostsAddParams, opts ...RequestOption) (*EmbeddableHostsAddResponse, error) {
+func (s *EmbeddableHostsService) Add(ctx context.Context, orgID string, body EmbeddableHostsAddParams, query *EmbeddableHostsAddQuery, opts ...RequestOption) (*EmbeddableHostsAddResponse, error) {
+	v, opts := query.encode(opts)
 	var out EmbeddableHostsAddResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/embeddable-hosts", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/embeddable-hosts", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// EmbeddableHostsRemoveQuery are the optional query parameters of EmbeddableHostsService.Remove.
+type EmbeddableHostsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EmbeddableHostsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the embeddable host
 //
 // DELETE /orgs/{orgId}/embeddable-hosts/{hostId}
-func (s *EmbeddableHostsService) Remove(ctx context.Context, orgID string, hostID string, opts ...RequestOption) (*EmbeddableHostsRemoveResponse, error) {
+func (s *EmbeddableHostsService) Remove(ctx context.Context, orgID string, hostID string, query *EmbeddableHostsRemoveQuery, opts ...RequestOption) (*EmbeddableHostsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out EmbeddableHostsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/embeddable-hosts/"+pathEscape(hostID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/embeddable-hosts/"+pathEscape(hostID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

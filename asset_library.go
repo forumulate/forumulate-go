@@ -13,12 +13,30 @@ type AssetLibraryService struct {
 	c *Client
 }
 
+// AssetLibraryUpdateQuery are the optional query parameters of AssetLibraryService.Update.
+type AssetLibraryUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AssetLibraryUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update an asset’s alt text, caption, focal point, folder or tags
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/assets/{assetId}
-func (s *AssetLibraryService) Update(ctx context.Context, orgID string, spaceID string, assetID string, body AssetLibraryUpdateParams, opts ...RequestOption) (*AssetLibraryUpdateResponse, error) {
+func (s *AssetLibraryService) Update(ctx context.Context, orgID string, spaceID string, assetID string, body AssetLibraryUpdateBody, query *AssetLibraryUpdateQuery, opts ...RequestOption) (*AssetLibraryUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out AssetLibraryUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/assets/"+pathEscape(assetID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/assets/"+pathEscape(assetID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -30,6 +48,10 @@ type AssetLibraryListFoldersQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *AssetLibraryListFoldersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -42,6 +64,12 @@ func (p *AssetLibraryListFoldersQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -73,34 +101,88 @@ func (s *AssetLibraryService) ListFoldersAutoPaging(ctx context.Context, orgID s
 	})
 }
 
+// AssetLibraryCreateFolderQuery are the optional query parameters of AssetLibraryService.CreateFolder.
+type AssetLibraryCreateFolderQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AssetLibraryCreateFolderQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateFolder create a media library folder
 //
 // POST /orgs/{orgId}/asset-folders
-func (s *AssetLibraryService) CreateFolder(ctx context.Context, orgID string, body AssetLibraryCreateFolderParams, opts ...RequestOption) (*AssetLibraryCreateFolderResponse, error) {
+func (s *AssetLibraryService) CreateFolder(ctx context.Context, orgID string, body AssetLibraryCreateFolderParams, query *AssetLibraryCreateFolderQuery, opts ...RequestOption) (*AssetLibraryCreateFolderResponse, error) {
+	v, opts := query.encode(opts)
 	var out AssetLibraryCreateFolderResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/asset-folders", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/asset-folders", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// AssetLibraryUpdateFolderQuery are the optional query parameters of AssetLibraryService.UpdateFolder.
+type AssetLibraryUpdateFolderQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AssetLibraryUpdateFolderQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // UpdateFolder rename or move a media library folder
 //
 // PATCH /orgs/{orgId}/asset-folders/{folderId}
-func (s *AssetLibraryService) UpdateFolder(ctx context.Context, orgID string, folderID string, body AssetLibraryUpdateFolderParams, opts ...RequestOption) (*AssetLibraryUpdateFolderResponse, error) {
+func (s *AssetLibraryService) UpdateFolder(ctx context.Context, orgID string, folderID string, body AssetLibraryUpdateFolderParams, query *AssetLibraryUpdateFolderQuery, opts ...RequestOption) (*AssetLibraryUpdateFolderResponse, error) {
+	v, opts := query.encode(opts)
 	var out AssetLibraryUpdateFolderResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/asset-folders/"+pathEscape(folderID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/asset-folders/"+pathEscape(folderID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// AssetLibraryDeleteFolderQuery are the optional query parameters of AssetLibraryService.DeleteFolder.
+type AssetLibraryDeleteFolderQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *AssetLibraryDeleteFolderQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteFolder delete a media library folder
 //
 // DELETE /orgs/{orgId}/asset-folders/{folderId}
-func (s *AssetLibraryService) DeleteFolder(ctx context.Context, orgID string, folderID string, opts ...RequestOption) (*AssetLibraryDeleteFolderResponse, error) {
+func (s *AssetLibraryService) DeleteFolder(ctx context.Context, orgID string, folderID string, query *AssetLibraryDeleteFolderQuery, opts ...RequestOption) (*AssetLibraryDeleteFolderResponse, error) {
+	v, opts := query.encode(opts)
 	var out AssetLibraryDeleteFolderResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/asset-folders/"+pathEscape(folderID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/asset-folders/"+pathEscape(folderID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

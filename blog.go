@@ -22,6 +22,10 @@ type BlogTagsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -34,6 +38,12 @@ func (p *BlogTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOptio
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -98,6 +108,10 @@ type BlogBookmarksQuery struct {
 	// Bookmarks per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogBookmarksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -110,6 +124,12 @@ func (p *BlogBookmarksQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -152,12 +172,30 @@ func (s *BlogService) GetSettings(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
+// BlogUpdateSettingsQuery are the optional query parameters of BlogService.UpdateSettings.
+type BlogUpdateSettingsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogUpdateSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // UpdateSettings update settings in a space (blog)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/blog/settings
-func (s *BlogService) UpdateSettings(ctx context.Context, orgID string, spaceID string, body BlogUpdateSettingsParams, opts ...RequestOption) (*BlogUpdateSettingsResponse, error) {
+func (s *BlogService) UpdateSettings(ctx context.Context, orgID string, spaceID string, body BlogUpdateSettingsBody, query *BlogUpdateSettingsQuery, opts ...RequestOption) (*BlogUpdateSettingsResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogUpdateSettingsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/settings", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/settings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -171,12 +209,17 @@ type BlogArticlesService struct {
 // BlogArticlesListQuery are the optional query parameters of BlogArticlesService.List.
 type BlogArticlesListQuery struct {
 	// Posts per page, once a version is stated.
-	Limit    *int64
-	Tag      *string
+	Limit *int64
+	Tag   *string
+	// The author uuid (uuid only — a slug is not resolved in a query parameter).
 	AuthorID *string
 	Cursor   *string
 	Sort     *string
 	State    *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogArticlesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -202,15 +245,21 @@ func (p *BlogArticlesListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	if p.State != nil {
 		v.Set("state", *p.State)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
 // List get the blog in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/blog
-func (s *BlogArticlesService) List(ctx context.Context, orgID string, spaceID string, query *BlogArticlesListQuery, opts ...RequestOption) (*BlogArticlesListResponse, error) {
+func (s *BlogArticlesService) List(ctx context.Context, orgID string, spaceID string, query *BlogArticlesListQuery, opts ...RequestOption) (*BlogBookmarksResponse, error) {
 	v, opts := query.encode(opts)
-	var out BlogArticlesListResponse
+	var out BlogBookmarksResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -232,12 +281,30 @@ func (s *BlogArticlesService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
-// Create create the blog in a space
+// BlogArticlesCreateQuery are the optional query parameters of BlogArticlesService.Create.
+type BlogArticlesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Create create a blog post
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog
-func (s *BlogArticlesService) Create(ctx context.Context, orgID string, spaceID string, body BlogArticlesCreateParams, opts ...RequestOption) (*BlogArticlesCreateResponse, error) {
+func (s *BlogArticlesService) Create(ctx context.Context, orgID string, spaceID string, body BlogArticlesCreateParams, query *BlogArticlesCreateQuery, opts ...RequestOption) (*BlogArticlesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -254,23 +321,59 @@ func (s *BlogArticlesService) Get(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
+// BlogArticlesUpdateQuery are the optional query parameters of BlogArticlesService.Update.
+type BlogArticlesUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the blog
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}
-func (s *BlogArticlesService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesUpdateParams, opts ...RequestOption) (*BlogArticlesUpdateResponse, error) {
+func (s *BlogArticlesService) Update(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesUpdateParams, query *BlogArticlesUpdateQuery, opts ...RequestOption) (*BlogArticlesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// BlogArticlesRemoveQuery are the optional query parameters of BlogArticlesService.Remove.
+type BlogArticlesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the blog
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}
-func (s *BlogArticlesService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*BlogArticlesRemoveResponse, error) {
+func (s *BlogArticlesService) Remove(ctx context.Context, orgID string, spaceID string, topicID string, query *BlogArticlesRemoveQuery, opts ...RequestOption) (*BlogArticlesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -282,6 +385,10 @@ type BlogArticlesSlugHistoryQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogArticlesSlugHistoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -294,6 +401,12 @@ func (p *BlogArticlesSlugHistoryQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -325,111 +438,296 @@ func (s *BlogArticlesService) SlugHistoryAutoPaging(ctx context.Context, orgID s
 	})
 }
 
-// Schedule create the schedule in a space (blog)
+// BlogArticlesScheduleQuery are the optional query parameters of BlogArticlesService.Schedule.
+type BlogArticlesScheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesScheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Schedule schedule the topic
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/schedule
-func (s *BlogArticlesService) Schedule(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesScheduleParams, opts ...RequestOption) (*BlogArticlesScheduleResponse, error) {
+func (s *BlogArticlesService) Schedule(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesScheduleParams, query *BlogArticlesScheduleQuery, opts ...RequestOption) (*BlogArticlesScheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesScheduleResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/schedule", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/schedule", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Unschedule delete the schedule in a space (blog)
+// BlogArticlesUnscheduleQuery are the optional query parameters of BlogArticlesService.Unschedule.
+type BlogArticlesUnscheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesUnscheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Unschedule unschedule the topic
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/schedule
-func (s *BlogArticlesService) Unschedule(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*BlogArticlesUnscheduleResponse, error) {
+func (s *BlogArticlesService) Unschedule(ctx context.Context, orgID string, spaceID string, topicID string, query *BlogArticlesUnscheduleQuery, opts ...RequestOption) (*BlogArticlesUnscheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesUnscheduleResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/schedule", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/schedule", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogArticlesSetAuthorsQuery are the optional query parameters of BlogArticlesService.SetAuthors.
+type BlogArticlesSetAuthorsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesSetAuthorsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetAuthors create an author in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/authors
-func (s *BlogArticlesService) SetAuthors(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesSetAuthorsParams, opts ...RequestOption) (*BlogArticlesSetAuthorsResponse, error) {
+func (s *BlogArticlesService) SetAuthors(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesSetAuthorsParams, query *BlogArticlesSetAuthorsQuery, opts ...RequestOption) (*BlogArticlesSetAuthorsResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesSetAuthorsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/authors", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/authors", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogArticlesSetCommentsQuery are the optional query parameters of BlogArticlesService.SetComments.
+type BlogArticlesSetCommentsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesSetCommentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetComments create a comment in a space (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/comments
-func (s *BlogArticlesService) SetComments(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesSetCommentsParams, opts ...RequestOption) (*BlogArticlesSetCommentsResponse, error) {
+func (s *BlogArticlesService) SetComments(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesSetCommentsParams, query *BlogArticlesSetCommentsQuery, opts ...RequestOption) (*BlogArticlesSetCommentsResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesSetCommentsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/comments", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/comments", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogArticlesPublishQuery are the optional query parameters of BlogArticlesService.Publish.
+type BlogArticlesPublishQuery struct {
+	// `true` holds the answer (up to 60 s) until the reader SERVES the published version — read through the reader past the edge — and adds `live` `{live, url, version, servedAt, waitedMs, retryAfter, reaso
+	Wait *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Wait != nil {
+		v.Set("wait", *p.Wait)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Publish publish the blog
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/publish
-func (s *BlogArticlesService) Publish(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesPublishParams, opts ...RequestOption) (*BlogArticlesPublishResponse, error) {
+func (s *BlogArticlesService) Publish(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesPublishParams, query *BlogArticlesPublishQuery, opts ...RequestOption) (*BlogArticlesPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/publish", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/publish", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetState create the state in a space (blog)
+// BlogArticlesSetStateQuery are the optional query parameters of BlogArticlesService.SetState.
+type BlogArticlesSetStateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesSetStateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetState set the state of the topic (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/state
-func (s *BlogArticlesService) SetState(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesSetStateParams, opts ...RequestOption) (*BlogArticlesSetStateResponse, error) {
+func (s *BlogArticlesService) SetState(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesSetStateParams, query *BlogArticlesSetStateQuery, opts ...RequestOption) (*BlogArticlesSetStateResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesSetStateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/state", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/state", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogArticlesPinQuery are the optional query parameters of BlogArticlesService.Pin.
+type BlogArticlesPinQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesPinQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Pin pin the blog
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/pin
-func (s *BlogArticlesService) Pin(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesPinParams, opts ...RequestOption) (*BlogArticlesPinResponse, error) {
+func (s *BlogArticlesService) Pin(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesPinParams, query *BlogArticlesPinQuery, opts ...RequestOption) (*BlogArticlesPinResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesPinResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/pin", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/pin", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogArticlesReplyQuery are the optional query parameters of BlogArticlesService.Reply.
+type BlogArticlesReplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesReplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Reply create a reply in a space (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/replies
-func (s *BlogArticlesService) Reply(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesReplyParams, opts ...RequestOption) (*BlogArticlesReplyResponse, error) {
+func (s *BlogArticlesService) Reply(ctx context.Context, orgID string, spaceID string, topicID string, body BlogArticlesReplyParams, query *BlogArticlesReplyQuery, opts ...RequestOption) (*BlogArticlesReplyResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesReplyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/replies", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/replies", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Bookmark create the bookmark in a space (blog)
+// BlogArticlesBookmarkQuery are the optional query parameters of BlogArticlesService.Bookmark.
+type BlogArticlesBookmarkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesBookmarkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Bookmark bookmark the topic (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/bookmark
-func (s *BlogArticlesService) Bookmark(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*BlogArticlesBookmarkResponse, error) {
+func (s *BlogArticlesService) Bookmark(ctx context.Context, orgID string, spaceID string, topicID string, query *BlogArticlesBookmarkQuery, opts ...RequestOption) (*BlogArticlesBookmarkResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesBookmarkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/bookmark", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/bookmark", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RecoverArticle create the recover in a space (blog)
+// BlogArticlesRecoverArticleQuery are the optional query parameters of BlogArticlesService.RecoverArticle.
+type BlogArticlesRecoverArticleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogArticlesRecoverArticleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RecoverArticle recover the article
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/{topicId}/recover
-func (s *BlogArticlesService) RecoverArticle(ctx context.Context, orgID string, spaceID string, topicID string, opts ...RequestOption) (*BlogArticlesRecoverArticleResponse, error) {
+func (s *BlogArticlesService) RecoverArticle(ctx context.Context, orgID string, spaceID string, topicID string, query *BlogArticlesRecoverArticleQuery, opts ...RequestOption) (*BlogArticlesRecoverArticleResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogArticlesRecoverArticleResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/recover", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/"+pathEscape(topicID)+"/recover", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -446,6 +744,10 @@ type BlogModerationFlagsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogModerationFlagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -458,6 +760,12 @@ func (p *BlogModerationFlagsQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -489,23 +797,59 @@ func (s *BlogModerationService) FlagsAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
-// ReviewFlag create the review in a space (blog flags)
+// BlogModerationReviewFlagQuery are the optional query parameters of BlogModerationService.ReviewFlag.
+type BlogModerationReviewFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogModerationReviewFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReviewFlag review a flag on a blog comment
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/flags/{flagId}/review
-func (s *BlogModerationService) ReviewFlag(ctx context.Context, orgID string, spaceID string, flagID string, body BlogModerationReviewFlagParams, opts ...RequestOption) (*BlogModerationReviewFlagResponse, error) {
+func (s *BlogModerationService) ReviewFlag(ctx context.Context, orgID string, spaceID string, flagID string, body BlogModerationReviewFlagParams, query *BlogModerationReviewFlagQuery, opts ...RequestOption) (*BlogModerationReviewFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogModerationReviewFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/flags/"+pathEscape(flagID)+"/review", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/flags/"+pathEscape(flagID)+"/review", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// BlogModerationResolveFlagQuery are the optional query parameters of BlogModerationService.ResolveFlag.
+type BlogModerationResolveFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogModerationResolveFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // ResolveFlag resolve the flag (blog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/flags/{flagId}/resolve
-func (s *BlogModerationService) ResolveFlag(ctx context.Context, orgID string, spaceID string, flagID string, body BlogModerationResolveFlagParams, opts ...RequestOption) (*BlogModerationResolveFlagResponse, error) {
+func (s *BlogModerationService) ResolveFlag(ctx context.Context, orgID string, spaceID string, flagID string, body BlogModerationResolveFlagParams, query *BlogModerationResolveFlagQuery, opts ...RequestOption) (*BlogModerationResolveFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogModerationResolveFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/flags/"+pathEscape(flagID)+"/resolve", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/flags/"+pathEscape(flagID)+"/resolve", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -521,6 +865,10 @@ type BlogNewsletterSubscribersQuery struct {
 	// Subscribers per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogNewsletterSubscribersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -533,6 +881,12 @@ func (p *BlogNewsletterSubscribersQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -580,6 +934,10 @@ type BlogNewsletterBroadcastsQuery struct {
 	// Broadcasts per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogNewsletterBroadcastsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -593,10 +951,16 @@ func (p *BlogNewsletterBroadcastsQuery) encode(opts []RequestOption) (url.Values
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Broadcasts list broadcasts in a space
+// Broadcasts list broadcasts in a space (blog)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/blog/broadcasts
 func (s *BlogNewsletterService) Broadcasts(ctx context.Context, orgID string, spaceID string, query *BlogNewsletterBroadcastsQuery, opts ...RequestOption) (*BlogNewsletterBroadcastsResponse, error) {
@@ -623,23 +987,59 @@ func (s *BlogNewsletterService) BroadcastsAutoPaging(ctx context.Context, orgID 
 	})
 }
 
-// SendBroadcast create a broadcast in a space
+// BlogNewsletterSendBroadcastQuery are the optional query parameters of BlogNewsletterService.SendBroadcast.
+type BlogNewsletterSendBroadcastQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogNewsletterSendBroadcastQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SendBroadcast send the broadcast
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/blog/broadcasts
-func (s *BlogNewsletterService) SendBroadcast(ctx context.Context, orgID string, spaceID string, body BlogNewsletterSendBroadcastParams, opts ...RequestOption) (*BlogNewsletterSendBroadcastResponse, error) {
+func (s *BlogNewsletterService) SendBroadcast(ctx context.Context, orgID string, spaceID string, body BlogNewsletterSendBroadcastParams, query *BlogNewsletterSendBroadcastQuery, opts ...RequestOption) (*BlogNewsletterSendBroadcastResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogNewsletterSendBroadcastResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/broadcasts", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/broadcasts", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// BlogNewsletterSetSubscriberTagsQuery are the optional query parameters of BlogNewsletterService.SetSubscriberTags.
+type BlogNewsletterSetSubscriberTagsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogNewsletterSetSubscriberTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetSubscriberTags replace tags in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/blog/subscribers/{subscriberId}/tags
-func (s *BlogNewsletterService) SetSubscriberTags(ctx context.Context, orgID string, spaceID string, subscriberID string, body BlogNewsletterSetSubscriberTagsParams, opts ...RequestOption) (*BlogNewsletterSetSubscriberTagsResponse, error) {
+func (s *BlogNewsletterService) SetSubscriberTags(ctx context.Context, orgID string, spaceID string, subscriberID string, body BlogNewsletterSetSubscriberTagsParams, query *BlogNewsletterSetSubscriberTagsQuery, opts ...RequestOption) (*BlogNewsletterSetSubscriberTagsResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogNewsletterSetSubscriberTagsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/subscribers/"+pathEscape(subscriberID)+"/tags", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/subscribers/"+pathEscape(subscriberID)+"/tags", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -651,6 +1051,10 @@ type BlogNewsletterSubscriberTagsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogNewsletterSubscriberTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -663,6 +1067,12 @@ func (p *BlogNewsletterSubscriberTagsQuery) encode(opts []RequestOption) (url.Va
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

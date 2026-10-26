@@ -13,12 +13,45 @@ type CourseLearnersService struct {
 	c *Client
 }
 
+// CourseLearnersRevokeQuery are the optional query parameters of CourseLearnersService.Revoke.
+type CourseLearnersRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseLearnersRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the certificate
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/course/learners/{userId}/certificate
+func (s *CourseLearnersService) Revoke(ctx context.Context, orgID string, spaceID string, userID string, body CourseLearnersRevokeParams, query *CourseLearnersRevokeQuery, opts ...RequestOption) (*CourseLearnersRevokeResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseLearnersRevokeResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/learners/"+pathEscape(userID)+"/certificate", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // CourseLearnersRosterQuery are the optional query parameters of CourseLearnersService.Roster.
 type CourseLearnersRosterQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CourseLearnersRosterQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +64,12 @@ func (p *CourseLearnersRosterQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -84,17 +123,6 @@ func (s *CourseLearnersService) Funnel(ctx context.Context, orgID string, spaceI
 	return &out, nil
 }
 
-// Revoke replace the certificate in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/course/learners/{userId}/certificate
-func (s *CourseLearnersService) Revoke(ctx context.Context, orgID string, spaceID string, userID string, body CourseLearnersRevokeParams, opts ...RequestOption) (*CourseLearnersRevokeResponse, error) {
-	var out CourseLearnersRevokeResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/learners/"+pathEscape(userID)+"/certificate", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // Learning get the learning in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/course/authoring/learning
@@ -106,12 +134,64 @@ func (s *CourseLearnersService) Learning(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
+// CourseLearnersSetLearningQuery are the optional query parameters of CourseLearnersService.SetLearning.
+type CourseLearnersSetLearningQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *CourseLearnersSetLearningQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetLearning replace the learning in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/learning
-func (s *CourseLearnersService) SetLearning(ctx context.Context, orgID string, spaceID string, body CourseLearnersSetLearningParams, opts ...RequestOption) (*CourseLearnersSetLearningResponse, error) {
-	var out CourseLearnersSetLearningResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/learning", nil, body, &out, opts); err != nil {
+func (s *CourseLearnersService) SetLearning(ctx context.Context, orgID string, spaceID string, body CourseLearnersSetLearningParams, query *CourseLearnersSetLearningQuery, opts ...RequestOption) (*CourseLearnersPatchLearningResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseLearnersPatchLearningResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/learning", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CourseLearnersPatchLearningQuery are the optional query parameters of CourseLearnersService.PatchLearning.
+type CourseLearnersPatchLearningQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *CourseLearnersPatchLearningQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchLearning update the learning in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/course/authoring/learning
+func (s *CourseLearnersService) PatchLearning(ctx context.Context, orgID string, spaceID string, body any, query *CourseLearnersPatchLearningQuery, opts ...RequestOption) (*CourseLearnersPatchLearningResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseLearnersPatchLearningResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/learning", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

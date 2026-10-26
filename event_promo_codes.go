@@ -19,6 +19,10 @@ type EventPromoCodesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EventPromoCodesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *EventPromoCodesListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *EventPromoCodesService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// EventPromoCodesCreateQuery are the optional query parameters of EventPromoCodesService.Create.
+type EventPromoCodesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventPromoCodesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an event promo code in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/event-promo-codes
-func (s *EventPromoCodesService) Create(ctx context.Context, orgID string, spaceID string, body EventPromoCodesCreateParams, opts ...RequestOption) (*EventPromoCodesCreateResponse, error) {
+func (s *EventPromoCodesService) Create(ctx context.Context, orgID string, spaceID string, body EventPromoCodesCreateParams, query *EventPromoCodesCreateQuery, opts ...RequestOption) (*EventPromoCodesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventPromoCodesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-promo-codes", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-promo-codes", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// EventPromoCodesReplaceQuery are the optional query parameters of EventPromoCodesService.Replace.
+type EventPromoCodesReplaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventPromoCodesReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Replace replace the event promo code
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/event-promo-codes/{id}
-func (s *EventPromoCodesService) Replace(ctx context.Context, orgID string, spaceID string, id string, body EventPromoCodesReplaceParams, opts ...RequestOption) (*EventPromoCodesReplaceResponse, error) {
+func (s *EventPromoCodesService) Replace(ctx context.Context, orgID string, spaceID string, id string, body EventPromoCodesReplaceParams, query *EventPromoCodesReplaceQuery, opts ...RequestOption) (*EventPromoCodesReplaceResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventPromoCodesReplaceResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-promo-codes/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-promo-codes/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// EventPromoCodesRemoveQuery are the optional query parameters of EventPromoCodesService.Remove.
+type EventPromoCodesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventPromoCodesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the event promo code
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/event-promo-codes/{id}
-func (s *EventPromoCodesService) Remove(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*EventPromoCodesRemoveResponse, error) {
+func (s *EventPromoCodesService) Remove(ctx context.Context, orgID string, spaceID string, id string, query *EventPromoCodesRemoveQuery, opts ...RequestOption) (*EventPromoCodesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventPromoCodesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-promo-codes/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-promo-codes/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

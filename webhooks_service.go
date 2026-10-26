@@ -29,6 +29,12 @@ type WebhooksListQuery struct {
 	// Webhooks per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *WebhooksListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -41,6 +47,15 @@ func (p *WebhooksListQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -72,34 +87,88 @@ func (s *WebhooksService) ListAutoPaging(ctx context.Context, orgID string, quer
 	})
 }
 
+// WebhooksCreateQuery are the optional query parameters of WebhooksService.Create.
+type WebhooksCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *WebhooksCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a webhook in an organization
 //
 // POST /orgs/{orgId}/webhooks
-func (s *WebhooksService) Create(ctx context.Context, orgID string, body WebhooksCreateParams, opts ...RequestOption) (*WebhooksCreateResponse, error) {
-	var out WebhooksCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks", nil, body, &out, opts); err != nil {
+func (s *WebhooksService) Create(ctx context.Context, orgID string, body WebhooksCreateParams, query *WebhooksCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
+}
+
+// WebhooksUpdateQuery are the optional query parameters of WebhooksService.Update.
+type WebhooksUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *WebhooksUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the webhook
 //
 // PATCH /orgs/{orgId}/webhooks/{webhookId}
-func (s *WebhooksService) Update(ctx context.Context, orgID string, webhookID string, body WebhooksUpdateParams, opts ...RequestOption) (*WebhooksUpdateResponse, error) {
+func (s *WebhooksService) Update(ctx context.Context, orgID string, webhookID string, body WebhooksUpdateParams, query *WebhooksUpdateQuery, opts ...RequestOption) (*WebhooksUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out WebhooksUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// WebhooksRemoveQuery are the optional query parameters of WebhooksService.Remove.
+type WebhooksRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *WebhooksRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the webhook
 //
 // DELETE /orgs/{orgId}/webhooks/{webhookId}
-func (s *WebhooksService) Remove(ctx context.Context, orgID string, webhookID string, opts ...RequestOption) (*WebhooksRemoveResponse, error) {
+func (s *WebhooksService) Remove(ctx context.Context, orgID string, webhookID string, query *WebhooksRemoveQuery, opts ...RequestOption) (*WebhooksRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out WebhooksRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -107,10 +176,15 @@ func (s *WebhooksService) Remove(ctx context.Context, orgID string, webhookID st
 
 // WebhooksDeliveriesQuery are the optional query parameters of WebhooksService.Deliveries.
 type WebhooksDeliveriesQuery struct {
+	Trace *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *WebhooksDeliveriesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -118,11 +192,20 @@ func (p *WebhooksDeliveriesQuery) encode(opts []RequestOption) (url.Values, []Re
 	if p == nil {
 		return v, opts
 	}
+	if p.Trace != nil {
+		v.Set("trace", *p.Trace)
+	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -154,35 +237,89 @@ func (s *WebhooksService) DeliveriesAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// WebhooksReplayQuery are the optional query parameters of WebhooksService.Replay.
+type WebhooksReplayQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *WebhooksReplayQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Replay replay the delivery
 //
 // POST /orgs/{orgId}/webhooks/{webhookId}/deliveries/{deliveryId}/replay
-func (s *WebhooksService) Replay(ctx context.Context, orgID string, webhookID string, deliveryID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID)+"/deliveries/"+pathEscape(deliveryID)+"/replay", nil, nil, &out, opts); err != nil {
+func (s *WebhooksService) Replay(ctx context.Context, orgID string, webhookID string, deliveryID string, query *WebhooksReplayQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID)+"/deliveries/"+pathEscape(deliveryID)+"/replay", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
+}
+
+// WebhooksRotateQuery are the optional query parameters of WebhooksService.Rotate.
+type WebhooksRotateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *WebhooksRotateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Rotate rotate secret in an organization (webhooks)
 //
 // POST /orgs/{orgId}/webhooks/{webhookId}/rotate-secret
-func (s *WebhooksService) Rotate(ctx context.Context, orgID string, webhookID string, body WebhooksRotateParams, opts ...RequestOption) (*WebhooksRotateResponse, error) {
+func (s *WebhooksService) Rotate(ctx context.Context, orgID string, webhookID string, body WebhooksRotateParams, query *WebhooksRotateQuery, opts ...RequestOption) (*WebhooksRotateResponse, error) {
+	v, opts := query.encode(opts)
 	var out WebhooksRotateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID)+"/rotate-secret", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID)+"/rotate-secret", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Ping create the ping in an organization
+// WebhooksPingQuery are the optional query parameters of WebhooksService.Ping.
+type WebhooksPingQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *WebhooksPingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Ping ping the webhook
 //
 // POST /orgs/{orgId}/webhooks/{webhookId}/ping
-func (s *WebhooksService) Ping(ctx context.Context, orgID string, webhookID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID)+"/ping", nil, nil, &out, opts); err != nil {
+func (s *WebhooksService) Ping(ctx context.Context, orgID string, webhookID string, query *WebhooksPingQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/webhooks/"+pathEscape(webhookID)+"/ping", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

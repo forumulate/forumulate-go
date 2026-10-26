@@ -4,6 +4,7 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
 )
 
 // SiteLabelsService holds the operations under client.SiteLabels.
@@ -11,7 +12,7 @@ type SiteLabelsService struct {
 	c *Client
 }
 
-// Strings list strings in an organization
+// Strings list strings on a site
 //
 // GET /orgs/{orgId}/sites/{siteId}/i18n/strings
 func (s *SiteLabelsService) Strings(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*OwnerStringsListing, error) {
@@ -22,24 +23,76 @@ func (s *SiteLabelsService) Strings(ctx context.Context, orgID string, siteID st
 	return &out, nil
 }
 
-// Replace replace labels in an organization
+// Labels list labels on a site
 //
-// PUT /orgs/{orgId}/sites/{siteId}/i18n/labels
-func (s *SiteLabelsService) Replace(ctx context.Context, orgID string, siteID string, body SiteLabelsReplaceParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/i18n/labels", nil, body, &out, opts); err != nil {
+// GET /orgs/{orgId}/sites/{siteId}/i18n/labels
+func (s *SiteLabelsService) Labels(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*LabelDictionaryAnswer, error) {
+	var out LabelDictionaryAnswer
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/i18n/labels", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
 }
 
-// Merge update labels in an organization
+// SiteLabelsReplaceQuery are the optional query parameters of SiteLabelsService.Replace.
+type SiteLabelsReplaceQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SiteLabelsReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Replace replace labels on a site
 //
-// PATCH /orgs/{orgId}/sites/{siteId}/i18n/labels
-func (s *SiteLabelsService) Merge(ctx context.Context, orgID string, siteID string, body SiteLabelsMergeParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/i18n/labels", nil, body, &out, opts); err != nil {
+// PUT /orgs/{orgId}/sites/{siteId}/i18n/labels
+func (s *SiteLabelsService) Replace(ctx context.Context, orgID string, siteID string, body SiteLabelsReplaceParams, query *SiteLabelsReplaceQuery, opts ...RequestOption) (*SiteLabelsReplaceResponse, error) {
+	v, opts := query.encode(opts)
+	var out SiteLabelsReplaceResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/i18n/labels", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// SiteLabelsMergeQuery are the optional query parameters of SiteLabelsService.Merge.
+type SiteLabelsMergeQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SiteLabelsMergeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Merge update labels on a site
+//
+// PATCH /orgs/{orgId}/sites/{siteId}/i18n/labels
+func (s *SiteLabelsService) Merge(ctx context.Context, orgID string, siteID string, body SiteLabelsMergeParams, query *SiteLabelsMergeQuery, opts ...RequestOption) (*SiteLabelsMergeResponse, error) {
+	v, opts := query.encode(opts)
+	var out SiteLabelsMergeResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/i18n/labels", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }

@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // ReleaseReviewService holds the operations under client.ReleaseReview.
@@ -11,45 +13,117 @@ type ReleaseReviewService struct {
 	c *Client
 }
 
-// Request create the review in a space (changelog)
+// ReleaseReviewRequestQuery are the optional query parameters of ReleaseReviewService.Request.
+type ReleaseReviewRequestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseReviewRequestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Request request a review of a release
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/review
-func (s *ReleaseReviewService) Request(ctx context.Context, orgID string, spaceID string, releaseID string, body ReleaseReviewRequestParams, opts ...RequestOption) (*ReleaseReviewRequestResponse, error) {
+func (s *ReleaseReviewService) Request(ctx context.Context, orgID string, spaceID string, releaseID string, body ReleaseReviewRequestParams, query *ReleaseReviewRequestQuery, opts ...RequestOption) (*ReleaseReviewRequestResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseReviewRequestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Withdraw delete the review in a space
+// ReleaseReviewWithdrawQuery are the optional query parameters of ReleaseReviewService.Withdraw.
+type ReleaseReviewWithdrawQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseReviewWithdrawQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Withdraw withdraw the review
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/review
-func (s *ReleaseReviewService) Withdraw(ctx context.Context, orgID string, spaceID string, releaseID string, opts ...RequestOption) (*ReleaseReviewWithdrawResponse, error) {
+func (s *ReleaseReviewService) Withdraw(ctx context.Context, orgID string, spaceID string, releaseID string, query *ReleaseReviewWithdrawQuery, opts ...RequestOption) (*ReleaseReviewWithdrawResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseReviewWithdrawResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleaseReviewApproveQuery are the optional query parameters of ReleaseReviewService.Approve.
+type ReleaseReviewApproveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseReviewApproveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Approve approve the review
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/review/approve
-func (s *ReleaseReviewService) Approve(ctx context.Context, orgID string, spaceID string, releaseID string, body ReleaseReviewApproveParams, opts ...RequestOption) (*ReleaseReviewApproveResponse, error) {
+func (s *ReleaseReviewService) Approve(ctx context.Context, orgID string, spaceID string, releaseID string, body ReleaseReviewApproveParams, query *ReleaseReviewApproveQuery, opts ...RequestOption) (*ReleaseReviewApproveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseReviewApproveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review/approve", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review/approve", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RequestChanges create a request change in a space
+// ReleaseReviewRequestChangesQuery are the optional query parameters of ReleaseReviewService.RequestChanges.
+type ReleaseReviewRequestChangesQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseReviewRequestChangesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RequestChanges request the changes
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/review/request-changes
-func (s *ReleaseReviewService) RequestChanges(ctx context.Context, orgID string, spaceID string, releaseID string, body ReleaseReviewRequestChangesParams, opts ...RequestOption) (*ReleaseReviewRequestChangesResponse, error) {
+func (s *ReleaseReviewService) RequestChanges(ctx context.Context, orgID string, spaceID string, releaseID string, body ReleaseReviewRequestChangesParams, query *ReleaseReviewRequestChangesQuery, opts ...RequestOption) (*ReleaseReviewRequestChangesResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseReviewRequestChangesResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review/request-changes", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/review/request-changes", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

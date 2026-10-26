@@ -13,30 +13,30 @@ type DeliveryEntriesService struct {
 	c *Client
 }
 
-// Types0 list the content types (libraries)
+// Types list the content types (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/types
-func (s *DeliveryEntriesService) Types0(ctx context.Context, libraryID string, opts ...RequestOption) (*DeliveryEntriesTypes0Response, error) {
-	var out DeliveryEntriesTypes0Response
+func (s *DeliveryEntriesService) Types(ctx context.Context, libraryID string, opts ...RequestOption) (*DeliveryEntriesTypesResponse, error) {
+	var out DeliveryEntriesTypesResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/types", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Types1 list the content types (k)
+// TypesByKey list the content types (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/types
-func (s *DeliveryEntriesService) Types1(ctx context.Context, keyID string, opts ...RequestOption) (*DeliveryEntriesTypes1Response, error) {
-	var out DeliveryEntriesTypes1Response
+func (s *DeliveryEntriesService) TypesByKey(ctx context.Context, keyID string, opts ...RequestOption) (*DeliveryEntriesTypesByKeyResponse, error) {
+	var out DeliveryEntriesTypesByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/types", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliveryEntriesList0Query are the optional query parameters of DeliveryEntriesService.List0.
-type DeliveryEntriesList0Query struct {
+// DeliveryEntriesListQuery are the optional query parameters of DeliveryEntriesService.List.
+type DeliveryEntriesListQuery struct {
 	// `{field: {operator: value}}` with `and`/`or` lists, as JSON or bracket-encoded (`where[price][gt]=10`).
 	Where *string
 	// Comma-separated field paths, `-` first for descending.
@@ -59,9 +59,13 @@ type DeliveryEntriesList0Query struct {
 	Select *string
 	// Accepted for a preview key, which always reads drafts; a delivery key asking for drafts is a 403.
 	Draft *bool
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliveryEntriesList0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -99,24 +103,30 @@ func (p *DeliveryEntriesList0Query) encode(opts []RequestOption) (url.Values, []
 	if p.Draft != nil {
 		v.Set("draft", strconv.FormatBool(*p.Draft))
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// List0 list entries of a content type (libraries)
+// List list entries of a content type (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/types/{type}/entries
-func (s *DeliveryEntriesService) List0(ctx context.Context, libraryID string, typeValue string, query *DeliveryEntriesList0Query, opts ...RequestOption) (*DeliveryEntriesList0Response, error) {
+func (s *DeliveryEntriesService) List(ctx context.Context, libraryID string, typeValue string, query *DeliveryEntriesListQuery, opts ...RequestOption) (*DeliveryEntriesListResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesList0Response
+	var out DeliveryEntriesListResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/types/"+pathEscape(typeValue)+"/entries", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// List0AutoPaging walks every item of List0 across all pages.
-func (s *DeliveryEntriesService) List0AutoPaging(ctx context.Context, libraryID string, typeValue string, query *DeliveryEntriesList0Query, opts ...RequestOption) *Iter[DeliveryEntriesList0ResponseDataItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliveryEntriesList0ResponseDataItem, string, error) {
+// ListAutoPaging walks every item of List across all pages.
+func (s *DeliveryEntriesService) ListAutoPaging(ctx context.Context, libraryID string, typeValue string, query *DeliveryEntriesListQuery, opts ...RequestOption) *Iter[DeliveryEntriesListResponseDataItem] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliveryEntriesListResponseDataItem, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -125,12 +135,12 @@ func (s *DeliveryEntriesService) List0AutoPaging(ctx context.Context, libraryID 
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DeliveryEntriesList0ResponseDataItem](raw, "data")
+		return decodePage[DeliveryEntriesListResponseDataItem](raw, "data")
 	})
 }
 
-// DeliveryEntriesList1Query are the optional query parameters of DeliveryEntriesService.List1.
-type DeliveryEntriesList1Query struct {
+// DeliveryEntriesListByKeyQuery are the optional query parameters of DeliveryEntriesService.ListByKey.
+type DeliveryEntriesListByKeyQuery struct {
 	// `{field: {operator: value}}` with `and`/`or` lists, as JSON or bracket-encoded (`where[price][gt]=10`).
 	Where *string
 	// Comma-separated field paths, `-` first for descending.
@@ -153,9 +163,13 @@ type DeliveryEntriesList1Query struct {
 	Select *string
 	// Accepted for a preview key, which always reads drafts; a delivery key asking for drafts is a 403.
 	Draft *bool
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliveryEntriesList1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesListByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -193,24 +207,30 @@ func (p *DeliveryEntriesList1Query) encode(opts []RequestOption) (url.Values, []
 	if p.Draft != nil {
 		v.Set("draft", strconv.FormatBool(*p.Draft))
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// List1 list entries of a content type (k)
+// ListByKey list entries of a content type (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/types/{type}/entries
-func (s *DeliveryEntriesService) List1(ctx context.Context, keyID string, typeValue string, query *DeliveryEntriesList1Query, opts ...RequestOption) (*DeliveryEntriesList1Response, error) {
+func (s *DeliveryEntriesService) ListByKey(ctx context.Context, keyID string, typeValue string, query *DeliveryEntriesListByKeyQuery, opts ...RequestOption) (*DeliveryEntriesListByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesList1Response
+	var out DeliveryEntriesListByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/types/"+pathEscape(typeValue)+"/entries", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// List1AutoPaging walks every item of List1 across all pages.
-func (s *DeliveryEntriesService) List1AutoPaging(ctx context.Context, keyID string, typeValue string, query *DeliveryEntriesList1Query, opts ...RequestOption) *Iter[DeliveryEntriesList1ResponseDataItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliveryEntriesList1ResponseDataItem, string, error) {
+// ListByKeyAutoPaging walks every item of ListByKey across all pages.
+func (s *DeliveryEntriesService) ListByKeyAutoPaging(ctx context.Context, keyID string, typeValue string, query *DeliveryEntriesListByKeyQuery, opts ...RequestOption) *Iter[DeliveryEntriesListByKeyResponseDataItem] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliveryEntriesListByKeyResponseDataItem, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -219,12 +239,12 @@ func (s *DeliveryEntriesService) List1AutoPaging(ctx context.Context, keyID stri
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DeliveryEntriesList1ResponseDataItem](raw, "data")
+		return decodePage[DeliveryEntriesListByKeyResponseDataItem](raw, "data")
 	})
 }
 
-// DeliveryEntriesQuery0Query are the optional query parameters of DeliveryEntriesService.Query0.
-type DeliveryEntriesQuery0Query struct {
+// DeliveryEntriesQueryQuery are the optional query parameters of DeliveryEntriesService.Query.
+type DeliveryEntriesQueryQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -237,9 +257,11 @@ type DeliveryEntriesQuery0Query struct {
 	Select *string
 	// Accepted for a preview key, which always reads drafts; a delivery key asking for drafts is a 403.
 	Draft *bool
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
-func (p *DeliveryEntriesQuery0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesQueryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -262,23 +284,26 @@ func (p *DeliveryEntriesQuery0Query) encode(opts []RequestOption) (url.Values, [
 	if p.Draft != nil {
 		v.Set("draft", strconv.FormatBool(*p.Draft))
 	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
 	return v, opts
 }
 
-// Query0 query entries of a content type (libraries)
+// Query query entries of a content type (libraries)
 //
 // POST /delivery/v1/libraries/{libraryId}/types/{type}/entries/query
-func (s *DeliveryEntriesService) Query0(ctx context.Context, libraryID string, typeValue string, body DeliveryEntriesQuery0Params, query *DeliveryEntriesQuery0Query, opts ...RequestOption) (*DeliveryEntriesQuery0Response, error) {
+func (s *DeliveryEntriesService) Query(ctx context.Context, libraryID string, typeValue string, body DeliveryEntriesQueryParams, query *DeliveryEntriesQueryQuery, opts ...RequestOption) (*DeliveryEntriesQueryByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesQuery0Response
+	var out DeliveryEntriesQueryByKeyResponse
 	if err := s.c.do(ctx, "POST", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/types/"+pathEscape(typeValue)+"/entries/query", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliveryEntriesQuery1Query are the optional query parameters of DeliveryEntriesService.Query1.
-type DeliveryEntriesQuery1Query struct {
+// DeliveryEntriesQueryByKeyQuery are the optional query parameters of DeliveryEntriesService.QueryByKey.
+type DeliveryEntriesQueryByKeyQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -291,9 +316,11 @@ type DeliveryEntriesQuery1Query struct {
 	Select *string
 	// Accepted for a preview key, which always reads drafts; a delivery key asking for drafts is a 403.
 	Draft *bool
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
-func (p *DeliveryEntriesQuery1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesQueryByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -316,23 +343,26 @@ func (p *DeliveryEntriesQuery1Query) encode(opts []RequestOption) (url.Values, [
 	if p.Draft != nil {
 		v.Set("draft", strconv.FormatBool(*p.Draft))
 	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
 	return v, opts
 }
 
-// Query1 query entries of a content type (k)
+// QueryByKey query entries of a content type (by delivery key)
 //
 // POST /delivery/v1/k/{keyId}/types/{type}/entries/query
-func (s *DeliveryEntriesService) Query1(ctx context.Context, keyID string, typeValue string, body DeliveryEntriesQuery1Params, query *DeliveryEntriesQuery1Query, opts ...RequestOption) (*DeliveryEntriesQuery1Response, error) {
+func (s *DeliveryEntriesService) QueryByKey(ctx context.Context, keyID string, typeValue string, body DeliveryEntriesQueryByKeyParams, query *DeliveryEntriesQueryByKeyQuery, opts ...RequestOption) (*DeliveryEntriesQueryByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesQuery1Response
+	var out DeliveryEntriesQueryByKeyResponse
 	if err := s.c.do(ctx, "POST", "/delivery/v1/k/"+pathEscape(keyID)+"/types/"+pathEscape(typeValue)+"/entries/query", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliveryEntriesOne0Query are the optional query parameters of DeliveryEntriesService.One0.
-type DeliveryEntriesOne0Query struct {
+// DeliveryEntriesOneQuery are the optional query parameters of DeliveryEntriesService.One.
+type DeliveryEntriesOneQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -347,7 +377,7 @@ type DeliveryEntriesOne0Query struct {
 	Draft *bool
 }
 
-func (p *DeliveryEntriesOne0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesOneQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -373,20 +403,20 @@ func (p *DeliveryEntriesOne0Query) encode(opts []RequestOption) (url.Values, []R
 	return v, opts
 }
 
-// One0 read one entry (libraries)
+// One read one entry (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/types/{type}/entries/{idOrSlug}
-func (s *DeliveryEntriesService) One0(ctx context.Context, libraryID string, typeValue string, idOrSlug string, query *DeliveryEntriesOne0Query, opts ...RequestOption) (*DeliveryEntriesOne0Response, error) {
+func (s *DeliveryEntriesService) One(ctx context.Context, libraryID string, typeValue string, idOrSlug string, query *DeliveryEntriesOneQuery, opts ...RequestOption) (*DeliveryEntriesOneResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesOne0Response
+	var out DeliveryEntriesOneResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/types/"+pathEscape(typeValue)+"/entries/"+pathEscape(idOrSlug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliveryEntriesOne1Query are the optional query parameters of DeliveryEntriesService.One1.
-type DeliveryEntriesOne1Query struct {
+// DeliveryEntriesOneByKeyQuery are the optional query parameters of DeliveryEntriesService.OneByKey.
+type DeliveryEntriesOneByKeyQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -401,7 +431,7 @@ type DeliveryEntriesOne1Query struct {
 	Draft *bool
 }
 
-func (p *DeliveryEntriesOne1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesOneByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -427,12 +457,12 @@ func (p *DeliveryEntriesOne1Query) encode(opts []RequestOption) (url.Values, []R
 	return v, opts
 }
 
-// One1 read one entry (k)
+// OneByKey read one entry (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/types/{type}/entries/{idOrSlug}
-func (s *DeliveryEntriesService) One1(ctx context.Context, keyID string, typeValue string, idOrSlug string, query *DeliveryEntriesOne1Query, opts ...RequestOption) (*DeliveryEntriesOne1Response, error) {
+func (s *DeliveryEntriesService) OneByKey(ctx context.Context, keyID string, typeValue string, idOrSlug string, query *DeliveryEntriesOneByKeyQuery, opts ...RequestOption) (*DeliveryEntriesOneByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesOne1Response
+	var out DeliveryEntriesOneByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/types/"+pathEscape(typeValue)+"/entries/"+pathEscape(idOrSlug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
@@ -453,6 +483,8 @@ type DeliveryEntriesResolveQuery struct {
 	Select *string
 	// Accepted for a preview key, which always reads drafts; a delivery key asking for drafts is a 403.
 	Draft *bool
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *DeliveryEntriesResolveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -478,6 +510,9 @@ func (p *DeliveryEntriesResolveQuery) encode(opts []RequestOption) (url.Values, 
 	if p.Draft != nil {
 		v.Set("draft", strconv.FormatBool(*p.Draft))
 	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
 	return v, opts
 }
 
@@ -493,8 +528,8 @@ func (s *DeliveryEntriesService) Resolve(ctx context.Context, libraryID string, 
 	return &out, nil
 }
 
-// DeliveryEntriesGlobal0Query are the optional query parameters of DeliveryEntriesService.Global0.
-type DeliveryEntriesGlobal0Query struct {
+// DeliveryEntriesGlobalQuery are the optional query parameters of DeliveryEntriesService.Global.
+type DeliveryEntriesGlobalQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -509,7 +544,7 @@ type DeliveryEntriesGlobal0Query struct {
 	Draft *bool
 }
 
-func (p *DeliveryEntriesGlobal0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesGlobalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -535,20 +570,20 @@ func (p *DeliveryEntriesGlobal0Query) encode(opts []RequestOption) (url.Values, 
 	return v, opts
 }
 
-// Global0 read a global (libraries)
+// Global read a global (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/globals/{key}
-func (s *DeliveryEntriesService) Global0(ctx context.Context, libraryID string, key string, query *DeliveryEntriesGlobal0Query, opts ...RequestOption) (*DeliveryEntriesGlobal0Response, error) {
+func (s *DeliveryEntriesService) Global(ctx context.Context, libraryID string, key string, query *DeliveryEntriesGlobalQuery, opts ...RequestOption) (*DeliveryEntriesGlobalResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesGlobal0Response
+	var out DeliveryEntriesGlobalResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/globals/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliveryEntriesGlobal1Query are the optional query parameters of DeliveryEntriesService.Global1.
-type DeliveryEntriesGlobal1Query struct {
+// DeliveryEntriesGlobalByKeyQuery are the optional query parameters of DeliveryEntriesService.GlobalByKey.
+type DeliveryEntriesGlobalByKeyQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -563,7 +598,7 @@ type DeliveryEntriesGlobal1Query struct {
 	Draft *bool
 }
 
-func (p *DeliveryEntriesGlobal1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliveryEntriesGlobalByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -589,22 +624,22 @@ func (p *DeliveryEntriesGlobal1Query) encode(opts []RequestOption) (url.Values, 
 	return v, opts
 }
 
-// Global1 read a global (k)
+// GlobalByKey read a global (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/globals/{key}
-func (s *DeliveryEntriesService) Global1(ctx context.Context, keyID string, key string, query *DeliveryEntriesGlobal1Query, opts ...RequestOption) (*DeliveryEntriesGlobal1Response, error) {
+func (s *DeliveryEntriesService) GlobalByKey(ctx context.Context, keyID string, key string, query *DeliveryEntriesGlobalByKeyQuery, opts ...RequestOption) (*DeliveryEntriesGlobalByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliveryEntriesGlobal1Response
+	var out DeliveryEntriesGlobalByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/globals/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Schema0 read the library’s JSON Schema (libraries)
+// Schema read the library’s JSON Schema (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/schema.json
-func (s *DeliveryEntriesService) Schema0(ctx context.Context, libraryID string, opts ...RequestOption) (any, error) {
+func (s *DeliveryEntriesService) Schema(ctx context.Context, libraryID string, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/schema.json", nil, nil, &out, opts); err != nil {
 		return nil, err
@@ -612,10 +647,10 @@ func (s *DeliveryEntriesService) Schema0(ctx context.Context, libraryID string, 
 	return out, nil
 }
 
-// Schema1 read the library’s JSON Schema (k)
+// SchemaByKey read the library’s JSON Schema (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/schema.json
-func (s *DeliveryEntriesService) Schema1(ctx context.Context, keyID string, opts ...RequestOption) (any, error) {
+func (s *DeliveryEntriesService) SchemaByKey(ctx context.Context, keyID string, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/schema.json", nil, nil, &out, opts); err != nil {
 		return nil, err
@@ -623,10 +658,10 @@ func (s *DeliveryEntriesService) Schema1(ctx context.Context, keyID string, opts
 	return out, nil
 }
 
-// Openapi0 read the library’s OpenAPI document (libraries)
+// Openapi read the library’s OpenAPI document (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/openapi.json
-func (s *DeliveryEntriesService) Openapi0(ctx context.Context, libraryID string, opts ...RequestOption) (any, error) {
+func (s *DeliveryEntriesService) Openapi(ctx context.Context, libraryID string, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/openapi.json", nil, nil, &out, opts); err != nil {
 		return nil, err
@@ -634,10 +669,10 @@ func (s *DeliveryEntriesService) Openapi0(ctx context.Context, libraryID string,
 	return out, nil
 }
 
-// Openapi1 read the library’s OpenAPI document (k)
+// OpenapiByKey read the library’s OpenAPI document (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/openapi.json
-func (s *DeliveryEntriesService) Openapi1(ctx context.Context, keyID string, opts ...RequestOption) (any, error) {
+func (s *DeliveryEntriesService) OpenapiByKey(ctx context.Context, keyID string, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/openapi.json", nil, nil, &out, opts); err != nil {
 		return nil, err

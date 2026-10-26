@@ -40,6 +40,17 @@ func (s *SectionLibraryService) List(ctx context.Context, query *SectionLibraryL
 	return &out, nil
 }
 
+// Preview get a schematic picture of one section
+//
+// GET /section-library/{id}/preview.svg
+func (s *SectionLibraryService) Preview(ctx context.Context, id string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/section-library/"+pathEscape(id)+"/preview.svg", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // One get one entry of the section library
 //
 // GET /section-library/{id}

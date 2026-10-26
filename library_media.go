@@ -16,15 +16,20 @@ type LibraryMediaService struct {
 // LibraryMediaListQuery are the optional query parameters of LibraryMediaService.List.
 type LibraryMediaListQuery struct {
 	// Assets per page.
-	Limit    *int64
-	Type     *string
-	Search   *string
+	Limit  *int64
+	Type   *string
+	Search *string
+	// The folder uuid (uuid only — a slug is not resolved in a query parameter).
 	FolderID *string
 	Tag      *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	MissingAlt *string
 	// The `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibraryMediaListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -52,6 +57,12 @@ func (p *LibraryMediaListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -83,56 +94,146 @@ func (s *LibraryMediaService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
+// LibraryMediaUploadQuery are the optional query parameters of LibraryMediaService.Upload.
+type LibraryMediaUploadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryMediaUploadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Upload upload a file to a content library
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/assets
-func (s *LibraryMediaService) Upload(ctx context.Context, orgID string, libraryID string, body LibraryMediaUploadParams, opts ...RequestOption) (*LibraryMediaUploadResponse, error) {
+func (s *LibraryMediaService) Upload(ctx context.Context, orgID string, libraryID string, body LibraryMediaUploadParams, query *LibraryMediaUploadQuery, opts ...RequestOption) (*LibraryMediaUploadResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryMediaUploadResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// LibraryMediaBulkUpdateQuery are the optional query parameters of LibraryMediaService.BulkUpdate.
+type LibraryMediaBulkUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryMediaBulkUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // BulkUpdate update many of a content library’s assets at once
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/assets
-func (s *LibraryMediaService) BulkUpdate(ctx context.Context, orgID string, libraryID string, body LibraryMediaBulkUpdateParams, opts ...RequestOption) (*LibraryMediaBulkUpdateResponse, error) {
+func (s *LibraryMediaService) BulkUpdate(ctx context.Context, orgID string, libraryID string, body LibraryMediaBulkUpdateParams, query *LibraryMediaBulkUpdateQuery, opts ...RequestOption) (*LibraryMediaBulkUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryMediaBulkUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// LibraryMediaSuggestAltTextQuery are the optional query parameters of LibraryMediaService.SuggestAltText.
+type LibraryMediaSuggestAltTextQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryMediaSuggestAltTextQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SuggestAltText suggest alt text for a content library’s pictures
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/assets/alt-text
-func (s *LibraryMediaService) SuggestAltText(ctx context.Context, orgID string, libraryID string, body LibraryMediaSuggestAltTextParams, opts ...RequestOption) (*LibraryMediaSuggestAltTextResponse, error) {
+func (s *LibraryMediaService) SuggestAltText(ctx context.Context, orgID string, libraryID string, body LibraryMediaSuggestAltTextParams, query *LibraryMediaSuggestAltTextQuery, opts ...RequestOption) (*LibraryMediaSuggestAltTextResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryMediaSuggestAltTextResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets/alt-text", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets/alt-text", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// LibraryMediaUpdateQuery are the optional query parameters of LibraryMediaService.Update.
+type LibraryMediaUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryMediaUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update one content library asset
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/assets/{assetId}
-func (s *LibraryMediaService) Update(ctx context.Context, orgID string, libraryID string, assetID string, body LibraryMediaUpdateParams, opts ...RequestOption) (*LibraryMediaUpdateResponse, error) {
+func (s *LibraryMediaService) Update(ctx context.Context, orgID string, libraryID string, assetID string, body AssetLibraryUpdateBody, query *LibraryMediaUpdateQuery, opts ...RequestOption) (*LibraryMediaUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryMediaUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets/"+pathEscape(assetID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets/"+pathEscape(assetID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// LibraryMediaRemoveQuery are the optional query parameters of LibraryMediaService.Remove.
+type LibraryMediaRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryMediaRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete a content library asset
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/assets/{assetId}
-func (s *LibraryMediaService) Remove(ctx context.Context, orgID string, libraryID string, assetID string, opts ...RequestOption) (*LibraryMediaRemoveResponse, error) {
+func (s *LibraryMediaService) Remove(ctx context.Context, orgID string, libraryID string, assetID string, query *LibraryMediaRemoveQuery, opts ...RequestOption) (*LibraryMediaRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryMediaRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets/"+pathEscape(assetID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/assets/"+pathEscape(assetID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

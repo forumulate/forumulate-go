@@ -21,6 +21,10 @@ type MembersListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MembersListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -36,6 +40,12 @@ func (p *MembersListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -67,12 +77,30 @@ func (s *MembersService) ListAutoPaging(ctx context.Context, orgID string, query
 	})
 }
 
-// Invite create a member in an organization
+// MembersInviteQuery are the optional query parameters of MembersService.Invite.
+type MembersInviteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersInviteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Invite invite a member
 //
 // POST /orgs/{orgId}/members
-func (s *MembersService) Invite(ctx context.Context, orgID string, body MembersInviteParams, opts ...RequestOption) (*MembersInviteResponse, error) {
+func (s *MembersService) Invite(ctx context.Context, orgID string, body MembersInviteParams, query *MembersInviteQuery, opts ...RequestOption) (*MembersInviteResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersInviteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -84,6 +112,10 @@ type MembersInvitesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MembersInvitesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -96,6 +128,12 @@ func (p *MembersInvitesQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -127,23 +165,59 @@ func (s *MembersService) InvitesAutoPaging(ctx context.Context, orgID string, qu
 	})
 }
 
-// RevokeInvite delete the invite
+// MembersRevokeInviteQuery are the optional query parameters of MembersService.RevokeInvite.
+type MembersRevokeInviteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersRevokeInviteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeInvite revoke the invite (members)
 //
 // DELETE /orgs/{orgId}/members/invites/{inviteId}
-func (s *MembersService) RevokeInvite(ctx context.Context, orgID string, inviteID string, opts ...RequestOption) (*MembersRevokeInviteResponse, error) {
+func (s *MembersService) RevokeInvite(ctx context.Context, orgID string, inviteID string, query *MembersRevokeInviteQuery, opts ...RequestOption) (*MembersRevokeInviteResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersRevokeInviteResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/members/invites/"+pathEscape(inviteID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/members/invites/"+pathEscape(inviteID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// BulkInvite create the bulk in an organization (members)
+// MembersBulkInviteQuery are the optional query parameters of MembersService.BulkInvite.
+type MembersBulkInviteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersBulkInviteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// BulkInvite invite members in bulk
 //
 // POST /orgs/{orgId}/members/bulk
-func (s *MembersService) BulkInvite(ctx context.Context, orgID string, body MembersBulkInviteParams, opts ...RequestOption) (any, error) {
+func (s *MembersService) BulkInvite(ctx context.Context, orgID string, body MembersBulkInviteParams, query *MembersBulkInviteQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/bulk", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/bulk", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -155,6 +229,10 @@ type MembersListInviteLinksQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MembersListInviteLinksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -167,6 +245,12 @@ func (p *MembersListInviteLinksQuery) encode(opts []RequestOption) (url.Values, 
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -198,67 +282,175 @@ func (s *MembersService) ListInviteLinksAutoPaging(ctx context.Context, orgID st
 	})
 }
 
+// MembersCreateInviteLinkQuery are the optional query parameters of MembersService.CreateInviteLink.
+type MembersCreateInviteLinkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersCreateInviteLinkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateInviteLink create an invite link in an organization
 //
 // POST /orgs/{orgId}/members/invite-links
-func (s *MembersService) CreateInviteLink(ctx context.Context, orgID string, body MembersCreateInviteLinkParams, opts ...RequestOption) (*MembersCreateInviteLinkResponse, error) {
+func (s *MembersService) CreateInviteLink(ctx context.Context, orgID string, body MembersCreateInviteLinkParams, query *MembersCreateInviteLinkQuery, opts ...RequestOption) (*MembersCreateInviteLinkResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersCreateInviteLinkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/invite-links", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/invite-links", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RevokeInviteLink delete the invite link
+// MembersRevokeInviteLinkQuery are the optional query parameters of MembersService.RevokeInviteLink.
+type MembersRevokeInviteLinkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersRevokeInviteLinkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeInviteLink revoke the invite link
 //
 // DELETE /orgs/{orgId}/members/invite-links/{linkId}
-func (s *MembersService) RevokeInviteLink(ctx context.Context, orgID string, linkID string, opts ...RequestOption) (*MembersRevokeInviteLinkResponse, error) {
+func (s *MembersService) RevokeInviteLink(ctx context.Context, orgID string, linkID string, query *MembersRevokeInviteLinkQuery, opts ...RequestOption) (*MembersRevokeInviteLinkResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersRevokeInviteLinkResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/members/invite-links/"+pathEscape(linkID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/members/invite-links/"+pathEscape(linkID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// MembersUpdateQuery are the optional query parameters of MembersService.Update.
+type MembersUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the member
 //
 // PATCH /orgs/{orgId}/members/{userId}
-func (s *MembersService) Update(ctx context.Context, orgID string, userID string, body MembersUpdateParams, opts ...RequestOption) (*MembersUpdateResponse, error) {
+func (s *MembersService) Update(ctx context.Context, orgID string, userID string, body MembersUpdateParams, query *MembersUpdateQuery, opts ...RequestOption) (*MembersUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// MembersRemoveQuery are the optional query parameters of MembersService.Remove.
+type MembersRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the member
 //
 // DELETE /orgs/{orgId}/members/{userId}
-func (s *MembersService) Remove(ctx context.Context, orgID string, userID string, opts ...RequestOption) (*MembersRemoveResponse, error) {
+func (s *MembersService) Remove(ctx context.Context, orgID string, userID string, query *MembersRemoveQuery, opts ...RequestOption) (*MembersRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RevokeSessions revoke the session
+// MembersRevokeSessionsQuery are the optional query parameters of MembersService.RevokeSessions.
+type MembersRevokeSessionsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersRevokeSessionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeSessions sign a member out of every session
 //
 // POST /orgs/{orgId}/members/{userId}/sessions/revoke
-func (s *MembersService) RevokeSessions(ctx context.Context, orgID string, userID string, opts ...RequestOption) (*MembersRevokeSessionsResponse, error) {
+func (s *MembersService) RevokeSessions(ctx context.Context, orgID string, userID string, query *MembersRevokeSessionsQuery, opts ...RequestOption) (*MembersRevokeSessionsResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersRevokeSessionsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID)+"/sessions/revoke", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID)+"/sessions/revoke", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ReassignContent create the reassign content in an organization
+// MembersReassignContentQuery are the optional query parameters of MembersService.ReassignContent.
+type MembersReassignContentQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MembersReassignContentQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReassignContent reassign the content
 //
 // POST /orgs/{orgId}/members/{userId}/reassign-content
-func (s *MembersService) ReassignContent(ctx context.Context, orgID string, userID string, body MembersReassignContentParams, opts ...RequestOption) (*MembersReassignContentResponse, error) {
+func (s *MembersService) ReassignContent(ctx context.Context, orgID string, userID string, body MembersReassignContentParams, query *MembersReassignContentQuery, opts ...RequestOption) (*MembersReassignContentResponse, error) {
+	v, opts := query.encode(opts)
 	var out MembersReassignContentResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID)+"/reassign-content", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/members/"+pathEscape(userID)+"/reassign-content", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

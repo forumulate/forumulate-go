@@ -36,6 +36,10 @@ type ContentStudioListQuery struct {
 	Cursor *string
 	// Ask for `page.total`; sent only where counting is cheap.
 	Count *bool
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContentStudioListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -57,6 +61,12 @@ func (p *ContentStudioListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Count != nil {
 		v.Set("count", strconv.FormatBool(*p.Count))
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -88,12 +98,30 @@ func (s *ContentStudioService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// ContentStudioRunBulkQuery are the optional query parameters of ContentStudioService.RunBulk.
+type ContentStudioRunBulkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentStudioRunBulkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RunBulk publish, unpublish, delete or copy many entries
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/bulk
-func (s *ContentStudioService) RunBulk(ctx context.Context, orgID string, libraryID string, body ContentStudioRunBulkParams, opts ...RequestOption) (any, error) {
+func (s *ContentStudioService) RunBulk(ctx context.Context, orgID string, libraryID string, body ContentStudioRunBulkParams, query *ContentStudioRunBulkQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/bulk", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/bulk", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

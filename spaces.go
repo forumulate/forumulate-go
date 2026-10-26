@@ -30,6 +30,12 @@ type SpacesListQuery struct {
 	// List the soft-deleted spaces instead of the live ones.
 	Deleted *string
 	Cursor  *string
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -45,6 +51,15 @@ func (p *SpacesListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -76,12 +91,30 @@ func (s *SpacesService) ListAutoPaging(ctx context.Context, orgID string, query 
 	})
 }
 
+// SpacesCreateQuery are the optional query parameters of SpacesService.Create.
+type SpacesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a space in an organization
 //
 // POST /orgs/{orgId}/spaces
-func (s *SpacesService) Create(ctx context.Context, orgID string, body SpacesCreateParams, opts ...RequestOption) (*SpaceCreatedDto, error) {
+func (s *SpacesService) Create(ctx context.Context, orgID string, body SpacesCreateParams, query *SpacesCreateQuery, opts ...RequestOption) (*SpaceCreatedDto, error) {
+	v, opts := query.encode(opts)
 	var out SpaceCreatedDto
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -104,6 +137,10 @@ type SpacesOverviewQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesOverviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -116,6 +153,12 @@ func (p *SpacesOverviewQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -169,34 +212,88 @@ func (s *SpacesService) Get(ctx context.Context, orgID string, spaceID string, o
 	return &out, nil
 }
 
+// SpacesUpdateQuery are the optional query parameters of SpacesService.Update.
+type SpacesUpdateQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	DryRun *string
+}
+
+func (p *SpacesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
 // Update update the space
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}
-func (s *SpacesService) Update(ctx context.Context, orgID string, spaceID string, body SpacesUpdateParams, opts ...RequestOption) (*SpacesUpdateResponse, error) {
+func (s *SpacesService) Update(ctx context.Context, orgID string, spaceID string, body SpacesUpdateParams, query *SpacesUpdateQuery, opts ...RequestOption) (*SpacesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesRemoveQuery are the optional query parameters of SpacesService.Remove.
+type SpacesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the space
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}
-func (s *SpacesService) Remove(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesRemoveResponse, error) {
+func (s *SpacesService) Remove(ctx context.Context, orgID string, spaceID string, query *SpacesRemoveQuery, opts ...RequestOption) (*SpacesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacesRenameQuery are the optional query parameters of SpacesService.Rename.
+type SpacesRenameQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesRenameQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Rename update the slug in a space
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/slug
-func (s *SpacesService) Rename(ctx context.Context, orgID string, spaceID string, body SpacesRenameParams, opts ...RequestOption) (*SpacesRenameResponse, error) {
+func (s *SpacesService) Rename(ctx context.Context, orgID string, spaceID string, body SpacesRenameParams, query *SpacesRenameQuery, opts ...RequestOption) (*SpacesRenameResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesRenameResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/slug", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/slug", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -208,6 +305,10 @@ type SpacesSlugHistoryQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesSlugHistoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -220,6 +321,12 @@ func (p *SpacesSlugHistoryQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -251,67 +358,219 @@ func (s *SpacesService) SlugHistoryAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
-// ForgetSlug delete the history
+// SpacesForgetSlugQuery are the optional query parameters of SpacesService.ForgetSlug.
+type SpacesForgetSlugQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesForgetSlugQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ForgetSlug forget the slug
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/slug/history/{slug}
-func (s *SpacesService) ForgetSlug(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*SpacesForgetSlugResponse, error) {
+func (s *SpacesService) ForgetSlug(ctx context.Context, orgID string, spaceID string, slug string, query *SpacesForgetSlugQuery, opts ...RequestOption) (*SpacesForgetSlugResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesForgetSlugResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/slug/history/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/slug/history/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Purge purge the space
+// SpacesDestroyQuery are the optional query parameters of SpacesService.Destroy.
+type SpacesDestroyQuery struct {
+	// The space's slug, typed out.
+	Confirm *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDestroyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Confirm != nil {
+		v.Set("confirm", *p.Confirm)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Destroy destroy a trashed space
 //
-// DELETE /orgs/{orgId}/spaces/{spaceId}/purge
-func (s *SpacesService) Purge(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesPurgeResponse, error) {
-	var out SpacesPurgeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/purge", nil, nil, &out, opts); err != nil {
+// DELETE /orgs/{orgId}/spaces/{spaceId}/destroy
+func (s *SpacesService) Destroy(ctx context.Context, orgID string, spaceID string, query *SpacesDestroyQuery, opts ...RequestOption) (*SpacesDestroyResponse, error) {
+	v, opts := query.encode(opts)
+	var out SpacesDestroyResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/destroy", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesPurgeQuery are the optional query parameters of SpacesService.Purge.
+type SpacesPurgeQuery struct {
+	// The space's slug.
+	Confirm *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesPurgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Confirm != nil {
+		v.Set("confirm", *p.Confirm)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Purge destroy a trashed space (deprecated name)
+//
+// DELETE /orgs/{orgId}/spaces/{spaceId}/purge
+func (s *SpacesService) Purge(ctx context.Context, orgID string, spaceID string, query *SpacesPurgeQuery, opts ...RequestOption) (*SpacesPurgeResponse, error) {
+	v, opts := query.encode(opts)
+	var out SpacesPurgeResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/purge", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SpacesRestoreQuery are the optional query parameters of SpacesService.Restore.
+type SpacesRestoreQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesRestoreQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Restore restore the space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/restore
-func (s *SpacesService) Restore(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesRestoreResponse, error) {
+func (s *SpacesService) Restore(ctx context.Context, orgID string, spaceID string, query *SpacesRestoreQuery, opts ...RequestOption) (*SpacesRestoreResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesRestoreResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/restore", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/restore", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesDuplicateQuery are the optional query parameters of SpacesService.Duplicate.
+type SpacesDuplicateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDuplicateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Duplicate duplicate the space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/duplicate
-func (s *SpacesService) Duplicate(ctx context.Context, orgID string, spaceID string, body SpacesDuplicateParams, opts ...RequestOption) (*SpacesDuplicateResponse, error) {
+func (s *SpacesService) Duplicate(ctx context.Context, orgID string, spaceID string, body SpacesDuplicateParams, query *SpacesDuplicateQuery, opts ...RequestOption) (*SpacesDuplicateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesDuplicateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/duplicate", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/duplicate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesMoveQuery are the optional query parameters of SpacesService.Move.
+type SpacesMoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesMoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Move move the space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/move
-func (s *SpacesService) Move(ctx context.Context, orgID string, spaceID string, body SpacesMoveParams, opts ...RequestOption) (*SpacesMoveResponse, error) {
+func (s *SpacesService) Move(ctx context.Context, orgID string, spaceID string, body SpacesMoveParams, query *SpacesMoveQuery, opts ...RequestOption) (*SpacesMoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesMoveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/move", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/move", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacesPublishAllQuery are the optional query parameters of SpacesService.PublishAll.
+type SpacesPublishAllQuery struct {
+	// `true` holds the answer (up to 60 s) until the reader SERVES the published version — read through the reader past the edge — and adds `live` `{live, url, version, servedAt, waitedMs, retryAfter, reaso
+	Wait *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesPublishAllQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Wait != nil {
+		v.Set("wait", *p.Wait)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PublishAll publish all in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/publish-all
-func (s *SpacesService) PublishAll(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesPublishAllResponse, error) {
+func (s *SpacesService) PublishAll(ctx context.Context, orgID string, spaceID string, query *SpacesPublishAllQuery, opts ...RequestOption) (*SpacesPublishAllResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesPublishAllResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/publish-all", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/publish-all", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -344,6 +603,10 @@ type SpacesAssetsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesAssetsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -356,6 +619,12 @@ func (p *SpacesAssetsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -387,12 +656,30 @@ func (s *SpacesAssetsService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
-// Upload create an asset in a space
+// SpacesAssetsUploadQuery are the optional query parameters of SpacesAssetsService.Upload.
+type SpacesAssetsUploadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesAssetsUploadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Upload upload an asset
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/assets
-func (s *SpacesAssetsService) Upload(ctx context.Context, orgID string, spaceID string, body SpacesAssetsUploadParams, opts ...RequestOption) (*SpacesAssetsUploadResponse, error) {
+func (s *SpacesAssetsService) Upload(ctx context.Context, orgID string, spaceID string, body SpacesAssetsUploadParams, query *SpacesAssetsUploadQuery, opts ...RequestOption) (*SpacesAssetsUploadResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesAssetsUploadResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/assets", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/assets", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -402,9 +689,11 @@ func (s *SpacesAssetsService) Upload(ctx context.Context, orgID string, spaceID 
 type SpacesAssetsCatalogQuery struct {
 	// Assets per page.
 	PageSize *int64
-	SpaceID  *string
-	Type     *string
-	Search   *string
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
+	SpaceID *string
+	Type    *string
+	Search  *string
+	// The folder uuid (uuid only — a slug is not resolved in a query parameter).
 	FolderID *string
 	Tag      *string
 	// Which page of results to return, 1-based.
@@ -412,6 +701,10 @@ type SpacesAssetsCatalogQuery struct {
 	Cursor *string
 	// Rows per page — the spelling used everywhere else in this API.
 	Limit *int64
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesAssetsCatalogQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -446,6 +739,12 @@ func (p *SpacesAssetsCatalogQuery) encode(opts []RequestOption) (url.Values, []R
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
@@ -476,12 +775,30 @@ func (s *SpacesAssetsService) CatalogAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// SpacesAssetsRemoveQuery are the optional query parameters of SpacesAssetsService.Remove.
+type SpacesAssetsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesAssetsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the asset
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/assets/{assetId}
-func (s *SpacesAssetsService) Remove(ctx context.Context, orgID string, spaceID string, assetID string, opts ...RequestOption) (*SpacesAssetsRemoveResponse, error) {
+func (s *SpacesAssetsService) Remove(ctx context.Context, orgID string, spaceID string, assetID string, query *SpacesAssetsRemoveQuery, opts ...RequestOption) (*SpacesAssetsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesAssetsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/assets/"+pathEscape(assetID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/assets/"+pathEscape(assetID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -534,10 +851,16 @@ type SpacesDomainsService struct {
 
 // SpacesDomainsListQuery are the optional query parameters of SpacesDomainsService.List.
 type SpacesDomainsListQuery struct {
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesDomainsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -545,11 +868,20 @@ func (p *SpacesDomainsListQuery) encode(opts []RequestOption) (url.Values, []Req
 	if p == nil {
 		return v, opts
 	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -581,78 +913,204 @@ func (s *SpacesDomainsService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// SpacesDomainsAddQuery are the optional query parameters of SpacesDomainsService.Add.
+type SpacesDomainsAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add create a domain in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/domains
-func (s *SpacesDomainsService) Add(ctx context.Context, orgID string, spaceID string, body SpacesDomainsAddParams, opts ...RequestOption) (any, error) {
+func (s *SpacesDomainsService) Add(ctx context.Context, orgID string, spaceID string, body DomainAddBody, query *SpacesDomainsAddQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// AllocateSubdomain create the subdomain in a space
+// SpacesDomainsAllocateSubdomainQuery are the optional query parameters of SpacesDomainsService.AllocateSubdomain.
+type SpacesDomainsAllocateSubdomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsAllocateSubdomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// AllocateSubdomain allocate the subdomain (spaces)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/domains/subdomain
-func (s *SpacesDomainsService) AllocateSubdomain(ctx context.Context, orgID string, spaceID string, body SpacesDomainsAllocateSubdomainParams, opts ...RequestOption) (any, error) {
+func (s *SpacesDomainsService) AllocateSubdomain(ctx context.Context, orgID string, spaceID string, body SpacesDomainsAllocateSubdomainParams, query *SpacesDomainsAllocateSubdomainQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/subdomain", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/subdomain", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SetAcmeChallenge create the acme challenge in a space
+// SpacesDomainsSetAcmeChallengeQuery are the optional query parameters of SpacesDomainsService.SetAcmeChallenge.
+type SpacesDomainsSetAcmeChallengeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsSetAcmeChallengeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetAcmeChallenge set the acme challenge
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/domains/acme-challenge
-func (s *SpacesDomainsService) SetAcmeChallenge(ctx context.Context, orgID string, spaceID string, body SpacesDomainsSetAcmeChallengeParams, opts ...RequestOption) (*SpacesDomainsSetAcmeChallengeResponse, error) {
+func (s *SpacesDomainsService) SetAcmeChallenge(ctx context.Context, orgID string, spaceID string, body SpacesDomainsSetAcmeChallengeParams, query *SpacesDomainsSetAcmeChallengeQuery, opts ...RequestOption) (*SpacesDomainsSetAcmeChallengeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesDomainsSetAcmeChallengeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/acme-challenge", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/acme-challenge", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesDomainsVerifyQuery are the optional query parameters of SpacesDomainsService.Verify.
+type SpacesDomainsVerifyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsVerifyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Verify verify the domain (spaces)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/verify
-func (s *SpacesDomainsService) Verify(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsVerifyParams, opts ...RequestOption) (any, error) {
+func (s *SpacesDomainsService) Verify(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsVerifyParams, query *SpacesDomainsVerifyQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/verify", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/verify", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// SpacesDomainsActivateQuery are the optional query parameters of SpacesDomainsService.Activate.
+type SpacesDomainsActivateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsActivateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Activate activate the domain (spaces)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/activate
-func (s *SpacesDomainsService) Activate(ctx context.Context, orgID string, spaceID string, domainID string, opts ...RequestOption) (*DomainResponseDto, error) {
+func (s *SpacesDomainsService) Activate(ctx context.Context, orgID string, spaceID string, domainID string, query *SpacesDomainsActivateQuery, opts ...RequestOption) (*DomainResponseDto, error) {
+	v, opts := query.encode(opts)
 	var out DomainResponseDto
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/activate", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/activate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesDomainsPreviewQuery are the optional query parameters of SpacesDomainsService.Preview.
+type SpacesDomainsPreviewQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsPreviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Preview preview the domain
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/domains/preview
-func (s *SpacesDomainsService) Preview(ctx context.Context, orgID string, spaceID string, body SpacesDomainsPreviewParams, opts ...RequestOption) (*DomainPreview, error) {
+func (s *SpacesDomainsService) Preview(ctx context.Context, orgID string, spaceID string, body SpacesDomainsPreviewParams, query *SpacesDomainsPreviewQuery, opts ...RequestOption) (*DomainPreview, error) {
+	v, opts := query.encode(opts)
 	var out DomainPreview
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/preview", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/preview", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacesDomainsRemoveQuery are the optional query parameters of SpacesDomainsService.Remove.
+type SpacesDomainsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the domain (spaces)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}
-func (s *SpacesDomainsService) Remove(ctx context.Context, orgID string, spaceID string, domainID string, opts ...RequestOption) (*SpacesDomainsRemoveResponse, error) {
+func (s *SpacesDomainsService) Remove(ctx context.Context, orgID string, spaceID string, domainID string, query *SpacesDomainsRemoveQuery, opts ...RequestOption) (*SpacesDomainsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesDomainsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -669,34 +1127,88 @@ func (s *SpacesDomainsService) Setup(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// SpacesDomainsSetWwwQuery are the optional query parameters of SpacesDomainsService.SetWww.
+type SpacesDomainsSetWwwQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsSetWwwQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetWww replace the www in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/www
-func (s *SpacesDomainsService) SetWww(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetWwwParams, opts ...RequestOption) (any, error) {
+func (s *SpacesDomainsService) SetWww(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetWwwParams, query *SpacesDomainsSetWwwQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/www", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/www", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// SpacesDomainsSetIPAllowListQuery are the optional query parameters of SpacesDomainsService.SetIPAllowList.
+type SpacesDomainsSetIPAllowListQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsSetIPAllowListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetIPAllowList replace the IP allow list in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/ip-allow-list
-func (s *SpacesDomainsService) SetIPAllowList(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetIPAllowListParams, opts ...RequestOption) (*SpacesDomainsSetIPAllowListResponse, error) {
+func (s *SpacesDomainsService) SetIPAllowList(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetIPAllowListParams, query *SpacesDomainsSetIPAllowListQuery, opts ...RequestOption) (*SpacesDomainsSetIPAllowListResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesDomainsSetIPAllowListResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/ip-allow-list", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/ip-allow-list", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacesDomainsSetRedirectQuery are the optional query parameters of SpacesDomainsService.SetRedirect.
+type SpacesDomainsSetRedirectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesDomainsSetRedirectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetRedirect replace the redirect in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/domains/{domainId}/redirect
-func (s *SpacesDomainsService) SetRedirect(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetRedirectParams, opts ...RequestOption) (*SpacesDomainsSetRedirectResponse, error) {
+func (s *SpacesDomainsService) SetRedirect(ctx context.Context, orgID string, spaceID string, domainID string, body SpacesDomainsSetRedirectParams, query *SpacesDomainsSetRedirectQuery, opts ...RequestOption) (*SpacesDomainsSetRedirectResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesDomainsSetRedirectResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/redirect", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/domains/"+pathEscape(domainID)+"/redirect", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -718,23 +1230,59 @@ func (s *SpacesHubIntrosService) Get(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// SpacesHubIntrosSetQuery are the optional query parameters of SpacesHubIntrosService.Set.
+type SpacesHubIntrosSetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesHubIntrosSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Set replace the intro in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/hubs/{kind}/{key}/intro
-func (s *SpacesHubIntrosService) Set(ctx context.Context, orgID string, spaceID string, kind string, key string, body SpacesHubIntrosSetParams, opts ...RequestOption) (any, error) {
+func (s *SpacesHubIntrosService) Set(ctx context.Context, orgID string, spaceID string, kind string, key string, body SpacesHubIntrosSetParams, query *SpacesHubIntrosSetQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/hubs/"+pathEscape(kind)+"/"+pathEscape(key)+"/intro", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/hubs/"+pathEscape(kind)+"/"+pathEscape(key)+"/intro", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// SpacesHubIntrosRenameSeriesQuery are the optional query parameters of SpacesHubIntrosService.RenameSeries.
+type SpacesHubIntrosRenameSeriesQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesHubIntrosRenameSeriesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RenameSeries update the series
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/hubs/series/{key}
-func (s *SpacesHubIntrosService) RenameSeries(ctx context.Context, orgID string, spaceID string, key string, body SpacesHubIntrosRenameSeriesParams, opts ...RequestOption) (*SpacesHubIntrosRenameSeriesResponse, error) {
+func (s *SpacesHubIntrosService) RenameSeries(ctx context.Context, orgID string, spaceID string, key string, body SpacesHubIntrosRenameSeriesParams, query *SpacesHubIntrosRenameSeriesQuery, opts ...RequestOption) (*SpacesHubIntrosRenameSeriesResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesHubIntrosRenameSeriesResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/hubs/series/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/hubs/series/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -745,12 +1293,59 @@ type SpacesPreviewLinksService struct {
 	c *Client
 }
 
+// SpacesPreviewLinksMintQuery are the optional query parameters of SpacesPreviewLinksService.Mint.
+type SpacesPreviewLinksMintQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesPreviewLinksMintQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Mint mint a preview link
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/preview
-func (s *SpacesPreviewLinksService) Mint(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*PreviewLink, error) {
+func (s *SpacesPreviewLinksService) Mint(ctx context.Context, orgID string, spaceID string, query *SpacesPreviewLinksMintQuery, opts ...RequestOption) (*PreviewLink, error) {
+	v, opts := query.encode(opts)
 	var out PreviewLink
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/preview", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/preview", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SpacesPreviewLinksMintForChangeRequestQuery are the optional query parameters of SpacesPreviewLinksService.MintForChangeRequest.
+type SpacesPreviewLinksMintForChangeRequestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesPreviewLinksMintForChangeRequestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// MintForChangeRequest mint a change request's preview link
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/preview/change-requests/{crId}
+func (s *SpacesPreviewLinksService) MintForChangeRequest(ctx context.Context, orgID string, spaceID string, crID string, query *SpacesPreviewLinksMintForChangeRequestQuery, opts ...RequestOption) (*ChangeRequestPreviewLink, error) {
+	v, opts := query.encode(opts)
+	var out ChangeRequestPreviewLink
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/preview/change-requests/"+pathEscape(crID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -761,89 +1356,102 @@ type SpacesSettingsService struct {
 	c *Client
 }
 
+// SpacesSettingsGetThemeQuery are the optional query parameters of SpacesSettingsService.GetTheme.
+type SpacesSettingsGetThemeQuery struct {
+	View *string
+}
+
+func (p *SpacesSettingsGetThemeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.View != nil {
+		v.Set("view", *p.View)
+	}
+	return v, opts
+}
+
 // GetTheme the live theme
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/theme
-func (s *SpacesSettingsService) GetTheme(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesSettingsGetThemeResponse, error) {
+func (s *SpacesSettingsService) GetTheme(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsGetThemeQuery, opts ...RequestOption) (*SpacesSettingsGetThemeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesSettingsGetThemeResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesSettingsSetThemeQuery are the optional query parameters of SpacesSettingsService.SetTheme.
+type SpacesSettingsSetThemeQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Strict *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SpacesSettingsSetThemeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Strict != nil {
+		v.Set("strict", *p.Strict)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
 }
 
 // SetTheme replace the live theme
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/theme
-func (s *SpacesSettingsService) SetTheme(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetThemeParams, opts ...RequestOption) (*SpacesSettingsSetThemeResponse, error) {
+func (s *SpacesSettingsService) SetTheme(ctx context.Context, orgID string, spaceID string, body SpaceSettingsSetThemeBody, query *SpacesSettingsSetThemeQuery, opts ...RequestOption) (*SpacesSettingsSetThemeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesSettingsSetThemeResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// PatchTheme update the theme in a space
+// SpacesSettingsPatchThemeQuery are the optional query parameters of SpacesSettingsService.PatchTheme.
+type SpacesSettingsPatchThemeQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Strict *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SpacesSettingsPatchThemeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Strict != nil {
+		v.Set("strict", *p.Strict)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchTheme merge into the live theme
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/theme
-func (s *SpacesSettingsService) PatchTheme(ctx context.Context, orgID string, spaceID string, body SpacesSettingsPatchThemeParams, opts ...RequestOption) (*SpacesSettingsPatchThemeResponse, error) {
+func (s *SpacesSettingsService) PatchTheme(ctx context.Context, orgID string, spaceID string, body SpaceSettingsPatchThemeBody, query *SpacesSettingsPatchThemeQuery, opts ...RequestOption) (*SpacesSettingsPatchThemeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesSettingsPatchThemeResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// GetThemeDraft the theme draft, if there is one
-//
-// GET /orgs/{orgId}/spaces/{spaceId}/theme/draft
-func (s *SpacesSettingsService) GetThemeDraft(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ThemeDraftState, error) {
-	var out ThemeDraftState
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetThemeDraft save a theme draft
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/theme/draft
-func (s *SpacesSettingsService) SetThemeDraft(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetThemeDraftParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// PatchThemeDraft merge into the theme draft
-//
-// PATCH /orgs/{orgId}/spaces/{spaceId}/theme/draft
-func (s *SpacesSettingsService) PatchThemeDraft(ctx context.Context, orgID string, spaceID string, body SpacesSettingsPatchThemeDraftParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// DiscardThemeDraft discard the theme draft
-//
-// DELETE /orgs/{orgId}/spaces/{spaceId}/theme/draft
-func (s *SpacesSettingsService) DiscardThemeDraft(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ThemeDraftState, error) {
-	var out ThemeDraftState
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// PublishThemeDraft make the theme draft live
-//
-// POST /orgs/{orgId}/spaces/{spaceId}/theme/draft/publish
-func (s *SpacesSettingsService) PublishThemeDraft(ctx context.Context, orgID string, spaceID string, body SpacesSettingsPublishThemeDraftParams, opts ...RequestOption) (*SpacesSettingsPublishThemeDraftResponse, error) {
-	var out SpacesSettingsPublishThemeDraftResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft/publish", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -855,6 +1463,10 @@ type SpacesSettingsGetReaderThemesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesSettingsGetReaderThemesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -867,6 +1479,12 @@ func (p *SpacesSettingsGetReaderThemesQuery) encode(opts []RequestOption) (url.V
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -898,34 +1516,16 @@ func (s *SpacesSettingsService) GetReaderThemesAutoPaging(ctx context.Context, o
 	})
 }
 
-// SetReaderThemes replace reader themes in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/reader-themes
-func (s *SpacesSettingsService) SetReaderThemes(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetReaderThemesParams, opts ...RequestOption) (*SpacesSettingsSetReaderThemesResponse, error) {
-	var out SpacesSettingsSetReaderThemesResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-themes", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetPreset replace the preset in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/preset
-func (s *SpacesSettingsService) SetPreset(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetPresetParams, opts ...RequestOption) (*SpacesSettingsSetPresetResponse, error) {
-	var out SpacesSettingsSetPresetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/preset", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // SpacesSettingsGetRedirectsQuery are the optional query parameters of SpacesSettingsService.GetRedirects.
 type SpacesSettingsGetRedirectsQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesSettingsGetRedirectsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -938,6 +1538,12 @@ func (p *SpacesSettingsGetRedirectsQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -969,17 +1575,6 @@ func (s *SpacesSettingsService) GetRedirectsAutoPaging(ctx context.Context, orgI
 	})
 }
 
-// SetRedirects replace redirects in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/redirects
-func (s *SpacesSettingsService) SetRedirects(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetRedirectsParams, opts ...RequestOption) (*SpacesSettingsSetRedirectsResponse, error) {
-	var out SpacesSettingsSetRedirectsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/redirects", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // GetAnalytics list analytics tags in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/analytics-tags
@@ -989,17 +1584,6 @@ func (s *SpacesSettingsService) GetAnalytics(ctx context.Context, orgID string, 
 		return nil, err
 	}
 	return &out, nil
-}
-
-// SetAnalytics replace analytics tags in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/analytics-tags
-func (s *SpacesSettingsService) SetAnalytics(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetAnalyticsParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/analytics-tags", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 // GetDiscovery get the discovery in a space
@@ -1013,34 +1597,12 @@ func (s *SpacesSettingsService) GetDiscovery(ctx context.Context, orgID string, 
 	return &out, nil
 }
 
-// SetDiscovery replace the discovery in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/discovery
-func (s *SpacesSettingsService) SetDiscovery(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetDiscoveryParams, opts ...RequestOption) (*SpacesSettingsSetDiscoveryResponse, error) {
-	var out SpacesSettingsSetDiscoveryResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/discovery", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// GetSeo list SEO settings in a space
+// GetSeo get a space’s SEO settings
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/seo
-func (s *SpacesSettingsService) GetSeo(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesSettingsGetSeoResponse, error) {
-	var out SpacesSettingsGetSeoResponse
+func (s *SpacesSettingsService) GetSeo(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SiteSettingsGetSeoResponse, error) {
+	var out SiteSettingsGetSeoResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/seo", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetSeo replace SEO settings in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/seo
-func (s *SpacesSettingsService) SetSeo(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetSeoParams, opts ...RequestOption) (*SpacesSettingsSetSeoResponse, error) {
-	var out SpacesSettingsSetSeoResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/seo", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1052,6 +1614,10 @@ type SpacesSettingsGetGlossaryQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesSettingsGetGlossaryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1064,6 +1630,12 @@ func (p *SpacesSettingsGetGlossaryQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1095,17 +1667,6 @@ func (s *SpacesSettingsService) GetGlossaryAutoPaging(ctx context.Context, orgID
 	})
 }
 
-// SetGlossary replace the glossary in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/glossary
-func (s *SpacesSettingsService) SetGlossary(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetGlossaryParams, opts ...RequestOption) (*SpacesSettingsSetGlossaryResponse, error) {
-	var out SpacesSettingsSetGlossaryResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/glossary", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // GetRoadmapSettings list roadmap settings in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/roadmap-settings
@@ -1117,23 +1678,30 @@ func (s *SpacesSettingsService) GetRoadmapSettings(ctx context.Context, orgID st
 	return &out, nil
 }
 
-// SetRoadmapSettings replace roadmap settings in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/roadmap-settings
-func (s *SpacesSettingsService) SetRoadmapSettings(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetRoadmapSettingsParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap-settings", nil, body, &out, opts); err != nil {
-		return nil, err
+// SpacesSettingsRenameRoadmapLaneQuery are the optional query parameters of SpacesSettingsService.RenameRoadmapLane.
+type SpacesSettingsRenameRoadmapLaneQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSettingsRenameRoadmapLaneQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
 	}
-	return out, nil
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RenameRoadmapLane update the lane
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/roadmap-settings/lanes/{laneKey}
-func (s *SpacesSettingsService) RenameRoadmapLane(ctx context.Context, orgID string, spaceID string, laneKey string, body SpacesSettingsRenameRoadmapLaneParams, opts ...RequestOption) (any, error) {
+func (s *SpacesSettingsService) RenameRoadmapLane(ctx context.Context, orgID string, spaceID string, laneKey string, body SpacesSettingsRenameRoadmapLaneParams, query *SpacesSettingsRenameRoadmapLaneQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap-settings/lanes/"+pathEscape(laneKey), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/roadmap-settings/lanes/"+pathEscape(laneKey), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -1150,34 +1718,12 @@ func (s *SpacesSettingsService) GetHomePage(ctx context.Context, orgID string, s
 	return &out, nil
 }
 
-// SetHomePage replace the home page in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/home-page
-func (s *SpacesSettingsService) SetHomePage(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetHomePageParams, opts ...RequestOption) (*SpacesSettingsSetHomePageResponse, error) {
-	var out SpacesSettingsSetHomePageResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/home-page", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // GetHomeDoc get the home doc in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/home-doc
 func (s *SpacesSettingsService) GetHomeDoc(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesSettingsGetHomeDocResponse, error) {
 	var out SpacesSettingsGetHomeDocResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/home-doc", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetHomeDoc replace the home doc in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/home-doc
-func (s *SpacesSettingsService) SetHomeDoc(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetHomeDocParams, opts ...RequestOption) (*SpacesSettingsSetHomeDocResponse, error) {
-	var out SpacesSettingsSetHomeDocResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/home-doc", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1194,34 +1740,12 @@ func (s *SpacesSettingsService) GetFaqSettings(ctx context.Context, orgID string
 	return &out, nil
 }
 
-// SetFaqSettings replace FAQ settings in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/faq-settings
-func (s *SpacesSettingsService) SetFaqSettings(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetFaqSettingsParams, opts ...RequestOption) (*SpacesSettingsSetFaqSettingsResponse, error) {
-	var out SpacesSettingsSetFaqSettingsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/faq-settings", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // GetCommentSettings list comment settings in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/comment-settings
 func (s *SpacesSettingsService) GetCommentSettings(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesSettingsGetCommentSettingsResponse, error) {
 	var out SpacesSettingsGetCommentSettingsResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/comment-settings", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetCommentSettings turn reader comments on, and whether they are moderated
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/comment-settings
-func (s *SpacesSettingsService) SetCommentSettings(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetCommentSettingsParams, opts ...RequestOption) (*SpacesSettingsSetCommentSettingsResponse, error) {
-	var out SpacesSettingsSetCommentSettingsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/comment-settings", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1238,17 +1762,6 @@ func (s *SpacesSettingsService) GetAISettings(ctx context.Context, orgID string,
 	return &out, nil
 }
 
-// SetAISettings replace AI settings in a space
-//
-// PUT /orgs/{orgId}/spaces/{spaceId}/ai-settings
-func (s *SpacesSettingsService) SetAISettings(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetAISettingsParams, opts ...RequestOption) (*SpacesSettingsSetAISettingsResponse, error) {
-	var out SpacesSettingsSetAISettingsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/ai-settings", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // GetVisitorAuth get the visitor auth in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/visitor-auth
@@ -1260,12 +1773,138 @@ func (s *SpacesSettingsService) GetVisitorAuth(ctx context.Context, orgID string
 	return &out, nil
 }
 
-// SetVisitorAuth replace the visitor auth in a space
+// GetThemeDraft the theme draft, if there is one
 //
-// PUT /orgs/{orgId}/spaces/{spaceId}/visitor-auth
-func (s *SpacesSettingsService) SetVisitorAuth(ctx context.Context, orgID string, spaceID string, body SpacesSettingsSetVisitorAuthParams, opts ...RequestOption) (*SpacesSettingsSetVisitorAuthResponse, error) {
-	var out SpacesSettingsSetVisitorAuthResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/visitor-auth", nil, body, &out, opts); err != nil {
+// GET /orgs/{orgId}/spaces/{spaceId}/theme/draft
+func (s *SpacesSettingsService) GetThemeDraft(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ThemeDraftState, error) {
+	var out ThemeDraftState
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SpacesSettingsSetThemeDraftQuery are the optional query parameters of SpacesSettingsService.SetThemeDraft.
+type SpacesSettingsSetThemeDraftQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Strict *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSettingsSetThemeDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Strict != nil {
+		v.Set("strict", *p.Strict)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetThemeDraft save a theme draft
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/theme/draft
+func (s *SpacesSettingsService) SetThemeDraft(ctx context.Context, orgID string, spaceID string, body SpaceSettingsSetThemeBody, query *SpacesSettingsSetThemeDraftQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SpacesSettingsPatchThemeDraftQuery are the optional query parameters of SpacesSettingsService.PatchThemeDraft.
+type SpacesSettingsPatchThemeDraftQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Strict *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSettingsPatchThemeDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Strict != nil {
+		v.Set("strict", *p.Strict)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PatchThemeDraft merge into the theme draft
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/theme/draft
+func (s *SpacesSettingsService) PatchThemeDraft(ctx context.Context, orgID string, spaceID string, body SpaceSettingsPatchThemeBody, query *SpacesSettingsPatchThemeDraftQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SpacesSettingsDiscardThemeDraftQuery are the optional query parameters of SpacesSettingsService.DiscardThemeDraft.
+type SpacesSettingsDiscardThemeDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSettingsDiscardThemeDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// DiscardThemeDraft discard the theme draft
+//
+// DELETE /orgs/{orgId}/spaces/{spaceId}/theme/draft
+func (s *SpacesSettingsService) DiscardThemeDraft(ctx context.Context, orgID string, spaceID string, query *SpacesSettingsDiscardThemeDraftQuery, opts ...RequestOption) (*ThemeDraftState, error) {
+	v, opts := query.encode(opts)
+	var out ThemeDraftState
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SpacesSettingsPublishThemeDraftQuery are the optional query parameters of SpacesSettingsService.PublishThemeDraft.
+type SpacesSettingsPublishThemeDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSettingsPublishThemeDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PublishThemeDraft make the theme draft live
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/theme/draft/publish
+func (s *SpacesSettingsService) PublishThemeDraft(ctx context.Context, orgID string, spaceID string, body SpacesSettingsPublishThemeDraftParams, query *SpacesSettingsPublishThemeDraftQuery, opts ...RequestOption) (*SpacesSettingsPublishThemeDraftResponse, error) {
+	v, opts := query.encode(opts)
+	var out SpacesSettingsPublishThemeDraftResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft/publish", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1304,67 +1943,175 @@ func (s *SpacesShapeService) Get(ctx context.Context, orgID string, spaceID stri
 	return &out, nil
 }
 
+// SpacesShapePutQuery are the optional query parameters of SpacesShapeService.Put.
+type SpacesShapePutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShapePutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Put replace the space's shape override
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/shape
-func (s *SpacesShapeService) Put(ctx context.Context, orgID string, spaceID string, body SpacesShapePutParams, opts ...RequestOption) (any, error) {
+func (s *SpacesShapeService) Put(ctx context.Context, orgID string, spaceID string, body ShapePatchBody, query *SpacesShapePutQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// SpacesShapePatchQuery are the optional query parameters of SpacesShapeService.Patch.
+type SpacesShapePatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShapePatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Patch merge a patch into the space's shape override
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/shape
-func (s *SpacesShapeService) Patch(ctx context.Context, orgID string, spaceID string, body SpacesShapePatchParams, opts ...RequestOption) (any, error) {
+func (s *SpacesShapeService) Patch(ctx context.Context, orgID string, spaceID string, body ShapePatchBody, query *SpacesShapePatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// SpacesShapeSetDefaultKindQuery are the optional query parameters of SpacesShapeService.SetDefaultKind.
+type SpacesShapeSetDefaultKindQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShapeSetDefaultKindQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetDefaultKind replace the default kind in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/shape/default-kind
-func (s *SpacesShapeService) SetDefaultKind(ctx context.Context, orgID string, spaceID string, body SpacesShapeSetDefaultKindParams, opts ...RequestOption) (any, error) {
+func (s *SpacesShapeService) SetDefaultKind(ctx context.Context, orgID string, spaceID string, body SpacesShapeSetDefaultKindParams, query *SpacesShapeSetDefaultKindQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/default-kind", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/default-kind", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// SpacesShapeSetKindQuery are the optional query parameters of SpacesShapeService.SetKind.
+type SpacesShapeSetKindQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShapeSetKindQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetKind replace the kind
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/shape/kinds/{name}
-func (s *SpacesShapeService) SetKind(ctx context.Context, orgID string, spaceID string, name string, body SpacesShapeSetKindParams, opts ...RequestOption) (any, error) {
+func (s *SpacesShapeService) SetKind(ctx context.Context, orgID string, spaceID string, name string, body ShapeSetKindBody, query *SpacesShapeSetKindQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/kinds/"+pathEscape(name), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/kinds/"+pathEscape(name), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// SpacesShapeRemoveKindQuery are the optional query parameters of SpacesShapeService.RemoveKind.
+type SpacesShapeRemoveKindQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShapeRemoveKindQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveKind delete the kind
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/shape/kinds/{name}
-func (s *SpacesShapeService) RemoveKind(ctx context.Context, orgID string, spaceID string, name string, opts ...RequestOption) (*SpaceShapeView, error) {
+func (s *SpacesShapeService) RemoveKind(ctx context.Context, orgID string, spaceID string, name string, query *SpacesShapeRemoveKindQuery, opts ...RequestOption) (*SpaceShapeView, error) {
+	v, opts := query.encode(opts)
 	var out SpaceShapeView
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/kinds/"+pathEscape(name), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/kinds/"+pathEscape(name), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// ApplyPreset create the preset
+// SpacesShapeApplyPresetQuery are the optional query parameters of SpacesShapeService.ApplyPreset.
+type SpacesShapeApplyPresetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShapeApplyPresetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ApplyPreset apply the preset
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/shape/presets/{name}
-func (s *SpacesShapeService) ApplyPreset(ctx context.Context, orgID string, spaceID string, name string, opts ...RequestOption) (*SpaceShapeView, error) {
+func (s *SpacesShapeService) ApplyPreset(ctx context.Context, orgID string, spaceID string, name string, query *SpacesShapeApplyPresetQuery, opts ...RequestOption) (*SpaceShapeView, error) {
+	v, opts := query.encode(opts)
 	var out SpaceShapeView
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/presets/"+pathEscape(name), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/shape/presets/"+pathEscape(name), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1381,6 +2128,10 @@ type SpacesShareLinksListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesShareLinksListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1393,6 +2144,12 @@ func (p *SpacesShareLinksListQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1424,34 +2181,88 @@ func (s *SpacesShareLinksService) ListAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// SpacesShareLinksCreateQuery are the optional query parameters of SpacesShareLinksService.Create.
+type SpacesShareLinksCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShareLinksCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a share link in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/share-links
-func (s *SpacesShareLinksService) Create(ctx context.Context, orgID string, spaceID string, body SpacesShareLinksCreateParams, opts ...RequestOption) (*SpacesShareLinksCreateResponse, error) {
+func (s *SpacesShareLinksService) Create(ctx context.Context, orgID string, spaceID string, body SpacesShareLinksCreateParams, query *SpacesShareLinksCreateQuery, opts ...RequestOption) (*SpacesShareLinksCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesShareLinksCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/share-links", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/share-links", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesShareLinksPreviewQuery are the optional query parameters of SpacesShareLinksService.Preview.
+type SpacesShareLinksPreviewQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShareLinksPreviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Preview preview the share link
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/share-links/preview
-func (s *SpacesShareLinksService) Preview(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacesShareLinksPreviewResponse, error) {
+func (s *SpacesShareLinksService) Preview(ctx context.Context, orgID string, spaceID string, query *SpacesShareLinksPreviewQuery, opts ...RequestOption) (*SpacesShareLinksPreviewResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesShareLinksPreviewResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/share-links/preview", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/share-links/preview", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Revoke delete the share link
+// SpacesShareLinksRevokeQuery are the optional query parameters of SpacesShareLinksService.Revoke.
+type SpacesShareLinksRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesShareLinksRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the share link
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/share-links/{id}
-func (s *SpacesShareLinksService) Revoke(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*SpacesShareLinksRevokeResponse, error) {
+func (s *SpacesShareLinksService) Revoke(ctx context.Context, orgID string, spaceID string, id string, query *SpacesShareLinksRevokeQuery, opts ...RequestOption) (*SpacesShareLinksRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesShareLinksRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/share-links/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/share-links/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1468,6 +2279,10 @@ type SpacesSnapshotsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpacesSnapshotsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1480,6 +2295,12 @@ func (p *SpacesSnapshotsListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1511,34 +2332,88 @@ func (s *SpacesSnapshotsService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// SpacesSnapshotsCreateQuery are the optional query parameters of SpacesSnapshotsService.Create.
+type SpacesSnapshotsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSnapshotsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a snapshot in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/snapshots
-func (s *SpacesSnapshotsService) Create(ctx context.Context, orgID string, spaceID string, body SpacesSnapshotsCreateParams, opts ...RequestOption) (*SpacesSnapshotsCreateResponse, error) {
+func (s *SpacesSnapshotsService) Create(ctx context.Context, orgID string, spaceID string, body SpacesSnapshotsCreateParams, query *SpacesSnapshotsCreateQuery, opts ...RequestOption) (*SpacesSnapshotsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesSnapshotsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/snapshots", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/snapshots", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpacesSnapshotsRestoreQuery are the optional query parameters of SpacesSnapshotsService.Restore.
+type SpacesSnapshotsRestoreQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSnapshotsRestoreQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Restore restore the snapshot
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/snapshots/{id}/restore
-func (s *SpacesSnapshotsService) Restore(ctx context.Context, orgID string, spaceID string, id string, body SpacesSnapshotsRestoreParams, opts ...RequestOption) (*SpacesSnapshotsRestoreResponse, error) {
+func (s *SpacesSnapshotsService) Restore(ctx context.Context, orgID string, spaceID string, id string, body SpacesSnapshotsRestoreParams, query *SpacesSnapshotsRestoreQuery, opts ...RequestOption) (*SpacesSnapshotsRestoreResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesSnapshotsRestoreResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/snapshots/"+pathEscape(id)+"/restore", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/snapshots/"+pathEscape(id)+"/restore", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacesSnapshotsRemoveQuery are the optional query parameters of SpacesSnapshotsService.Remove.
+type SpacesSnapshotsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesSnapshotsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the snapshot
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/snapshots/{id}
-func (s *SpacesSnapshotsService) Remove(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*SpacesSnapshotsRemoveResponse, error) {
+func (s *SpacesSnapshotsService) Remove(ctx context.Context, orgID string, spaceID string, id string, query *SpacesSnapshotsRemoveQuery, opts ...RequestOption) (*SpacesSnapshotsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesSnapshotsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/snapshots/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/snapshots/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1560,23 +2435,59 @@ func (s *SpacesThemeOriginsService) List(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
-// Restore create the origin
+// SpacesThemeOriginsRestoreQuery are the optional query parameters of SpacesThemeOriginsService.Restore.
+type SpacesThemeOriginsRestoreQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesThemeOriginsRestoreQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Restore restore the theme origin
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/theme/origins/{origin}
-func (s *SpacesThemeOriginsService) Restore(ctx context.Context, orgID string, spaceID string, origin string, opts ...RequestOption) (*SpacesThemeOriginsRestoreResponse, error) {
+func (s *SpacesThemeOriginsService) Restore(ctx context.Context, orgID string, spaceID string, origin string, query *SpacesThemeOriginsRestoreQuery, opts ...RequestOption) (*SpacesThemeOriginsRestoreResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesThemeOriginsRestoreResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/origins/"+pathEscape(origin), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/origins/"+pathEscape(origin), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacesThemeOriginsRemoveQuery are the optional query parameters of SpacesThemeOriginsService.Remove.
+type SpacesThemeOriginsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacesThemeOriginsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the origin
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/theme/origins/{origin}
-func (s *SpacesThemeOriginsService) Remove(ctx context.Context, orgID string, spaceID string, origin string, opts ...RequestOption) (*SpacesThemeOriginsRemoveResponse, error) {
+func (s *SpacesThemeOriginsService) Remove(ctx context.Context, orgID string, spaceID string, origin string, query *SpacesThemeOriginsRemoveQuery, opts ...RequestOption) (*SpacesThemeOriginsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacesThemeOriginsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/origins/"+pathEscape(origin), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/origins/"+pathEscape(origin), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

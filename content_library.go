@@ -19,6 +19,10 @@ type ContentLibraryListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContentLibraryListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *ContentLibraryListQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,12 +72,30 @@ func (s *ContentLibraryService) ListAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// ContentLibraryCreateQuery are the optional query parameters of ContentLibraryService.Create.
+type ContentLibraryCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLibraryCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a library in an organization
 //
 // POST /orgs/{orgId}/content/libraries
-func (s *ContentLibraryService) Create(ctx context.Context, orgID string, body ContentLibraryCreateParams, opts ...RequestOption) (*ContentLibraryCreateResponse, error) {
+func (s *ContentLibraryService) Create(ctx context.Context, orgID string, body ContentLibraryCreateParams, query *ContentLibraryCreateQuery, opts ...RequestOption) (*ContentLibraryCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentLibraryCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -84,23 +112,59 @@ func (s *ContentLibraryService) Get(ctx context.Context, orgID string, libraryID
 	return &out, nil
 }
 
+// ContentLibraryUpdateQuery are the optional query parameters of ContentLibraryService.Update.
+type ContentLibraryUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLibraryUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the library
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}
-func (s *ContentLibraryService) Update(ctx context.Context, orgID string, libraryID string, body ContentLibraryUpdateParams, opts ...RequestOption) (*ContentLibraryUpdateResponse, error) {
+func (s *ContentLibraryService) Update(ctx context.Context, orgID string, libraryID string, body ContentLibraryUpdateParams, query *ContentLibraryUpdateQuery, opts ...RequestOption) (*ContentLibraryUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentLibraryUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ContentLibraryRemoveQuery are the optional query parameters of ContentLibraryService.Remove.
+type ContentLibraryRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLibraryRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the library
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}
-func (s *ContentLibraryService) Remove(ctx context.Context, orgID string, libraryID string, opts ...RequestOption) (*ContentLibraryRemoveResponse, error) {
+func (s *ContentLibraryService) Remove(ctx context.Context, orgID string, libraryID string, query *ContentLibraryRemoveQuery, opts ...RequestOption) (*ContentLibraryRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentLibraryRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -112,6 +176,10 @@ type ContentLibraryListMembersQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContentLibraryListMembersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -124,6 +192,12 @@ func (p *ContentLibraryListMembersQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -155,23 +229,59 @@ func (s *ContentLibraryService) ListMembersAutoPaging(ctx context.Context, orgID
 	})
 }
 
+// ContentLibraryPutMemberQuery are the optional query parameters of ContentLibraryService.PutMember.
+type ContentLibraryPutMemberQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLibraryPutMemberQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PutMember create a member in an organization (content libraries)
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/members
-func (s *ContentLibraryService) PutMember(ctx context.Context, orgID string, libraryID string, body ContentLibraryPutMemberParams, opts ...RequestOption) (*ContentLibraryPutMemberResponse, error) {
+func (s *ContentLibraryService) PutMember(ctx context.Context, orgID string, libraryID string, body ContentLibraryPutMemberParams, query *ContentLibraryPutMemberQuery, opts ...RequestOption) (*ContentLibraryPutMemberResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentLibraryPutMemberResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/members", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/members", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ContentLibraryRemoveMemberQuery are the optional query parameters of ContentLibraryService.RemoveMember.
+type ContentLibraryRemoveMemberQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentLibraryRemoveMemberQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveMember delete the member (content libraries)
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/members/{userId}
-func (s *ContentLibraryService) RemoveMember(ctx context.Context, orgID string, libraryID string, userID string, opts ...RequestOption) (*ContentLibraryRemoveMemberResponse, error) {
+func (s *ContentLibraryService) RemoveMember(ctx context.Context, orgID string, libraryID string, userID string, query *ContentLibraryRemoveMemberQuery, opts ...RequestOption) (*ContentLibraryRemoveMemberResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentLibraryRemoveMemberResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/members/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/members/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

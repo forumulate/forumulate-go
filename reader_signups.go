@@ -20,6 +20,10 @@ type ReaderSignupsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ReaderSignupsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +39,12 @@ func (p *ReaderSignupsListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -66,23 +76,59 @@ func (s *ReaderSignupsService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// ReaderSignupsApproveQuery are the optional query parameters of ReaderSignupsService.Approve.
+type ReaderSignupsApproveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderSignupsApproveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Approve approve the reader signup
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/reader-signups/{id}/approve
-func (s *ReaderSignupsService) Approve(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*ReaderSignupsApproveResponse, error) {
+func (s *ReaderSignupsService) Approve(ctx context.Context, orgID string, spaceID string, id string, query *ReaderSignupsApproveQuery, opts ...RequestOption) (*ReaderSignupsApproveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderSignupsApproveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-signups/"+pathEscape(id)+"/approve", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-signups/"+pathEscape(id)+"/approve", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ReaderSignupsRejectQuery are the optional query parameters of ReaderSignupsService.Reject.
+type ReaderSignupsRejectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderSignupsRejectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Reject reject the reader signup
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/reader-signups/{id}/reject
-func (s *ReaderSignupsService) Reject(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*ReaderSignupsRejectResponse, error) {
+func (s *ReaderSignupsService) Reject(ctx context.Context, orgID string, spaceID string, id string, query *ReaderSignupsRejectQuery, opts ...RequestOption) (*ReaderSignupsRejectResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderSignupsRejectResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-signups/"+pathEscape(id)+"/reject", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-signups/"+pathEscape(id)+"/reject", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

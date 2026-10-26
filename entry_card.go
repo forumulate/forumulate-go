@@ -24,12 +24,30 @@ func (s *EntryCardService) Overview(ctx context.Context, orgID string, libraryID
 	return &out, nil
 }
 
+// EntryCardUnpublishQuery are the optional query parameters of EntryCardService.Unpublish.
+type EntryCardUnpublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryCardUnpublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Unpublish unpublish an entry
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/unpublish
-func (s *EntryCardService) Unpublish(ctx context.Context, orgID string, libraryID string, entryID string, opts ...RequestOption) (*EntryOverview, error) {
+func (s *EntryCardService) Unpublish(ctx context.Context, orgID string, libraryID string, entryID string, query *EntryCardUnpublishQuery, opts ...RequestOption) (*EntryOverview, error) {
+	v, opts := query.encode(opts)
 	var out EntryOverview
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/unpublish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/unpublish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -46,23 +64,59 @@ func (s *EntryCardService) GetSchedule(ctx context.Context, orgID string, librar
 	return &out, nil
 }
 
+// EntryCardScheduleQuery are the optional query parameters of EntryCardService.Schedule.
+type EntryCardScheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryCardScheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Schedule schedule an entry to publish
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/schedule
-func (s *EntryCardService) Schedule(ctx context.Context, orgID string, libraryID string, entryID string, body EntryCardScheduleParams, opts ...RequestOption) (*EntryCardScheduleResponse, error) {
+func (s *EntryCardService) Schedule(ctx context.Context, orgID string, libraryID string, entryID string, body EntryCardScheduleParams, query *EntryCardScheduleQuery, opts ...RequestOption) (*EntryCardScheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out EntryCardScheduleResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/schedule", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/schedule", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// CancelSchedule delete the schedule in an organization
+// EntryCardCancelScheduleQuery are the optional query parameters of EntryCardService.CancelSchedule.
+type EntryCardCancelScheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryCardCancelScheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// CancelSchedule cancel the schedule (content libraries entries)
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/schedule
-func (s *EntryCardService) CancelSchedule(ctx context.Context, orgID string, libraryID string, entryID string, opts ...RequestOption) (*EntryCardCancelScheduleResponse, error) {
+func (s *EntryCardService) CancelSchedule(ctx context.Context, orgID string, libraryID string, entryID string, query *EntryCardCancelScheduleQuery, opts ...RequestOption) (*EntryCardCancelScheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out EntryCardCancelScheduleResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/schedule", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/schedule", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -74,6 +128,10 @@ type EntryCardRevisionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EntryCardRevisionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -86,6 +144,12 @@ func (p *EntryCardRevisionsQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -128,23 +192,59 @@ func (s *EntryCardService) Revision(ctx context.Context, orgID string, libraryID
 	return &out, nil
 }
 
+// EntryCardRestoreQuery are the optional query parameters of EntryCardService.Restore.
+type EntryCardRestoreQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryCardRestoreQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Restore restore a revision
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/revisions/{revisionId}/restore
-func (s *EntryCardService) Restore(ctx context.Context, orgID string, libraryID string, entryID string, revisionID string, body EntryCardRestoreParams, opts ...RequestOption) (*EntryCardRestoreResponse, error) {
+func (s *EntryCardService) Restore(ctx context.Context, orgID string, libraryID string, entryID string, revisionID string, body EntryCardRestoreParams, query *EntryCardRestoreQuery, opts ...RequestOption) (*EntryCardRestoreResponse, error) {
+	v, opts := query.encode(opts)
 	var out EntryCardRestoreResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/revisions/"+pathEscape(revisionID)+"/restore", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/revisions/"+pathEscape(revisionID)+"/restore", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// EntryCardTranslateQuery are the optional query parameters of EntryCardService.Translate.
+type EntryCardTranslateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryCardTranslateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Translate start a translation of an entry
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/translations
-func (s *EntryCardService) Translate(ctx context.Context, orgID string, libraryID string, entryID string, body EntryCardTranslateParams, opts ...RequestOption) (any, error) {
+func (s *EntryCardService) Translate(ctx context.Context, orgID string, libraryID string, entryID string, body EntryCardTranslateParams, query *EntryCardTranslateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/translations", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/translations", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

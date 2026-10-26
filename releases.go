@@ -19,6 +19,10 @@ type ReleasesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ReleasesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *ReleasesListQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,12 +72,30 @@ func (s *ReleasesService) ListAutoPaging(ctx context.Context, orgID string, quer
 	})
 }
 
+// ReleasesCreateQuery are the optional query parameters of ReleasesService.Create.
+type ReleasesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a release
 //
 // POST /orgs/{orgId}/content/releases
-func (s *ReleasesService) Create(ctx context.Context, orgID string, body ReleasesCreateParams, opts ...RequestOption) (*ReleasesCreateResponse, error) {
+func (s *ReleasesService) Create(ctx context.Context, orgID string, body ReleasesCreateParams, query *ReleasesCreateQuery, opts ...RequestOption) (*ReleasesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -81,6 +109,10 @@ type ReleasesCandidatesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ReleasesCandidatesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -99,6 +131,12 @@ func (p *ReleasesCandidatesQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -141,100 +179,262 @@ func (s *ReleasesService) Get(ctx context.Context, orgID string, releaseID strin
 	return &out, nil
 }
 
+// ReleasesUpdateQuery are the optional query parameters of ReleasesService.Update.
+type ReleasesUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update rename a release
 //
 // PATCH /orgs/{orgId}/content/releases/{releaseId}
-func (s *ReleasesService) Update(ctx context.Context, orgID string, releaseID string, body ReleasesUpdateParams, opts ...RequestOption) (*ReleasesUpdateResponse, error) {
+func (s *ReleasesService) Update(ctx context.Context, orgID string, releaseID string, body ReleasesUpdateParams, query *ReleasesUpdateQuery, opts ...RequestOption) (*ReleasesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesRemoveQuery are the optional query parameters of ReleasesService.Remove.
+type ReleasesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete a release
 //
 // DELETE /orgs/{orgId}/content/releases/{releaseId}
-func (s *ReleasesService) Remove(ctx context.Context, orgID string, releaseID string, opts ...RequestOption) (*ReleasesRemoveResponse, error) {
+func (s *ReleasesService) Remove(ctx context.Context, orgID string, releaseID string, query *ReleasesRemoveQuery, opts ...RequestOption) (*ReleasesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesAddItemQuery are the optional query parameters of ReleasesService.AddItem.
+type ReleasesAddItemQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesAddItemQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // AddItem add a draft to a release
 //
 // POST /orgs/{orgId}/content/releases/{releaseId}/items
-func (s *ReleasesService) AddItem(ctx context.Context, orgID string, releaseID string, body ReleasesAddItemParams, opts ...RequestOption) (*ReleasesAddItemResponse, error) {
+func (s *ReleasesService) AddItem(ctx context.Context, orgID string, releaseID string, body ReleasesAddItemParams, query *ReleasesAddItemQuery, opts ...RequestOption) (*ReleasesAddItemResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesAddItemResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/items", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/items", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesRemoveItemQuery are the optional query parameters of ReleasesService.RemoveItem.
+type ReleasesRemoveItemQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesRemoveItemQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveItem remove an item from a release
 //
 // DELETE /orgs/{orgId}/content/releases/{releaseId}/items/{itemId}
-func (s *ReleasesService) RemoveItem(ctx context.Context, orgID string, releaseID string, itemID string, opts ...RequestOption) (*ReleasesRemoveItemResponse, error) {
+func (s *ReleasesService) RemoveItem(ctx context.Context, orgID string, releaseID string, itemID string, query *ReleasesRemoveItemQuery, opts ...RequestOption) (*ReleasesRemoveItemResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesRemoveItemResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/items/"+pathEscape(itemID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/items/"+pathEscape(itemID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesScheduleQuery are the optional query parameters of ReleasesService.Schedule.
+type ReleasesScheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesScheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Schedule schedule a release
 //
 // POST /orgs/{orgId}/content/releases/{releaseId}/schedule
-func (s *ReleasesService) Schedule(ctx context.Context, orgID string, releaseID string, body ReleasesScheduleParams, opts ...RequestOption) (*ReleasesScheduleResponse, error) {
+func (s *ReleasesService) Schedule(ctx context.Context, orgID string, releaseID string, body ReleasesScheduleParams, query *ReleasesScheduleQuery, opts ...RequestOption) (*ReleasesScheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesScheduleResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/schedule", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/schedule", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesUnscheduleQuery are the optional query parameters of ReleasesService.Unschedule.
+type ReleasesUnscheduleQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesUnscheduleQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Unschedule unschedule a release
 //
 // POST /orgs/{orgId}/content/releases/{releaseId}/unschedule
-func (s *ReleasesService) Unschedule(ctx context.Context, orgID string, releaseID string, opts ...RequestOption) (*ReleasesUnscheduleResponse, error) {
+func (s *ReleasesService) Unschedule(ctx context.Context, orgID string, releaseID string, query *ReleasesUnscheduleQuery, opts ...RequestOption) (*ReleasesUnscheduleResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesUnscheduleResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/unschedule", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/unschedule", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesPublishQuery are the optional query parameters of ReleasesService.Publish.
+type ReleasesPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Publish publish a release now
 //
 // POST /orgs/{orgId}/content/releases/{releaseId}/publish
-func (s *ReleasesService) Publish(ctx context.Context, orgID string, releaseID string, opts ...RequestOption) (*ReleasePublishResult, error) {
+func (s *ReleasesService) Publish(ctx context.Context, orgID string, releaseID string, query *ReleasesPublishQuery, opts ...RequestOption) (*ReleasePublishResult, error) {
+	v, opts := query.encode(opts)
 	var out ReleasePublishResult
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/publish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/publish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleasesRollbackQuery are the optional query parameters of ReleasesService.Rollback.
+type ReleasesRollbackQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesRollbackQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Rollback roll a release back
 //
 // POST /orgs/{orgId}/content/releases/{releaseId}/rollback
-func (s *ReleasesService) Rollback(ctx context.Context, orgID string, releaseID string, opts ...RequestOption) (*ReleaseRollbackResult, error) {
+func (s *ReleasesService) Rollback(ctx context.Context, orgID string, releaseID string, query *ReleasesRollbackQuery, opts ...RequestOption) (*ReleaseRollbackResult, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseRollbackResult
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/rollback", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/rollback", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ReleasesPreviewQuery are the optional query parameters of ReleasesService.Preview.
+type ReleasesPreviewQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleasesPreviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Preview preview a release
 //
 // POST /orgs/{orgId}/content/releases/{releaseId}/preview
-func (s *ReleasesService) Preview(ctx context.Context, orgID string, releaseID string, opts ...RequestOption) (*ReleasesPreviewResponse, error) {
+func (s *ReleasesService) Preview(ctx context.Context, orgID string, releaseID string, query *ReleasesPreviewQuery, opts ...RequestOption) (*ReleasesPreviewResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleasesPreviewResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/preview", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/releases/"+pathEscape(releaseID)+"/preview", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

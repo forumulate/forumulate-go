@@ -19,6 +19,10 @@ type SpaceAuthorsListAuthorsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpaceAuthorsListAuthorsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *SpaceAuthorsListAuthorsQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,23 +72,59 @@ func (s *SpaceAuthorsService) ListAuthorsAutoPaging(ctx context.Context, orgID s
 	})
 }
 
+// SpaceAuthorsPutAuthorQuery are the optional query parameters of SpaceAuthorsService.PutAuthor.
+type SpaceAuthorsPutAuthorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceAuthorsPutAuthorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PutAuthor replace the author
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/authors/{key}
-func (s *SpaceAuthorsService) PutAuthor(ctx context.Context, orgID string, spaceID string, key string, body SpaceAuthorsPutAuthorParams, opts ...RequestOption) (*SpaceAuthorsPutAuthorResponse, error) {
+func (s *SpaceAuthorsService) PutAuthor(ctx context.Context, orgID string, spaceID string, key string, body BlogTaxonomyPutAuthorBody, query *SpaceAuthorsPutAuthorQuery, opts ...RequestOption) (*SpaceAuthorsPutAuthorResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceAuthorsPutAuthorResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpaceAuthorsRemoveAuthorQuery are the optional query parameters of SpaceAuthorsService.RemoveAuthor.
+type SpaceAuthorsRemoveAuthorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceAuthorsRemoveAuthorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveAuthor delete the author
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/authors/{key}
-func (s *SpaceAuthorsService) RemoveAuthor(ctx context.Context, orgID string, spaceID string, key string, opts ...RequestOption) (*SpaceAuthorsRemoveAuthorResponse, error) {
+func (s *SpaceAuthorsService) RemoveAuthor(ctx context.Context, orgID string, spaceID string, key string, query *SpaceAuthorsRemoveAuthorQuery, opts ...RequestOption) (*SpaceAuthorsRemoveAuthorResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceAuthorsRemoveAuthorResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/authors/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

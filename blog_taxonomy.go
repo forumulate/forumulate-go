@@ -13,12 +13,85 @@ type BlogTaxonomyService struct {
 	c *Client
 }
 
+// GetHubPage get the page in a space (hubs)
+//
+// GET /orgs/{orgId}/spaces/{spaceId}/blog/hubs/{hub}/{key}/page
+func (s *BlogTaxonomyService) GetHubPage(ctx context.Context, orgID string, spaceID string, hub string, key string, opts ...RequestOption) (*BlogTaxonomyGetHubPageResponse, error) {
+	var out BlogTaxonomyGetHubPageResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/hubs/"+pathEscape(hub)+"/"+pathEscape(key)+"/page", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// BlogTaxonomySetHubPageQuery are the optional query parameters of BlogTaxonomyService.SetHubPage.
+type BlogTaxonomySetHubPageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomySetHubPageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetHubPage replace the page in a space (hubs)
+//
+// PUT /orgs/{orgId}/spaces/{spaceId}/blog/hubs/{hub}/{key}/page
+func (s *BlogTaxonomyService) SetHubPage(ctx context.Context, orgID string, spaceID string, hub string, key string, body BlogTaxonomySetHubPageBody, query *BlogTaxonomySetHubPageQuery, opts ...RequestOption) (*BlogTaxonomySetHubPageResponse, error) {
+	v, opts := query.encode(opts)
+	var out BlogTaxonomySetHubPageResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/hubs/"+pathEscape(hub)+"/"+pathEscape(key)+"/page", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// BlogTaxonomyRemoveHubPageQuery are the optional query parameters of BlogTaxonomyService.RemoveHubPage.
+type BlogTaxonomyRemoveHubPageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomyRemoveHubPageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RemoveHubPage delete the page in a space (hubs)
+//
+// DELETE /orgs/{orgId}/spaces/{spaceId}/blog/hubs/{hub}/{key}/page
+func (s *BlogTaxonomyService) RemoveHubPage(ctx context.Context, orgID string, spaceID string, hub string, key string, query *BlogTaxonomyRemoveHubPageQuery, opts ...RequestOption) (*BlogTaxonomyRemoveHubPageResponse, error) {
+	v, opts := query.encode(opts)
+	var out BlogTaxonomyRemoveHubPageResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/hubs/"+pathEscape(hub)+"/"+pathEscape(key)+"/page", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // BlogTaxonomyListTagsQuery are the optional query parameters of BlogTaxonomyService.ListTags.
 type BlogTaxonomyListTagsQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogTaxonomyListTagsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +104,12 @@ func (p *BlogTaxonomyListTagsQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,29 +141,65 @@ func (s *BlogTaxonomyService) ListTagsAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// BlogTaxonomySetTagQuery are the optional query parameters of BlogTaxonomyService.SetTag.
+type BlogTaxonomySetTagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomySetTagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetTag replace the tag
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/blog/tags/{slug}
-func (s *BlogTaxonomyService) SetTag(ctx context.Context, orgID string, spaceID string, slug string, body BlogTaxonomySetTagParams, opts ...RequestOption) (*BlogTaxonomySetTagResponse, error) {
+func (s *BlogTaxonomyService) SetTag(ctx context.Context, orgID string, spaceID string, slug string, body BlogTaxonomySetTagParams, query *BlogTaxonomySetTagQuery, opts ...RequestOption) (*BlogTaxonomySetTagResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogTaxonomySetTagResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// BlogTaxonomyClearTagQuery are the optional query parameters of BlogTaxonomyService.ClearTag.
+type BlogTaxonomyClearTagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomyClearTagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ClearTag delete the tag
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/tags/{slug}
-func (s *BlogTaxonomyService) ClearTag(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*BlogTaxonomyClearTagResponse, error) {
+func (s *BlogTaxonomyService) ClearTag(ctx context.Context, orgID string, spaceID string, slug string, query *BlogTaxonomyClearTagQuery, opts ...RequestOption) (*BlogTaxonomyClearTagResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogTaxonomyClearTagResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// GetTagPage get the page in a space
+// GetTagPage get the page in a space (tags)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/blog/tags/{slug}/page
 func (s *BlogTaxonomyService) GetTagPage(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*BlogTaxonomyGetTagPageResponse, error) {
@@ -95,23 +210,59 @@ func (s *BlogTaxonomyService) GetTagPage(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
-// SetTagPage replace the page in a space
+// BlogTaxonomySetTagPageQuery are the optional query parameters of BlogTaxonomyService.SetTagPage.
+type BlogTaxonomySetTagPageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomySetTagPageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetTagPage replace the page in a space (tags)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/blog/tags/{slug}/page
-func (s *BlogTaxonomyService) SetTagPage(ctx context.Context, orgID string, spaceID string, slug string, body BlogTaxonomySetTagPageParams, opts ...RequestOption) (*BlogTaxonomySetTagPageResponse, error) {
+func (s *BlogTaxonomyService) SetTagPage(ctx context.Context, orgID string, spaceID string, slug string, body BlogTaxonomySetHubPageBody, query *BlogTaxonomySetTagPageQuery, opts ...RequestOption) (*BlogTaxonomySetTagPageResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogTaxonomySetTagPageResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug)+"/page", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug)+"/page", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RemoveTagPage delete the page in a space
+// BlogTaxonomyRemoveTagPageQuery are the optional query parameters of BlogTaxonomyService.RemoveTagPage.
+type BlogTaxonomyRemoveTagPageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomyRemoveTagPageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RemoveTagPage delete the page in a space (tags)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/tags/{slug}/page
-func (s *BlogTaxonomyService) RemoveTagPage(ctx context.Context, orgID string, spaceID string, slug string, opts ...RequestOption) (*BlogTaxonomyRemoveTagPageResponse, error) {
+func (s *BlogTaxonomyService) RemoveTagPage(ctx context.Context, orgID string, spaceID string, slug string, query *BlogTaxonomyRemoveTagPageQuery, opts ...RequestOption) (*BlogTaxonomyRemoveTagPageResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogTaxonomyRemoveTagPageResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug)+"/page", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/tags/"+pathEscape(slug)+"/page", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -123,6 +274,10 @@ type BlogTaxonomyListAuthorsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *BlogTaxonomyListAuthorsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -135,6 +290,12 @@ func (p *BlogTaxonomyListAuthorsQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -166,23 +327,59 @@ func (s *BlogTaxonomyService) ListAuthorsAutoPaging(ctx context.Context, orgID s
 	})
 }
 
+// BlogTaxonomyPutAuthorQuery are the optional query parameters of BlogTaxonomyService.PutAuthor.
+type BlogTaxonomyPutAuthorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomyPutAuthorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PutAuthor replace the author (blog)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/blog/authors/{key}
-func (s *BlogTaxonomyService) PutAuthor(ctx context.Context, orgID string, spaceID string, key string, body BlogTaxonomyPutAuthorParams, opts ...RequestOption) (*BlogTaxonomyPutAuthorResponse, error) {
+func (s *BlogTaxonomyService) PutAuthor(ctx context.Context, orgID string, spaceID string, key string, body BlogTaxonomyPutAuthorBody, query *BlogTaxonomyPutAuthorQuery, opts ...RequestOption) (*BlogTaxonomyPutAuthorResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogTaxonomyPutAuthorResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// BlogTaxonomyRemoveAuthorQuery are the optional query parameters of BlogTaxonomyService.RemoveAuthor.
+type BlogTaxonomyRemoveAuthorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BlogTaxonomyRemoveAuthorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveAuthor delete the author (blog)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/blog/authors/{key}
-func (s *BlogTaxonomyService) RemoveAuthor(ctx context.Context, orgID string, spaceID string, key string, opts ...RequestOption) (*BlogTaxonomyRemoveAuthorResponse, error) {
+func (s *BlogTaxonomyService) RemoveAuthor(ctx context.Context, orgID string, spaceID string, key string, query *BlogTaxonomyRemoveAuthorQuery, opts ...RequestOption) (*BlogTaxonomyRemoveAuthorResponse, error) {
+	v, opts := query.encode(opts)
 	var out BlogTaxonomyRemoveAuthorResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/blog/authors/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

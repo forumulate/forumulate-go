@@ -45,29 +45,65 @@ func (s *ThemesBundlesService) ExportSpace(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
-// ImportSpace replace the bundle in a space
+// ThemesBundlesImportSpaceQuery are the optional query parameters of ThemesBundlesService.ImportSpace.
+type ThemesBundlesImportSpaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesImportSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ImportSpace import a theme bundle into a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/theme/bundle
-func (s *ThemesBundlesService) ImportSpace(ctx context.Context, orgID string, spaceID string, body ThemesBundlesImportSpaceParams, opts ...RequestOption) (any, error) {
+func (s *ThemesBundlesService) ImportSpace(ctx context.Context, orgID string, spaceID string, body ThemeBundleImportSiteBody, query *ThemesBundlesImportSpaceQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/bundle", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/bundle", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ThemesBundlesApplySpaceQuery are the optional query parameters of ThemesBundlesService.ApplySpace.
+type ThemesBundlesApplySpaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesApplySpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ApplySpace apply the draft (spaces)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/theme/draft/apply
-func (s *ThemesBundlesService) ApplySpace(ctx context.Context, orgID string, spaceID string, body ThemesBundlesApplySpaceParams, opts ...RequestOption) (any, error) {
+func (s *ThemesBundlesService) ApplySpace(ctx context.Context, orgID string, spaceID string, body ThemesBundlesApplySpaceParams, query *ThemesBundlesApplySpaceQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft/apply", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/draft/apply", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ExportSite get the bundle in an organization (sites theme)
+// ExportSite get the bundle on a site
 //
 // GET /orgs/{orgId}/sites/{siteId}/theme/bundle
 func (s *ThemesBundlesService) ExportSite(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*ThemeBundleExport, error) {
@@ -78,29 +114,65 @@ func (s *ThemesBundlesService) ExportSite(ctx context.Context, orgID string, sit
 	return &out, nil
 }
 
-// ImportSite replace the bundle in an organization
+// ThemesBundlesImportSiteQuery are the optional query parameters of ThemesBundlesService.ImportSite.
+type ThemesBundlesImportSiteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesImportSiteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ImportSite import a theme bundle into a site
 //
 // PUT /orgs/{orgId}/sites/{siteId}/theme/bundle
-func (s *ThemesBundlesService) ImportSite(ctx context.Context, orgID string, siteID string, body ThemesBundlesImportSiteParams, opts ...RequestOption) (any, error) {
+func (s *ThemesBundlesService) ImportSite(ctx context.Context, orgID string, siteID string, body ThemeBundleImportSiteBody, query *ThemesBundlesImportSiteQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/bundle", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/bundle", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ThemesBundlesApplySiteQuery are the optional query parameters of ThemesBundlesService.ApplySite.
+type ThemesBundlesApplySiteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesApplySiteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ApplySite apply the draft (sites)
 //
 // POST /orgs/{orgId}/sites/{siteId}/theme/draft/apply
-func (s *ThemesBundlesService) ApplySite(ctx context.Context, orgID string, siteID string, body ThemesBundlesApplySiteParams, opts ...RequestOption) (any, error) {
+func (s *ThemesBundlesService) ApplySite(ctx context.Context, orgID string, siteID string, body ThemesBundlesApplySiteParams, query *ThemesBundlesApplySiteQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft/apply", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft/apply", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SiteDraft list draft theme in an organization
+// SiteDraft list draft theme on a site
 //
 // GET /orgs/{orgId}/sites/{siteId}/theme/draft
 func (s *ThemesBundlesService) SiteDraft(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*ThemeDraftState, error) {
@@ -111,45 +183,117 @@ func (s *ThemesBundlesService) SiteDraft(ctx context.Context, orgID string, site
 	return &out, nil
 }
 
-// SetSiteDraft list draft theme in an organization (replace)
+// ThemesBundlesSetSiteDraftQuery are the optional query parameters of ThemesBundlesService.SetSiteDraft.
+type ThemesBundlesSetSiteDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesSetSiteDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetSiteDraft list draft theme on a site (replace)
 //
 // PUT /orgs/{orgId}/sites/{siteId}/theme/draft
-func (s *ThemesBundlesService) SetSiteDraft(ctx context.Context, orgID string, siteID string, body ThemesBundlesSetSiteDraftParams, opts ...RequestOption) (any, error) {
+func (s *ThemesBundlesService) SetSiteDraft(ctx context.Context, orgID string, siteID string, body SpaceSettingsSetThemeBody, query *ThemesBundlesSetSiteDraftQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// PatchSiteDraft list draft theme in an organization (update)
+// ThemesBundlesPatchSiteDraftQuery are the optional query parameters of ThemesBundlesService.PatchSiteDraft.
+type ThemesBundlesPatchSiteDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesPatchSiteDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PatchSiteDraft list draft theme on a site (update)
 //
 // PATCH /orgs/{orgId}/sites/{siteId}/theme/draft
-func (s *ThemesBundlesService) PatchSiteDraft(ctx context.Context, orgID string, siteID string, body ThemesBundlesPatchSiteDraftParams, opts ...RequestOption) (any, error) {
+func (s *ThemesBundlesService) PatchSiteDraft(ctx context.Context, orgID string, siteID string, body SpaceSettingsPatchThemeBody, query *ThemesBundlesPatchSiteDraftQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DiscardSiteDraft list draft theme in an organization (delete)
+// ThemesBundlesDiscardSiteDraftQuery are the optional query parameters of ThemesBundlesService.DiscardSiteDraft.
+type ThemesBundlesDiscardSiteDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesDiscardSiteDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// DiscardSiteDraft list draft theme on a site (delete)
 //
 // DELETE /orgs/{orgId}/sites/{siteId}/theme/draft
-func (s *ThemesBundlesService) DiscardSiteDraft(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*ThemeDraftState, error) {
+func (s *ThemesBundlesService) DiscardSiteDraft(ctx context.Context, orgID string, siteID string, query *ThemesBundlesDiscardSiteDraftQuery, opts ...RequestOption) (*ThemeDraftState, error) {
+	v, opts := query.encode(opts)
 	var out ThemeDraftState
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ThemesBundlesPublishSiteDraftQuery are the optional query parameters of ThemesBundlesService.PublishSiteDraft.
+type ThemesBundlesPublishSiteDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesBundlesPublishSiteDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PublishSiteDraft publish the draft
 //
 // POST /orgs/{orgId}/sites/{siteId}/theme/draft/publish
-func (s *ThemesBundlesService) PublishSiteDraft(ctx context.Context, orgID string, siteID string, body ThemesBundlesPublishSiteDraftParams, opts ...RequestOption) (*ThemesBundlesPublishSiteDraftResponse, error) {
+func (s *ThemesBundlesService) PublishSiteDraft(ctx context.Context, orgID string, siteID string, body ThemesBundlesPublishSiteDraftParams, query *ThemesBundlesPublishSiteDraftQuery, opts ...RequestOption) (*ThemesBundlesPublishSiteDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesBundlesPublishSiteDraftResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft/publish", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/draft/publish", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -162,12 +306,12 @@ type ThemesComponentMarketplaceService struct {
 
 // ThemesComponentMarketplaceBrowseQuery are the optional query parameters of ThemesComponentMarketplaceService.Browse.
 type ThemesComponentMarketplaceBrowseQuery struct {
-	Q   *string
-	Tag *string
+	Q      *string
+	Tag    *string
+	Outlet *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Featured *string
 	Sort     *string
-	Outlet   *string
 }
 
 func (p *ThemesComponentMarketplaceBrowseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -181,14 +325,14 @@ func (p *ThemesComponentMarketplaceBrowseQuery) encode(opts []RequestOption) (ur
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
+	if p.Outlet != nil {
+		v.Set("outlet", *p.Outlet)
+	}
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
-	}
-	if p.Outlet != nil {
-		v.Set("outlet", *p.Outlet)
 	}
 	return v, opts
 }
@@ -216,12 +360,30 @@ func (s *ThemesComponentMarketplaceService) Detail(ctx context.Context, orgID st
 	return &out, nil
 }
 
+// ThemesComponentMarketplaceInstallQuery are the optional query parameters of ThemesComponentMarketplaceService.Install.
+type ThemesComponentMarketplaceInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentMarketplaceInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Install install the component
 //
 // POST /orgs/{orgId}/component-marketplace/components/{slug}/install
-func (s *ThemesComponentMarketplaceService) Install(ctx context.Context, orgID string, slug string, body ThemesComponentMarketplaceInstallParams, opts ...RequestOption) (any, error) {
+func (s *ThemesComponentMarketplaceService) Install(ctx context.Context, orgID string, slug string, body ThemesComponentMarketplaceInstallParams, query *ThemesComponentMarketplaceInstallQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/component-marketplace/components/"+pathEscape(slug)+"/install", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/component-marketplace/components/"+pathEscape(slug)+"/install", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -233,6 +395,10 @@ type ThemesComponentMarketplaceMineQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ThemesComponentMarketplaceMineQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -245,6 +411,12 @@ func (p *ThemesComponentMarketplaceMineQuery) encode(opts []RequestOption) (url.
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -276,23 +448,59 @@ func (s *ThemesComponentMarketplaceService) MineAutoPaging(ctx context.Context, 
 	})
 }
 
+// ThemesComponentMarketplaceSubmitQuery are the optional query parameters of ThemesComponentMarketplaceService.Submit.
+type ThemesComponentMarketplaceSubmitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentMarketplaceSubmitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Submit create a listing in an organization (component marketplace)
 //
 // POST /orgs/{orgId}/component-marketplace/listings
-func (s *ThemesComponentMarketplaceService) Submit(ctx context.Context, orgID string, body ThemesComponentMarketplaceSubmitParams, opts ...RequestOption) (*ThemesComponentMarketplaceSubmitResponse, error) {
+func (s *ThemesComponentMarketplaceService) Submit(ctx context.Context, orgID string, body ThemesComponentMarketplaceSubmitParams, query *ThemesComponentMarketplaceSubmitQuery, opts ...RequestOption) (*ThemesComponentMarketplaceSubmitResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentMarketplaceSubmitResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/component-marketplace/listings", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/component-marketplace/listings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Withdraw delete the listing (component marketplace)
+// ThemesComponentMarketplaceWithdrawQuery are the optional query parameters of ThemesComponentMarketplaceService.Withdraw.
+type ThemesComponentMarketplaceWithdrawQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentMarketplaceWithdrawQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Withdraw withdraw the listing (component marketplace)
 //
 // DELETE /orgs/{orgId}/component-marketplace/listings/{slug}
-func (s *ThemesComponentMarketplaceService) Withdraw(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ThemesComponentMarketplaceWithdrawResponse, error) {
+func (s *ThemesComponentMarketplaceService) Withdraw(ctx context.Context, orgID string, slug string, query *ThemesComponentMarketplaceWithdrawQuery, opts ...RequestOption) (*ThemesComponentMarketplaceWithdrawResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentMarketplaceWithdrawResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/component-marketplace/listings/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/component-marketplace/listings/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -314,34 +522,88 @@ func (s *ThemesComponentsService) Gallery(ctx context.Context, orgID string, opt
 	return &out, nil
 }
 
+// ThemesComponentsSaveQuery are the optional query parameters of ThemesComponentsService.Save.
+type ThemesComponentsSaveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsSaveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Save create a theme component in an organization
 //
 // POST /orgs/{orgId}/theme-components
-func (s *ThemesComponentsService) Save(ctx context.Context, orgID string, body ThemesComponentsSaveParams, opts ...RequestOption) (*ThemesComponentsSaveResponse, error) {
+func (s *ThemesComponentsService) Save(ctx context.Context, orgID string, body ThemesComponentsSaveParams, query *ThemesComponentsSaveQuery, opts ...RequestOption) (*ThemesComponentsSaveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsSaveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-components", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-components", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ThemesComponentsPatchQuery are the optional query parameters of ThemesComponentsService.Patch.
+type ThemesComponentsPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Patch update the theme component
 //
 // PATCH /orgs/{orgId}/theme-components/{id}
-func (s *ThemesComponentsService) Patch(ctx context.Context, orgID string, id string, body ThemesComponentsPatchParams, opts ...RequestOption) (*ThemesComponentsPatchResponse, error) {
+func (s *ThemesComponentsService) Patch(ctx context.Context, orgID string, id string, body ThemesComponentsPatchParams, query *ThemesComponentsPatchQuery, opts ...RequestOption) (*ThemesComponentsPatchResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsPatchResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/theme-components/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/theme-components/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ThemesComponentsRemoveQuery are the optional query parameters of ThemesComponentsService.Remove.
+type ThemesComponentsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the theme component
 //
 // DELETE /orgs/{orgId}/theme-components/{id}
-func (s *ThemesComponentsService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ThemesComponentsRemoveResponse, error) {
+func (s *ThemesComponentsService) Remove(ctx context.Context, orgID string, id string, query *ThemesComponentsRemoveQuery, opts ...RequestOption) (*ThemesComponentsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-components/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-components/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -358,12 +620,30 @@ func (s *ThemesComponentsService) Composite(ctx context.Context, orgID string, i
 	return &out, nil
 }
 
+// ThemesComponentsImportQuery are the optional query parameters of ThemesComponentsService.Import.
+type ThemesComponentsImportQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsImportQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Import import the theme component
 //
 // POST /orgs/{orgId}/theme-components/import
-func (s *ThemesComponentsService) Import(ctx context.Context, orgID string, body ThemesComponentsImportParams, opts ...RequestOption) (*ThemesComponentsImportResponse, error) {
+func (s *ThemesComponentsService) Import(ctx context.Context, orgID string, body ThemesComponentsImportParams, query *ThemesComponentsImportQuery, opts ...RequestOption) (*ThemesComponentsImportResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsImportResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-components/import", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-components/import", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -380,12 +660,30 @@ func (s *ThemesComponentsService) Export(ctx context.Context, orgID string, id s
 	return &out, nil
 }
 
+// ThemesComponentsApplyQuery are the optional query parameters of ThemesComponentsService.Apply.
+type ThemesComponentsApplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsApplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Apply apply the theme
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/theme/apply
-func (s *ThemesComponentsService) Apply(ctx context.Context, orgID string, spaceID string, body ThemesComponentsApplyParams, opts ...RequestOption) (*ThemesComponentsApplyResponse, error) {
+func (s *ThemesComponentsService) Apply(ctx context.Context, orgID string, spaceID string, body ThemesComponentsApplyParams, query *ThemesComponentsApplyQuery, opts ...RequestOption) (*ThemesComponentsApplyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsApplyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/apply", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/apply", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -397,6 +695,10 @@ type ThemesComponentsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ThemesComponentsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -409,6 +711,12 @@ func (p *ThemesComponentsListQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -440,12 +748,30 @@ func (s *ThemesComponentsService) ListAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// ThemesComponentsCreateQuery are the optional query parameters of ThemesComponentsService.Create.
+type ThemesComponentsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a component install in an organization
 //
 // POST /orgs/{orgId}/component-installs
-func (s *ThemesComponentsService) Create(ctx context.Context, orgID string, body ThemesComponentsCreateParams, opts ...RequestOption) (any, error) {
+func (s *ThemesComponentsService) Create(ctx context.Context, orgID string, body ThemesComponentsCreateParams, query *ThemesComponentsCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/component-installs", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/component-installs", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -462,23 +788,59 @@ func (s *ThemesComponentsService) Get(ctx context.Context, orgID string, id stri
 	return &out, nil
 }
 
+// ThemesComponentsUpdateQuery are the optional query parameters of ThemesComponentsService.Update.
+type ThemesComponentsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the component install
 //
 // PATCH /orgs/{orgId}/component-installs/{id}
-func (s *ThemesComponentsService) Update(ctx context.Context, orgID string, id string, body ThemesComponentsUpdateParams, opts ...RequestOption) (*ThemesComponentsUpdateResponse, error) {
+func (s *ThemesComponentsService) Update(ctx context.Context, orgID string, id string, body ThemesComponentsUpdateParams, query *ThemesComponentsUpdateQuery, opts ...RequestOption) (*ThemesComponentsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/component-installs/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/component-installs/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ThemesComponentsComponentinstallsQuery are the optional query parameters of ThemesComponentsService.Componentinstalls.
+type ThemesComponentsComponentinstallsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsComponentinstallsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Componentinstalls delete the component install
 //
 // DELETE /orgs/{orgId}/component-installs/{id}
-func (s *ThemesComponentsService) Componentinstalls(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ThemesComponentsComponentinstallsResponse, error) {
+func (s *ThemesComponentsService) Componentinstalls(ctx context.Context, orgID string, id string, query *ThemesComponentsComponentinstallsQuery, opts ...RequestOption) (*ThemesComponentsComponentinstallsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesComponentsComponentinstallsResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/component-installs/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/component-installs/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -506,18 +868,36 @@ func (s *ThemesComponentsService) SpaceComponents(ctx context.Context, orgID str
 	return &out, nil
 }
 
+// ThemesComponentsSetSpaceComponentsQuery are the optional query parameters of ThemesComponentsService.SetSpaceComponents.
+type ThemesComponentsSetSpaceComponentsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsSetSpaceComponentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetSpaceComponents replace components in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/theme/components
-func (s *ThemesComponentsService) SetSpaceComponents(ctx context.Context, orgID string, spaceID string, body ThemesComponentsSetSpaceComponentsParams, opts ...RequestOption) (any, error) {
+func (s *ThemesComponentsService) SetSpaceComponents(ctx context.Context, orgID string, spaceID string, body ThemesComponentsSetSpaceComponentsParams, query *ThemesComponentsSetSpaceComponentsQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/components", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/theme/components", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SiteComponents list components in an organization
+// SiteComponents list components on a site
 //
 // GET /orgs/{orgId}/sites/{siteId}/theme/components
 func (s *ThemesComponentsService) SiteComponents(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*TargetComponents, error) {
@@ -528,12 +908,30 @@ func (s *ThemesComponentsService) SiteComponents(ctx context.Context, orgID stri
 	return &out, nil
 }
 
-// SetSiteComponents replace components in an organization
+// ThemesComponentsSetSiteComponentsQuery are the optional query parameters of ThemesComponentsService.SetSiteComponents.
+type ThemesComponentsSetSiteComponentsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesComponentsSetSiteComponentsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetSiteComponents replace components on a site
 //
 // PUT /orgs/{orgId}/sites/{siteId}/theme/components
-func (s *ThemesComponentsService) SetSiteComponents(ctx context.Context, orgID string, siteID string, body ThemesComponentsSetSiteComponentsParams, opts ...RequestOption) (any, error) {
+func (s *ThemesComponentsService) SetSiteComponents(ctx context.Context, orgID string, siteID string, body ThemesComponentsSetSiteComponentsParams, query *ThemesComponentsSetSiteComponentsQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/components", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/theme/components", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -550,6 +948,10 @@ type ThemesLibraryListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ThemesLibraryListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -562,6 +964,12 @@ func (p *ThemesLibraryListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -593,23 +1001,59 @@ func (s *ThemesLibraryService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
-// Save create the theme library in an organization
+// ThemesLibrarySaveQuery are the optional query parameters of ThemesLibraryService.Save.
+type ThemesLibrarySaveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesLibrarySaveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Save create a theme library in an organization
 //
 // POST /orgs/{orgId}/theme-library
-func (s *ThemesLibraryService) Save(ctx context.Context, orgID string, body ThemesLibrarySaveParams, opts ...RequestOption) (any, error) {
+func (s *ThemesLibraryService) Save(ctx context.Context, orgID string, body ThemesLibrarySaveParams, query *ThemesLibrarySaveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-library", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-library", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// ThemesLibraryImportQuery are the optional query parameters of ThemesLibraryService.Import.
+type ThemesLibraryImportQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesLibraryImportQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Import import the theme library
 //
 // POST /orgs/{orgId}/theme-library/import
-func (s *ThemesLibraryService) Import(ctx context.Context, orgID string, body ThemesLibraryImportParams, opts ...RequestOption) (any, error) {
+func (s *ThemesLibraryService) Import(ctx context.Context, orgID string, body ThemeBundleImportSiteBody, query *ThemesLibraryImportQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-library/import", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-library/import", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -626,29 +1070,65 @@ func (s *ThemesLibraryService) Get(ctx context.Context, orgID string, id string,
 	return &out, nil
 }
 
+// ThemesLibraryPatchQuery are the optional query parameters of ThemesLibraryService.Patch.
+type ThemesLibraryPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesLibraryPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Patch update the theme library
 //
 // PATCH /orgs/{orgId}/theme-library/{id}
-func (s *ThemesLibraryService) Patch(ctx context.Context, orgID string, id string, body ThemesLibraryPatchParams, opts ...RequestOption) (*ThemesLibraryPatchResponse, error) {
+func (s *ThemesLibraryService) Patch(ctx context.Context, orgID string, id string, body ThemesLibraryPatchParams, query *ThemesLibraryPatchQuery, opts ...RequestOption) (*ThemesLibraryPatchResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesLibraryPatchResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/theme-library/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/theme-library/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ThemesLibraryRemoveQuery are the optional query parameters of ThemesLibraryService.Remove.
+type ThemesLibraryRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesLibraryRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the theme library
 //
 // DELETE /orgs/{orgId}/theme-library/{id}
-func (s *ThemesLibraryService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ThemesLibraryRemoveResponse, error) {
+func (s *ThemesLibraryService) Remove(ctx context.Context, orgID string, id string, query *ThemesLibraryRemoveQuery, opts ...RequestOption) (*ThemesLibraryRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesLibraryRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-library/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-library/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Bundle get the bundle in an organization (theme library)
+// Bundle get the bundle in an organization
 //
 // GET /orgs/{orgId}/theme-library/{id}/bundle
 func (s *ThemesLibraryService) Bundle(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ThemeBundleExport, error) {
@@ -666,12 +1146,12 @@ type ThemesMarketplaceService struct {
 
 // ThemesMarketplaceBrowseQuery are the optional query parameters of ThemesMarketplaceService.Browse.
 type ThemesMarketplaceBrowseQuery struct {
-	Q   *string
-	Tag *string
-	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
-	Featured  *string
-	Sort      *string
+	Q         *string
+	Tag       *string
 	SpaceType *string
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Featured *string
+	Sort     *string
 }
 
 func (p *ThemesMarketplaceBrowseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -685,14 +1165,14 @@ func (p *ThemesMarketplaceBrowseQuery) encode(opts []RequestOption) (url.Values,
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
 	}
+	if p.SpaceType != nil {
+		v.Set("spaceType", *p.SpaceType)
+	}
 	if p.Featured != nil {
 		v.Set("featured", *p.Featured)
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
-	}
-	if p.SpaceType != nil {
-		v.Set("spaceType", *p.SpaceType)
 	}
 	return v, opts
 }
@@ -720,23 +1200,59 @@ func (s *ThemesMarketplaceService) Detail(ctx context.Context, orgID string, slu
 	return &out, nil
 }
 
+// ThemesMarketplaceInstallQuery are the optional query parameters of ThemesMarketplaceService.Install.
+type ThemesMarketplaceInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplaceInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Install install the theme
 //
 // POST /orgs/{orgId}/theme-marketplace/themes/{slug}/install
-func (s *ThemesMarketplaceService) Install(ctx context.Context, orgID string, slug string, body ThemesMarketplaceInstallParams, opts ...RequestOption) (any, error) {
+func (s *ThemesMarketplaceService) Install(ctx context.Context, orgID string, slug string, body ThemesMarketplaceInstallParams, query *ThemesMarketplaceInstallQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/themes/"+pathEscape(slug)+"/install", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/themes/"+pathEscape(slug)+"/install", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Purchase create the purchase in an organization (theme marketplace themes)
+// ThemesMarketplacePurchaseQuery are the optional query parameters of ThemesMarketplaceService.Purchase.
+type ThemesMarketplacePurchaseQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplacePurchaseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Purchase purchase the theme
 //
 // POST /orgs/{orgId}/theme-marketplace/themes/{slug}/purchase
-func (s *ThemesMarketplaceService) Purchase(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ThemesMarketplacePurchaseResponse, error) {
+func (s *ThemesMarketplaceService) Purchase(ctx context.Context, orgID string, slug string, query *ThemesMarketplacePurchaseQuery, opts ...RequestOption) (*ThemesMarketplacePurchaseResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplacePurchaseResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/themes/"+pathEscape(slug)+"/purchase", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/themes/"+pathEscape(slug)+"/purchase", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -748,6 +1264,10 @@ type ThemesMarketplaceMineQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ThemesMarketplaceMineQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -760,6 +1280,12 @@ func (p *ThemesMarketplaceMineQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -791,34 +1317,88 @@ func (s *ThemesMarketplaceService) MineAutoPaging(ctx context.Context, orgID str
 	})
 }
 
+// ThemesMarketplaceSubmitQuery are the optional query parameters of ThemesMarketplaceService.Submit.
+type ThemesMarketplaceSubmitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplaceSubmitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Submit create a listing in an organization (theme marketplace)
 //
 // POST /orgs/{orgId}/theme-marketplace/listings
-func (s *ThemesMarketplaceService) Submit(ctx context.Context, orgID string, body ThemesMarketplaceSubmitParams, opts ...RequestOption) (*ThemesMarketplaceSubmitResponse, error) {
+func (s *ThemesMarketplaceService) Submit(ctx context.Context, orgID string, body ThemesMarketplaceSubmitParams, query *ThemesMarketplaceSubmitQuery, opts ...RequestOption) (*ThemesMarketplaceSubmitResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplaceSubmitResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/listings", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/listings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ThemesMarketplacePricingQuery are the optional query parameters of ThemesMarketplaceService.Pricing.
+type ThemesMarketplacePricingQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplacePricingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Pricing replace the pricing in an organization
 //
 // PUT /orgs/{orgId}/theme-marketplace/listings/{slug}/pricing
-func (s *ThemesMarketplaceService) Pricing(ctx context.Context, orgID string, slug string, body ThemesMarketplacePricingParams, opts ...RequestOption) (*ThemesMarketplacePricingResponse, error) {
+func (s *ThemesMarketplaceService) Pricing(ctx context.Context, orgID string, slug string, body ThemesMarketplacePricingParams, query *ThemesMarketplacePricingQuery, opts ...RequestOption) (*ThemesMarketplacePricingResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplacePricingResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/listings/"+pathEscape(slug)+"/pricing", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/listings/"+pathEscape(slug)+"/pricing", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Withdraw delete the listing (theme marketplace)
+// ThemesMarketplaceWithdrawQuery are the optional query parameters of ThemesMarketplaceService.Withdraw.
+type ThemesMarketplaceWithdrawQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplaceWithdrawQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Withdraw withdraw the listing (theme marketplace)
 //
 // DELETE /orgs/{orgId}/theme-marketplace/listings/{slug}
-func (s *ThemesMarketplaceService) Withdraw(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ThemesMarketplaceWithdrawResponse, error) {
+func (s *ThemesMarketplaceService) Withdraw(ctx context.Context, orgID string, slug string, query *ThemesMarketplaceWithdrawQuery, opts ...RequestOption) (*ThemesMarketplaceWithdrawResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplaceWithdrawResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/listings/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-marketplace/listings/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -830,6 +1410,10 @@ type ThemesMarketplaceBrowseRegistryQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ThemesMarketplaceBrowseRegistryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -842,6 +1426,12 @@ func (p *ThemesMarketplaceBrowseRegistryQuery) encode(opts []RequestOption) (url
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -873,34 +1463,88 @@ func (s *ThemesMarketplaceService) BrowseRegistryAutoPaging(ctx context.Context,
 	})
 }
 
+// ThemesMarketplacePublishQuery are the optional query parameters of ThemesMarketplaceService.Publish.
+type ThemesMarketplacePublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplacePublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the theme registry
 //
 // POST /orgs/{orgId}/theme-registry/publish
-func (s *ThemesMarketplaceService) Publish(ctx context.Context, orgID string, body ThemesMarketplacePublishParams, opts ...RequestOption) (*ThemesMarketplacePublishResponse, error) {
+func (s *ThemesMarketplaceService) Publish(ctx context.Context, orgID string, body ThemesMarketplacePublishParams, query *ThemesMarketplacePublishQuery, opts ...RequestOption) (*ThemesMarketplacePublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplacePublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-registry/publish", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-registry/publish", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ThemesMarketplaceLegacyInstallQuery are the optional query parameters of ThemesMarketplaceService.LegacyInstall.
+type ThemesMarketplaceLegacyInstallQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplaceLegacyInstallQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // LegacyInstall install the theme registry
 //
 // POST /orgs/{orgId}/theme-registry/{slug}/install
-func (s *ThemesMarketplaceService) LegacyInstall(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ThemesMarketplaceLegacyInstallResponse, error) {
+func (s *ThemesMarketplaceService) LegacyInstall(ctx context.Context, orgID string, slug string, query *ThemesMarketplaceLegacyInstallQuery, opts ...RequestOption) (*ThemesMarketplaceLegacyInstallResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplaceLegacyInstallResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-registry/"+pathEscape(slug)+"/install", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/theme-registry/"+pathEscape(slug)+"/install", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Unpublish delete the theme registry
+// ThemesMarketplaceUnpublishQuery are the optional query parameters of ThemesMarketplaceService.Unpublish.
+type ThemesMarketplaceUnpublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ThemesMarketplaceUnpublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Unpublish unpublish the theme registry
 //
 // DELETE /orgs/{orgId}/theme-registry/{slug}
-func (s *ThemesMarketplaceService) Unpublish(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ThemesMarketplaceUnpublishResponse, error) {
+func (s *ThemesMarketplaceService) Unpublish(ctx context.Context, orgID string, slug string, query *ThemesMarketplaceUnpublishQuery, opts ...RequestOption) (*ThemesMarketplaceUnpublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out ThemesMarketplaceUnpublishResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-registry/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/theme-registry/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

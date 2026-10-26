@@ -4,6 +4,7 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
 )
 
 // EventTicketsPublicService holds the operations under client.EventTicketsPublic.
@@ -11,18 +12,35 @@ type EventTicketsPublicService struct {
 	c *Client
 }
 
+// EventTicketsPublicViewQuery are the optional query parameters of EventTicketsPublicService.View.
+type EventTicketsPublicViewQuery struct {
+	Unlock *string
+}
+
+func (p *EventTicketsPublicViewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Unlock != nil {
+		v.Set("unlock", *p.Unlock)
+	}
+	return v, opts
+}
+
 // View list tickets in a space
 //
 // GET /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}/tickets
-func (s *EventTicketsPublicService) View(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*EventTicketsView, error) {
+func (s *EventTicketsPublicService) View(ctx context.Context, orgID string, spaceID string, handle string, query *EventTicketsPublicViewQuery, opts ...RequestOption) (*EventTicketsView, error) {
+	v, opts := query.encode(opts)
 	var out EventTicketsView
-	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tickets", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tickets", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Quote create the quote in a space
+// Quote quote a ticket
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}/tickets/quote
 func (s *EventTicketsPublicService) Quote(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsPublicQuoteParams, opts ...RequestOption) (any, error) {
@@ -33,10 +51,10 @@ func (s *EventTicketsPublicService) Quote(ctx context.Context, orgID string, spa
 	return out, nil
 }
 
-// Checkout create the checkout in a space (public reader events tickets)
+// Checkout start a checkout for a ticket (public reader)
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}/tickets/checkout
-func (s *EventTicketsPublicService) Checkout(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsPublicCheckoutParams, opts ...RequestOption) (any, error) {
+func (s *EventTicketsPublicService) Checkout(ctx context.Context, orgID string, spaceID string, handle string, body EventTicketsCheckoutBody, opts ...RequestOption) (any, error) {
 	var out any
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/tickets/checkout", nil, body, &out, opts); err != nil {
 		return nil, err

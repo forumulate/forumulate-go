@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // SCIMService holds the operations under client.SCIM.
@@ -47,12 +48,30 @@ func (s *SCIMGroupsService) List(ctx context.Context, query *SCIMGroupsListQuery
 	return &out, nil
 }
 
+// SCIMGroupsCreateQuery are the optional query parameters of SCIMGroupsService.Create.
+type SCIMGroupsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMGroupsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a group
 //
 // POST /scim/v2/Groups
-func (s *SCIMGroupsService) Create(ctx context.Context, body SCIMGroupsCreateParams, opts ...RequestOption) (any, error) {
+func (s *SCIMGroupsService) Create(ctx context.Context, body SCIMGroupsCreateParams, query *SCIMGroupsCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/scim/v2/Groups", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/scim/v2/Groups", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -69,37 +88,91 @@ func (s *SCIMGroupsService) Get(ctx context.Context, id string, opts ...RequestO
 	return &out, nil
 }
 
+// SCIMGroupsReplaceQuery are the optional query parameters of SCIMGroupsService.Replace.
+type SCIMGroupsReplaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMGroupsReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Replace replace the group
 //
 // PUT /scim/v2/Groups/{id}
-func (s *SCIMGroupsService) Replace(ctx context.Context, id string, body SCIMGroupsReplaceParams, opts ...RequestOption) (any, error) {
+func (s *SCIMGroupsService) Replace(ctx context.Context, id string, body SCIMGroupsReplaceParams, query *SCIMGroupsReplaceQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/scim/v2/Groups/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/scim/v2/Groups/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// SCIMGroupsPatchQuery are the optional query parameters of SCIMGroupsService.Patch.
+type SCIMGroupsPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMGroupsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Patch update the group (SCIM v2 groups)
 //
 // PATCH /scim/v2/Groups/{id}
-func (s *SCIMGroupsService) Patch(ctx context.Context, id string, body SCIMGroupsPatchParams, opts ...RequestOption) (any, error) {
+func (s *SCIMGroupsService) Patch(ctx context.Context, id string, body SCIMGroupsPatchParams, query *SCIMGroupsPatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/scim/v2/Groups/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/scim/v2/Groups/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// SCIMGroupsRemoveQuery are the optional query parameters of SCIMGroupsService.Remove.
+type SCIMGroupsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMGroupsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the group (SCIM v2 groups)
 //
 // DELETE /scim/v2/Groups/{id}
-func (s *SCIMGroupsService) Remove(ctx context.Context, id string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/scim/v2/Groups/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+func (s *SCIMGroupsService) Remove(ctx context.Context, id string, query *SCIMGroupsRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/scim/v2/Groups/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // SCIMUsersService holds the operations under client.SCIM.Users.
@@ -135,12 +208,30 @@ func (s *SCIMUsersService) List(ctx context.Context, query *SCIMUsersListQuery, 
 	return &out, nil
 }
 
+// SCIMUsersCreateQuery are the optional query parameters of SCIMUsersService.Create.
+type SCIMUsersCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMUsersCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an user
 //
 // POST /scim/v2/Users
-func (s *SCIMUsersService) Create(ctx context.Context, body SCIMUsersCreateParams, opts ...RequestOption) (any, error) {
+func (s *SCIMUsersService) Create(ctx context.Context, body SCIMUsersCreateParams, query *SCIMUsersCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/scim/v2/Users", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/scim/v2/Users", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -157,24 +248,60 @@ func (s *SCIMUsersService) Get(ctx context.Context, id string, opts ...RequestOp
 	return &out, nil
 }
 
+// SCIMUsersPatchQuery are the optional query parameters of SCIMUsersService.Patch.
+type SCIMUsersPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMUsersPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Patch update the user
 //
 // PATCH /scim/v2/Users/{id}
-func (s *SCIMUsersService) Patch(ctx context.Context, id string, body SCIMUsersPatchParams, opts ...RequestOption) (any, error) {
+func (s *SCIMUsersService) Patch(ctx context.Context, id string, body SCIMUsersPatchParams, query *SCIMUsersPatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/scim/v2/Users/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/scim/v2/Users/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// SCIMUsersRemoveQuery are the optional query parameters of SCIMUsersService.Remove.
+type SCIMUsersRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SCIMUsersRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the user
 //
 // DELETE /scim/v2/Users/{id}
-func (s *SCIMUsersService) Remove(ctx context.Context, id string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/scim/v2/Users/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+func (s *SCIMUsersService) Remove(ctx context.Context, id string, query *SCIMUsersRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/scim/v2/Users/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

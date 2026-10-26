@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // OrgPaymentsService holds the operations under client.OrgPayments.
@@ -22,34 +24,122 @@ func (s *OrgPaymentsService) Status(ctx context.Context, orgID string, opts ...R
 	return &out, nil
 }
 
+// OrgPaymentsSetQuery are the optional query parameters of OrgPaymentsService.Set.
+type OrgPaymentsSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *OrgPaymentsSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace the stripe in an organization
 //
 // PUT /orgs/{orgId}/payments/stripe
-func (s *OrgPaymentsService) Set(ctx context.Context, orgID string, body OrgPaymentsSetParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/payments/stripe", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Clear delete the stripe in an organization
-//
-// DELETE /orgs/{orgId}/payments/stripe
-func (s *OrgPaymentsService) Clear(ctx context.Context, orgID string, opts ...RequestOption) (*OrgPaymentsClearResponse, error) {
-	var out OrgPaymentsClearResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/payments/stripe", nil, nil, &out, opts); err != nil {
+func (s *OrgPaymentsService) Set(ctx context.Context, orgID string, body OrgPaymentsSetParams, query *OrgPaymentsSetQuery, opts ...RequestOption) (*OrgPaymentsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgPaymentsPatchResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/payments/stripe", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// OrgPaymentsPatchQuery are the optional query parameters of OrgPaymentsService.Patch.
+type OrgPaymentsPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *OrgPaymentsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the stripe in an organization
+//
+// PATCH /orgs/{orgId}/payments/stripe
+func (s *OrgPaymentsService) Patch(ctx context.Context, orgID string, body any, query *OrgPaymentsPatchQuery, opts ...RequestOption) (*OrgPaymentsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgPaymentsPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/payments/stripe", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgPaymentsClearQuery are the optional query parameters of OrgPaymentsService.Clear.
+type OrgPaymentsClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgPaymentsClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Clear delete the stripe in an organization
+//
+// DELETE /orgs/{orgId}/payments/stripe
+func (s *OrgPaymentsService) Clear(ctx context.Context, orgID string, query *OrgPaymentsClearQuery, opts ...RequestOption) (*OrgPaymentsClearResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgPaymentsClearResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/payments/stripe", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgPaymentsTestQuery are the optional query parameters of OrgPaymentsService.Test.
+type OrgPaymentsTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgPaymentsTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Test test the stripe
 //
 // POST /orgs/{orgId}/payments/stripe/test
-func (s *OrgPaymentsService) Test(ctx context.Context, orgID string, opts ...RequestOption) (*OrgPaymentsTestResponse, error) {
+func (s *OrgPaymentsService) Test(ctx context.Context, orgID string, query *OrgPaymentsTestQuery, opts ...RequestOption) (*OrgPaymentsTestResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgPaymentsTestResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/payments/stripe/test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/payments/stripe/test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

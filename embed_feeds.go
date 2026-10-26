@@ -19,6 +19,10 @@ type EmbedFeedsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EmbedFeedsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *EmbedFeedsListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,45 +72,117 @@ func (s *EmbedFeedsService) ListAutoPaging(ctx context.Context, orgID string, qu
 	})
 }
 
+// EmbedFeedsAddQuery are the optional query parameters of EmbedFeedsService.Add.
+type EmbedFeedsAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EmbedFeedsAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add create an embed feed in an organization
 //
 // POST /orgs/{orgId}/embed-feeds
-func (s *EmbedFeedsService) Add(ctx context.Context, orgID string, body EmbedFeedsAddParams, opts ...RequestOption) (*EmbedFeedsAddResponse, error) {
+func (s *EmbedFeedsService) Add(ctx context.Context, orgID string, body EmbedFeedsAddParams, query *EmbedFeedsAddQuery, opts ...RequestOption) (*EmbedFeedsAddResponse, error) {
+	v, opts := query.encode(opts)
 	var out EmbedFeedsAddResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/embed-feeds", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/embed-feeds", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// EmbedFeedsUpdateQuery are the optional query parameters of EmbedFeedsService.Update.
+type EmbedFeedsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EmbedFeedsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the embed feed
 //
 // PATCH /orgs/{orgId}/embed-feeds/{feedId}
-func (s *EmbedFeedsService) Update(ctx context.Context, orgID string, feedID string, body EmbedFeedsUpdateParams, opts ...RequestOption) (*EmbedFeedsUpdateResponse, error) {
+func (s *EmbedFeedsService) Update(ctx context.Context, orgID string, feedID string, body EmbedFeedsUpdateParams, query *EmbedFeedsUpdateQuery, opts ...RequestOption) (*EmbedFeedsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out EmbedFeedsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/embed-feeds/"+pathEscape(feedID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/embed-feeds/"+pathEscape(feedID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// EmbedFeedsRemoveQuery are the optional query parameters of EmbedFeedsService.Remove.
+type EmbedFeedsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EmbedFeedsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the embed feed
 //
 // DELETE /orgs/{orgId}/embed-feeds/{feedId}
-func (s *EmbedFeedsService) Remove(ctx context.Context, orgID string, feedID string, opts ...RequestOption) (*EmbedFeedsRemoveResponse, error) {
+func (s *EmbedFeedsService) Remove(ctx context.Context, orgID string, feedID string, query *EmbedFeedsRemoveQuery, opts ...RequestOption) (*EmbedFeedsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out EmbedFeedsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/embed-feeds/"+pathEscape(feedID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/embed-feeds/"+pathEscape(feedID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// PollNow create the poll in an organization
+// EmbedFeedsPollNowQuery are the optional query parameters of EmbedFeedsService.PollNow.
+type EmbedFeedsPollNowQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EmbedFeedsPollNowQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PollNow poll an embed feed now
 //
 // POST /orgs/{orgId}/embed-feeds/{feedId}/poll
-func (s *EmbedFeedsService) PollNow(ctx context.Context, orgID string, feedID string, opts ...RequestOption) (*EmbedFeedsPollNowResponse, error) {
+func (s *EmbedFeedsService) PollNow(ctx context.Context, orgID string, feedID string, query *EmbedFeedsPollNowQuery, opts ...RequestOption) (*EmbedFeedsPollNowResponse, error) {
+	v, opts := query.encode(opts)
 	var out EmbedFeedsPollNowResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/embed-feeds/"+pathEscape(feedID)+"/poll", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/embed-feeds/"+pathEscape(feedID)+"/poll", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

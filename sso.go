@@ -29,12 +29,64 @@ func (s *SSOService) Get(ctx context.Context, orgID string, opts ...RequestOptio
 	return &out, nil
 }
 
+// SSOSetQuery are the optional query parameters of SSOService.Set.
+type SSOSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SSOSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace the SSO in an organization
 //
 // PUT /orgs/{orgId}/sso
-func (s *SSOService) Set(ctx context.Context, orgID string, body SSOSetParams, opts ...RequestOption) (*SSOSetResponse, error) {
+func (s *SSOService) Set(ctx context.Context, orgID string, body SSOSetParams, query *SSOSetQuery, opts ...RequestOption) (*SSOSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sso", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sso", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SSOPatchQuery are the optional query parameters of SSOService.Patch.
+type SSOPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SSOPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the SSO in an organization
+//
+// PATCH /orgs/{orgId}/sso
+func (s *SSOService) Patch(ctx context.Context, orgID string, body SSOPatchParams, query *SSOPatchQuery, opts ...RequestOption) (*SSOPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out SSOPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sso", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -46,6 +98,10 @@ type SSOProvidersQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SSOProvidersQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -59,10 +115,16 @@ func (p *SSOProvidersQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Providers list providers in an organization
+// Providers list providers in an organization (SSO)
 //
 // GET /orgs/{orgId}/sso/providers
 func (s *SSOService) Providers(ctx context.Context, orgID string, query *SSOProvidersQuery, opts ...RequestOption) (*SSOProvidersResponse, error) {
@@ -100,6 +162,10 @@ type SSOAtlasListSSOQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SSOAtlasListSSOQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -112,6 +178,12 @@ func (p *SSOAtlasListSSOQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -143,45 +215,117 @@ func (s *SSOAtlasService) ListSSOAutoPaging(ctx context.Context, orgID string, q
 	})
 }
 
-// CreateSSO create the SSO in an organization
+// SSOAtlasCreateSSOQuery are the optional query parameters of SSOAtlasService.CreateSSO.
+type SSOAtlasCreateSSOQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasCreateSSOQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// CreateSSO create an SSO in an organization
 //
 // POST /orgs/{orgId}/atlas-enterprise/sso
-func (s *SSOAtlasService) CreateSSO(ctx context.Context, orgID string, body SSOAtlasCreateSSOParams, opts ...RequestOption) (*SSOAtlasCreateSSOResponse, error) {
+func (s *SSOAtlasService) CreateSSO(ctx context.Context, orgID string, body SSOAtlasCreateSSOParams, query *SSOAtlasCreateSSOQuery, opts ...RequestOption) (*SSOAtlasCreateSSOResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasCreateSSOResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SSOAtlasSetEnforcedQuery are the optional query parameters of SSOAtlasService.SetEnforced.
+type SSOAtlasSetEnforcedQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasSetEnforcedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetEnforced update the enforce in an organization
 //
 // PATCH /orgs/{orgId}/atlas-enterprise/sso/enforce
-func (s *SSOAtlasService) SetEnforced(ctx context.Context, orgID string, body SSOAtlasSetEnforcedParams, opts ...RequestOption) (*SSOAtlasSetEnforcedResponse, error) {
+func (s *SSOAtlasService) SetEnforced(ctx context.Context, orgID string, body SSOAtlasSetEnforcedParams, query *SSOAtlasSetEnforcedQuery, opts ...RequestOption) (*SSOAtlasSetEnforcedResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasSetEnforcedResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/enforce", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/enforce", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SSOAtlasUpdateSSOQuery are the optional query parameters of SSOAtlasService.UpdateSSO.
+type SSOAtlasUpdateSSOQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasUpdateSSOQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // UpdateSSO update the SSO
 //
 // PATCH /orgs/{orgId}/atlas-enterprise/sso/{id}
-func (s *SSOAtlasService) UpdateSSO(ctx context.Context, orgID string, id string, body SSOAtlasUpdateSSOParams, opts ...RequestOption) (*SSOAtlasUpdateSSOResponse, error) {
+func (s *SSOAtlasService) UpdateSSO(ctx context.Context, orgID string, id string, body SSOAtlasUpdateSSOParams, query *SSOAtlasUpdateSSOQuery, opts ...RequestOption) (*SSOAtlasUpdateSSOResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasUpdateSSOResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SSOAtlasDeleteSSOQuery are the optional query parameters of SSOAtlasService.DeleteSSO.
+type SSOAtlasDeleteSSOQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasDeleteSSOQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteSSO delete the SSO
 //
 // DELETE /orgs/{orgId}/atlas-enterprise/sso/{id}
-func (s *SSOAtlasService) DeleteSSO(ctx context.Context, orgID string, id string, opts ...RequestOption) (*SSOAtlasDeleteSSOResponse, error) {
+func (s *SSOAtlasService) DeleteSSO(ctx context.Context, orgID string, id string, query *SSOAtlasDeleteSSOQuery, opts ...RequestOption) (*SSOAtlasDeleteSSOResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasDeleteSSOResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/sso/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -198,34 +342,88 @@ func (s *SSOAtlasService) GetSCIM(ctx context.Context, orgID string, opts ...Req
 	return &out, nil
 }
 
-// MintSCIM create the mint in an organization
+// SSOAtlasMintSCIMQuery are the optional query parameters of SSOAtlasService.MintSCIM.
+type SSOAtlasMintSCIMQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasMintSCIMQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// MintSCIM mint a SCIM token in an organization
 //
 // POST /orgs/{orgId}/atlas-enterprise/scim/mint
-func (s *SSOAtlasService) MintSCIM(ctx context.Context, orgID string, opts ...RequestOption) (*SSOAtlasMintSCIMResponse, error) {
+func (s *SSOAtlasService) MintSCIM(ctx context.Context, orgID string, query *SSOAtlasMintSCIMQuery, opts ...RequestOption) (*SSOAtlasMintSCIMResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasMintSCIMResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/scim/mint", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/scim/mint", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SSOAtlasRotateSCIMQuery are the optional query parameters of SSOAtlasService.RotateSCIM.
+type SSOAtlasRotateSCIMQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasRotateSCIMQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RotateSCIM rotate the SCIM
 //
 // POST /orgs/{orgId}/atlas-enterprise/scim/rotate
-func (s *SSOAtlasService) RotateSCIM(ctx context.Context, orgID string, opts ...RequestOption) (*SSOAtlasRotateSCIMResponse, error) {
+func (s *SSOAtlasService) RotateSCIM(ctx context.Context, orgID string, query *SSOAtlasRotateSCIMQuery, opts ...RequestOption) (*SSOAtlasRotateSCIMResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasRotateSCIMResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/scim/rotate", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/scim/rotate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SSOAtlasDisableSCIMQuery are the optional query parameters of SSOAtlasService.DisableSCIM.
+type SSOAtlasDisableSCIMQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasDisableSCIMQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DisableSCIM disable the SCIM
 //
 // POST /orgs/{orgId}/atlas-enterprise/scim/disable
-func (s *SSOAtlasService) DisableSCIM(ctx context.Context, orgID string, opts ...RequestOption) (*SSOAtlasDisableSCIMResponse, error) {
+func (s *SSOAtlasService) DisableSCIM(ctx context.Context, orgID string, query *SSOAtlasDisableSCIMQuery, opts ...RequestOption) (*SSOAtlasDisableSCIMResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasDisableSCIMResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/scim/disable", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/scim/disable", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -237,6 +435,10 @@ type SSOAtlasListOauthClientsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SSOAtlasListOauthClientsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -249,6 +451,12 @@ func (p *SSOAtlasListOauthClientsQuery) encode(opts []RequestOption) (url.Values
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -280,34 +488,88 @@ func (s *SSOAtlasService) ListOauthClientsAutoPaging(ctx context.Context, orgID 
 	})
 }
 
+// SSOAtlasCreateOauthClientQuery are the optional query parameters of SSOAtlasService.CreateOauthClient.
+type SSOAtlasCreateOauthClientQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasCreateOauthClientQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateOauthClient create an OAuth client in an organization
 //
 // POST /orgs/{orgId}/atlas-enterprise/oauth-clients
-func (s *SSOAtlasService) CreateOauthClient(ctx context.Context, orgID string, body SSOAtlasCreateOauthClientParams, opts ...RequestOption) (*SSOAtlasCreateOauthClientResponse, error) {
+func (s *SSOAtlasService) CreateOauthClient(ctx context.Context, orgID string, body SSOAtlasCreateOauthClientParams, query *SSOAtlasCreateOauthClientQuery, opts ...RequestOption) (*SSOAtlasCreateOauthClientResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasCreateOauthClientResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/oauth-clients", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/oauth-clients", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SSOAtlasRotateOauthClientSecretQuery are the optional query parameters of SSOAtlasService.RotateOauthClientSecret.
+type SSOAtlasRotateOauthClientSecretQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasRotateOauthClientSecretQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RotateOauthClientSecret rotate secret in an organization (atlas enterprise OAuth clients)
 //
 // POST /orgs/{orgId}/atlas-enterprise/oauth-clients/{id}/rotate-secret
-func (s *SSOAtlasService) RotateOauthClientSecret(ctx context.Context, orgID string, id string, opts ...RequestOption) (*SSOAtlasRotateOauthClientSecretResponse, error) {
+func (s *SSOAtlasService) RotateOauthClientSecret(ctx context.Context, orgID string, id string, query *SSOAtlasRotateOauthClientSecretQuery, opts ...RequestOption) (*SSOAtlasRotateOauthClientSecretResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasRotateOauthClientSecretResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/oauth-clients/"+pathEscape(id)+"/rotate-secret", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/oauth-clients/"+pathEscape(id)+"/rotate-secret", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SSOAtlasDeleteOauthClientQuery are the optional query parameters of SSOAtlasService.DeleteOauthClient.
+type SSOAtlasDeleteOauthClientQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOAtlasDeleteOauthClientQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteOauthClient delete the OAuth client
 //
 // DELETE /orgs/{orgId}/atlas-enterprise/oauth-clients/{id}
-func (s *SSOAtlasService) DeleteOauthClient(ctx context.Context, orgID string, id string, opts ...RequestOption) (*SSOAtlasDeleteOauthClientResponse, error) {
+func (s *SSOAtlasService) DeleteOauthClient(ctx context.Context, orgID string, id string, query *SSOAtlasDeleteOauthClientQuery, opts ...RequestOption) (*SSOAtlasDeleteOauthClientResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOAtlasDeleteOauthClientResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/oauth-clients/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/atlas-enterprise/oauth-clients/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -329,12 +591,64 @@ func (s *SSODiscourseConnectService) GetConfig(ctx context.Context, orgID string
 	return &out, nil
 }
 
+// SSODiscourseConnectSetConfigQuery are the optional query parameters of SSODiscourseConnectService.SetConfig.
+type SSODiscourseConnectSetConfigQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SSODiscourseConnectSetConfigQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetConfig replace the config in an organization
 //
 // PUT /orgs/{orgId}/discourse-connect/config
-func (s *SSODiscourseConnectService) SetConfig(ctx context.Context, orgID string, body SSODiscourseConnectSetConfigParams, opts ...RequestOption) (*SSODiscourseConnectSetConfigResponse, error) {
+func (s *SSODiscourseConnectService) SetConfig(ctx context.Context, orgID string, body SSODiscourseConnectSetConfigParams, query *SSODiscourseConnectSetConfigQuery, opts ...RequestOption) (*SSODiscourseConnectSetConfigResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSODiscourseConnectSetConfigResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/discourse-connect/config", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/discourse-connect/config", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SSODiscourseConnectPatchConfigQuery are the optional query parameters of SSODiscourseConnectService.PatchConfig.
+type SSODiscourseConnectPatchConfigQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SSODiscourseConnectPatchConfigQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchConfig update the config in an organization
+//
+// PATCH /orgs/{orgId}/discourse-connect/config
+func (s *SSODiscourseConnectService) PatchConfig(ctx context.Context, orgID string, body SSODiscourseConnectPatchConfigParams, query *SSODiscourseConnectPatchConfigQuery, opts ...RequestOption) (*SSODiscourseConnectPatchConfigResponse, error) {
+	v, opts := query.encode(opts)
+	var out SSODiscourseConnectPatchConfigResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/discourse-connect/config", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -363,13 +677,13 @@ func (p *SSODiscourseConnectProviderQuery) encode(opts []RequestOption) (url.Val
 // Provider get the provider in an organization (discourse connect)
 //
 // GET /orgs/{orgId}/discourse-connect/provider
-func (s *SSODiscourseConnectService) Provider(ctx context.Context, orgID string, query *SSODiscourseConnectProviderQuery, opts ...RequestOption) (*ErrorEnvelope, error) {
+func (s *SSODiscourseConnectService) Provider(ctx context.Context, orgID string, query *SSODiscourseConnectProviderQuery, opts ...RequestOption) (any, error) {
 	v, opts := query.encode(opts)
-	var out ErrorEnvelope
+	var out any
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/discourse-connect/provider", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // SSOLTIService holds the operations under client.SSO.LTI.
@@ -388,12 +702,64 @@ func (s *SSOLTIService) Get(ctx context.Context, orgID string, opts ...RequestOp
 	return &out, nil
 }
 
+// SSOLTISetQuery are the optional query parameters of SSOLTIService.Set.
+type SSOLTISetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SSOLTISetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace the LTI in an organization
 //
 // PUT /orgs/{orgId}/lti
-func (s *SSOLTIService) Set(ctx context.Context, orgID string, body SSOLTISetParams, opts ...RequestOption) (*SSOLTISetResponse, error) {
+func (s *SSOLTIService) Set(ctx context.Context, orgID string, body SSOLTISetParams, query *SSOLTISetQuery, opts ...RequestOption) (*SSOLTISetResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOLTISetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/lti", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/lti", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SSOLTIPatchQuery are the optional query parameters of SSOLTIService.Patch.
+type SSOLTIPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SSOLTIPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the LTI in an organization
+//
+// PATCH /orgs/{orgId}/lti
+func (s *SSOLTIService) Patch(ctx context.Context, orgID string, body SSOLTIPatchParams, query *SSOLTIPatchQuery, opts ...RequestOption) (*SSOLTIPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out SSOLTIPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/lti", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -415,12 +781,64 @@ func (s *SSOSAMLService) Get(ctx context.Context, orgID string, opts ...RequestO
 	return &out, nil
 }
 
+// SSOSAMLSetQuery are the optional query parameters of SSOSAMLService.Set.
+type SSOSAMLSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SSOSAMLSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace the SAML in an organization
 //
 // PUT /orgs/{orgId}/saml
-func (s *SSOSAMLService) Set(ctx context.Context, orgID string, body SSOSAMLSetParams, opts ...RequestOption) (*SSOSAMLSetResponse, error) {
+func (s *SSOSAMLService) Set(ctx context.Context, orgID string, body SSOSAMLSetParams, query *SSOSAMLSetQuery, opts ...RequestOption) (*SSOSAMLSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOSAMLSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/saml", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/saml", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SSOSAMLPatchQuery are the optional query parameters of SSOSAMLService.Patch.
+type SSOSAMLPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SSOSAMLPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the SAML in an organization
+//
+// PATCH /orgs/{orgId}/saml
+func (s *SSOSAMLService) Patch(ctx context.Context, orgID string, body SSOSAMLPatchParams, query *SSOSAMLPatchQuery, opts ...RequestOption) (*SSOSAMLPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out SSOSAMLPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/saml", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -442,23 +860,59 @@ func (s *SSOSCIMService) Status(ctx context.Context, orgID string, opts ...Reque
 	return &out, nil
 }
 
-// Create create the token in an organization
+// SSOSCIMCreateQuery are the optional query parameters of SSOSCIMService.Create.
+type SSOSCIMCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOSCIMCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Create create a token in an organization
 //
 // POST /orgs/{orgId}/scim/token
-func (s *SSOSCIMService) Create(ctx context.Context, orgID string, opts ...RequestOption) (*SSOSCIMCreateResponse, error) {
+func (s *SSOSCIMService) Create(ctx context.Context, orgID string, query *SSOSCIMCreateQuery, opts ...RequestOption) (*SSOSCIMCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOSCIMCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/scim/token", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/scim/token", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Revoke delete the token in an organization
+// SSOSCIMRevokeQuery are the optional query parameters of SSOSCIMService.Revoke.
+type SSOSCIMRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SSOSCIMRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the SCIM token
 //
 // DELETE /orgs/{orgId}/scim/token
-func (s *SSOSCIMService) Revoke(ctx context.Context, orgID string, opts ...RequestOption) (*SSOSCIMRevokeResponse, error) {
+func (s *SSOSCIMService) Revoke(ctx context.Context, orgID string, query *SSOSCIMRevokeQuery, opts ...RequestOption) (*SSOSCIMRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out SSOSCIMRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/scim/token", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/scim/token", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

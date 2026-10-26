@@ -13,17 +13,21 @@ type DeliverySiteService struct {
 	c *Client
 }
 
-// DeliverySiteRoutes0Query are the optional query parameters of DeliverySiteService.Routes0.
-type DeliverySiteRoutes0Query struct {
+// DeliverySiteRoutesQuery are the optional query parameters of DeliverySiteService.Routes.
+type DeliverySiteRoutesQuery struct {
 	// A locale code (the source locale when omitted).
 	Locale *string
 	// `page.nextCursor` from the previous window.
 	Cursor *string
 	// Routes per window, 1–100 (default 20).
 	Limit *int64
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteRoutes0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteRoutesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -37,24 +41,30 @@ func (p *DeliverySiteRoutes0Query) encode(opts []RequestOption) (url.Values, []R
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Routes0 list routes (libraries)
+// Routes list routes (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/routes
-func (s *DeliverySiteService) Routes0(ctx context.Context, libraryID string, query *DeliverySiteRoutes0Query, opts ...RequestOption) (*DeliverySiteRoutes0Response, error) {
+func (s *DeliverySiteService) Routes(ctx context.Context, libraryID string, query *DeliverySiteRoutesQuery, opts ...RequestOption) (*DeliverySiteRoutesResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteRoutes0Response
+	var out DeliverySiteRoutesResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/routes", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Routes0AutoPaging walks every item of Routes0 across all pages.
-func (s *DeliverySiteService) Routes0AutoPaging(ctx context.Context, libraryID string, query *DeliverySiteRoutes0Query, opts ...RequestOption) *Iter[DeliverySiteRoutes0ResponseDataItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteRoutes0ResponseDataItem, string, error) {
+// RoutesAutoPaging walks every item of Routes across all pages.
+func (s *DeliverySiteService) RoutesAutoPaging(ctx context.Context, libraryID string, query *DeliverySiteRoutesQuery, opts ...RequestOption) *Iter[DeliverySiteRoutesResponseDataItem] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteRoutesResponseDataItem, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -63,21 +73,25 @@ func (s *DeliverySiteService) Routes0AutoPaging(ctx context.Context, libraryID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DeliverySiteRoutes0ResponseDataItem](raw, "data")
+		return decodePage[DeliverySiteRoutesResponseDataItem](raw, "data")
 	})
 }
 
-// DeliverySiteRoutes1Query are the optional query parameters of DeliverySiteService.Routes1.
-type DeliverySiteRoutes1Query struct {
+// DeliverySiteRoutesByKeyQuery are the optional query parameters of DeliverySiteService.RoutesByKey.
+type DeliverySiteRoutesByKeyQuery struct {
 	// A locale code (the source locale when omitted).
 	Locale *string
 	// `page.nextCursor` from the previous window.
 	Cursor *string
 	// Routes per window, 1–100 (default 20).
 	Limit *int64
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteRoutes1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteRoutesByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -91,24 +105,30 @@ func (p *DeliverySiteRoutes1Query) encode(opts []RequestOption) (url.Values, []R
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Routes1 list routes (k)
+// RoutesByKey list routes (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/routes
-func (s *DeliverySiteService) Routes1(ctx context.Context, keyID string, query *DeliverySiteRoutes1Query, opts ...RequestOption) (*DeliverySiteRoutes1Response, error) {
+func (s *DeliverySiteService) RoutesByKey(ctx context.Context, keyID string, query *DeliverySiteRoutesByKeyQuery, opts ...RequestOption) (*DeliverySiteRoutesByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteRoutes1Response
+	var out DeliverySiteRoutesByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/routes", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Routes1AutoPaging walks every item of Routes1 across all pages.
-func (s *DeliverySiteService) Routes1AutoPaging(ctx context.Context, keyID string, query *DeliverySiteRoutes1Query, opts ...RequestOption) *Iter[DeliverySiteRoutes1ResponseDataItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteRoutes1ResponseDataItem, string, error) {
+// RoutesByKeyAutoPaging walks every item of RoutesByKey across all pages.
+func (s *DeliverySiteService) RoutesByKeyAutoPaging(ctx context.Context, keyID string, query *DeliverySiteRoutesByKeyQuery, opts ...RequestOption) *Iter[DeliverySiteRoutesByKeyResponseDataItem] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteRoutesByKeyResponseDataItem, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -117,12 +137,12 @@ func (s *DeliverySiteService) Routes1AutoPaging(ctx context.Context, keyID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DeliverySiteRoutes1ResponseDataItem](raw, "data")
+		return decodePage[DeliverySiteRoutesByKeyResponseDataItem](raw, "data")
 	})
 }
 
-// DeliverySiteResolve0Query are the optional query parameters of DeliverySiteService.Resolve0.
-type DeliverySiteResolve0Query struct {
+// DeliverySiteResolveQuery are the optional query parameters of DeliverySiteService.Resolve.
+type DeliverySiteResolveQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -139,7 +159,7 @@ type DeliverySiteResolve0Query struct {
 	Path *string
 }
 
-func (p *DeliverySiteResolve0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteResolveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -168,20 +188,20 @@ func (p *DeliverySiteResolve0Query) encode(opts []RequestOption) (url.Values, []
 	return v, opts
 }
 
-// Resolve0 resolve a site path (libraries)
+// Resolve resolve a site path (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/routes/resolve
-func (s *DeliverySiteService) Resolve0(ctx context.Context, libraryID string, query *DeliverySiteResolve0Query, opts ...RequestOption) (*DeliverySiteResolve0Response, error) {
+func (s *DeliverySiteService) Resolve(ctx context.Context, libraryID string, query *DeliverySiteResolveQuery, opts ...RequestOption) (*DeliverySiteResolveByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteResolve0Response
+	var out DeliverySiteResolveByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/routes/resolve", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliverySiteResolve1Query are the optional query parameters of DeliverySiteService.Resolve1.
-type DeliverySiteResolve1Query struct {
+// DeliverySiteResolveByKeyQuery are the optional query parameters of DeliverySiteService.ResolveByKey.
+type DeliverySiteResolveByKeyQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -198,7 +218,7 @@ type DeliverySiteResolve1Query struct {
 	Path *string
 }
 
-func (p *DeliverySiteResolve1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteResolveByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -227,27 +247,31 @@ func (p *DeliverySiteResolve1Query) encode(opts []RequestOption) (url.Values, []
 	return v, opts
 }
 
-// Resolve1 resolve a site path (k)
+// ResolveByKey resolve a site path (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/routes/resolve
-func (s *DeliverySiteService) Resolve1(ctx context.Context, keyID string, query *DeliverySiteResolve1Query, opts ...RequestOption) (*DeliverySiteResolve1Response, error) {
+func (s *DeliverySiteService) ResolveByKey(ctx context.Context, keyID string, query *DeliverySiteResolveByKeyQuery, opts ...RequestOption) (*DeliverySiteResolveByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteResolve1Response
+	var out DeliverySiteResolveByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/routes/resolve", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeliverySiteRedirects0Query are the optional query parameters of DeliverySiteService.Redirects0.
-type DeliverySiteRedirects0Query struct {
+// DeliverySiteRedirectsQuery are the optional query parameters of DeliverySiteService.Redirects.
+type DeliverySiteRedirectsQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteRedirects0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteRedirectsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -258,23 +282,29 @@ func (p *DeliverySiteRedirects0Query) encode(opts []RequestOption) (url.Values, 
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Redirects0 list redirects (libraries)
+// Redirects list redirects (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/redirects
-func (s *DeliverySiteService) Redirects0(ctx context.Context, libraryID string, query *DeliverySiteRedirects0Query, opts ...RequestOption) (*DeliverySiteRedirects0Response, error) {
+func (s *DeliverySiteService) Redirects(ctx context.Context, libraryID string, query *DeliverySiteRedirectsQuery, opts ...RequestOption) (*DeliverySiteRedirectsByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteRedirects0Response
+	var out DeliverySiteRedirectsByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/redirects", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Redirects0AutoPaging walks every item of Redirects0 across all pages.
-func (s *DeliverySiteService) Redirects0AutoPaging(ctx context.Context, libraryID string, query *DeliverySiteRedirects0Query, opts ...RequestOption) *Iter[any] {
+// RedirectsAutoPaging walks every item of Redirects across all pages.
+func (s *DeliverySiteService) RedirectsAutoPaging(ctx context.Context, libraryID string, query *DeliverySiteRedirectsQuery, opts ...RequestOption) *Iter[any] {
 	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
@@ -288,15 +318,19 @@ func (s *DeliverySiteService) Redirects0AutoPaging(ctx context.Context, libraryI
 	})
 }
 
-// DeliverySiteRedirects1Query are the optional query parameters of DeliverySiteService.Redirects1.
-type DeliverySiteRedirects1Query struct {
+// DeliverySiteRedirectsByKeyQuery are the optional query parameters of DeliverySiteService.RedirectsByKey.
+type DeliverySiteRedirectsByKeyQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteRedirects1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteRedirectsByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -307,23 +341,29 @@ func (p *DeliverySiteRedirects1Query) encode(opts []RequestOption) (url.Values, 
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Redirects1 list redirects (k)
+// RedirectsByKey list redirects (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/redirects
-func (s *DeliverySiteService) Redirects1(ctx context.Context, keyID string, query *DeliverySiteRedirects1Query, opts ...RequestOption) (*DeliverySiteRedirects1Response, error) {
+func (s *DeliverySiteService) RedirectsByKey(ctx context.Context, keyID string, query *DeliverySiteRedirectsByKeyQuery, opts ...RequestOption) (*DeliverySiteRedirectsByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteRedirects1Response
+	var out DeliverySiteRedirectsByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/redirects", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Redirects1AutoPaging walks every item of Redirects1 across all pages.
-func (s *DeliverySiteService) Redirects1AutoPaging(ctx context.Context, keyID string, query *DeliverySiteRedirects1Query, opts ...RequestOption) *Iter[any] {
+// RedirectsByKeyAutoPaging walks every item of RedirectsByKey across all pages.
+func (s *DeliverySiteService) RedirectsByKeyAutoPaging(ctx context.Context, keyID string, query *DeliverySiteRedirectsByKeyQuery, opts ...RequestOption) *Iter[any] {
 	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
@@ -337,15 +377,19 @@ func (s *DeliverySiteService) Redirects1AutoPaging(ctx context.Context, keyID st
 	})
 }
 
-// DeliverySiteSitemap0Query are the optional query parameters of DeliverySiteService.Sitemap0.
-type DeliverySiteSitemap0Query struct {
+// DeliverySiteSitemapQuery are the optional query parameters of DeliverySiteService.Sitemap.
+type DeliverySiteSitemapQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteSitemap0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteSitemapQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -356,23 +400,29 @@ func (p *DeliverySiteSitemap0Query) encode(opts []RequestOption) (url.Values, []
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Sitemap0 read the sitemap (libraries)
+// Sitemap read the sitemap (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/sitemap.json
-func (s *DeliverySiteService) Sitemap0(ctx context.Context, libraryID string, query *DeliverySiteSitemap0Query, opts ...RequestOption) (*DeliverySiteSitemap0Response, error) {
+func (s *DeliverySiteService) Sitemap(ctx context.Context, libraryID string, query *DeliverySiteSitemapQuery, opts ...RequestOption) (*DeliverySiteSitemapByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteSitemap0Response
+	var out DeliverySiteSitemapByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/sitemap.json", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Sitemap0AutoPaging walks every item of Sitemap0 across all pages.
-func (s *DeliverySiteService) Sitemap0AutoPaging(ctx context.Context, libraryID string, query *DeliverySiteSitemap0Query, opts ...RequestOption) *Iter[any] {
+// SitemapAutoPaging walks every item of Sitemap across all pages.
+func (s *DeliverySiteService) SitemapAutoPaging(ctx context.Context, libraryID string, query *DeliverySiteSitemapQuery, opts ...RequestOption) *Iter[any] {
 	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
@@ -386,15 +436,19 @@ func (s *DeliverySiteService) Sitemap0AutoPaging(ctx context.Context, libraryID 
 	})
 }
 
-// DeliverySiteSitemap1Query are the optional query parameters of DeliverySiteService.Sitemap1.
-type DeliverySiteSitemap1Query struct {
+// DeliverySiteSitemapByKeyQuery are the optional query parameters of DeliverySiteService.SitemapByKey.
+type DeliverySiteSitemapByKeyQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteSitemap1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteSitemapByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -405,23 +459,29 @@ func (p *DeliverySiteSitemap1Query) encode(opts []RequestOption) (url.Values, []
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Sitemap1 read the sitemap (k)
+// SitemapByKey read the sitemap (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/sitemap.json
-func (s *DeliverySiteService) Sitemap1(ctx context.Context, keyID string, query *DeliverySiteSitemap1Query, opts ...RequestOption) (*DeliverySiteSitemap1Response, error) {
+func (s *DeliverySiteService) SitemapByKey(ctx context.Context, keyID string, query *DeliverySiteSitemapByKeyQuery, opts ...RequestOption) (*DeliverySiteSitemapByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteSitemap1Response
+	var out DeliverySiteSitemapByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/sitemap.json", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Sitemap1AutoPaging walks every item of Sitemap1 across all pages.
-func (s *DeliverySiteService) Sitemap1AutoPaging(ctx context.Context, keyID string, query *DeliverySiteSitemap1Query, opts ...RequestOption) *Iter[any] {
+// SitemapByKeyAutoPaging walks every item of SitemapByKey across all pages.
+func (s *DeliverySiteService) SitemapByKeyAutoPaging(ctx context.Context, keyID string, query *DeliverySiteSitemapByKeyQuery, opts ...RequestOption) *Iter[any] {
 	return newIter(ctx, func(ctx context.Context, cursor string) ([]any, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
@@ -435,8 +495,8 @@ func (s *DeliverySiteService) Sitemap1AutoPaging(ctx context.Context, keyID stri
 	})
 }
 
-// DeliverySiteSearch0Query are the optional query parameters of DeliverySiteService.Search0.
-type DeliverySiteSearch0Query struct {
+// DeliverySiteSearchQuery are the optional query parameters of DeliverySiteService.Search.
+type DeliverySiteSearchQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -457,9 +517,13 @@ type DeliverySiteSearch0Query struct {
 	Type *string
 	// The text to search for (2–200 characters).
 	Q *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteSearch0Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteSearchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -494,24 +558,30 @@ func (p *DeliverySiteSearch0Query) encode(opts []RequestOption) (url.Values, []R
 	if p.Q != nil {
 		v.Set("q", *p.Q)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Search0 search entries (libraries)
+// Search search entries (libraries)
 //
 // GET /delivery/v1/libraries/{libraryId}/search
-func (s *DeliverySiteService) Search0(ctx context.Context, libraryID string, query *DeliverySiteSearch0Query, opts ...RequestOption) (*DeliverySiteSearch0Response, error) {
+func (s *DeliverySiteService) Search(ctx context.Context, libraryID string, query *DeliverySiteSearchQuery, opts ...RequestOption) (*DeliverySiteSearchByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteSearch0Response
+	var out DeliverySiteSearchByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/libraries/"+pathEscape(libraryID)+"/search", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Search0AutoPaging walks every item of Search0 across all pages.
-func (s *DeliverySiteService) Search0AutoPaging(ctx context.Context, libraryID string, query *DeliverySiteSearch0Query, opts ...RequestOption) *Iter[DeliverySiteSearch0ResponseDataItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteSearch0ResponseDataItem, string, error) {
+// SearchAutoPaging walks every item of Search across all pages.
+func (s *DeliverySiteService) SearchAutoPaging(ctx context.Context, libraryID string, query *DeliverySiteSearchQuery, opts ...RequestOption) *Iter[DeliverySiteSearchByKeyResponseDataItem] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteSearchByKeyResponseDataItem, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -520,12 +590,12 @@ func (s *DeliverySiteService) Search0AutoPaging(ctx context.Context, libraryID s
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DeliverySiteSearch0ResponseDataItem](raw, "data")
+		return decodePage[DeliverySiteSearchByKeyResponseDataItem](raw, "data")
 	})
 }
 
-// DeliverySiteSearch1Query are the optional query parameters of DeliverySiteService.Search1.
-type DeliverySiteSearch1Query struct {
+// DeliverySiteSearchByKeyQuery are the optional query parameters of DeliverySiteService.SearchByKey.
+type DeliverySiteSearchByKeyQuery struct {
 	// A locale code (the library’s source locale when omitted).
 	Locale *string
 	// Fall back through the declared locale chain, then the source (default `true`).
@@ -546,9 +616,13 @@ type DeliverySiteSearch1Query struct {
 	Type *string
 	// The text to search for (2–200 characters).
 	Q *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
-func (p *DeliverySiteSearch1Query) encode(opts []RequestOption) (url.Values, []RequestOption) {
+func (p *DeliverySiteSearchByKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
@@ -583,24 +657,30 @@ func (p *DeliverySiteSearch1Query) encode(opts []RequestOption) (url.Values, []R
 	if p.Q != nil {
 		v.Set("q", *p.Q)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// Search1 search entries (k)
+// SearchByKey search entries (by delivery key)
 //
 // GET /delivery/v1/k/{keyId}/search
-func (s *DeliverySiteService) Search1(ctx context.Context, keyID string, query *DeliverySiteSearch1Query, opts ...RequestOption) (*DeliverySiteSearch1Response, error) {
+func (s *DeliverySiteService) SearchByKey(ctx context.Context, keyID string, query *DeliverySiteSearchByKeyQuery, opts ...RequestOption) (*DeliverySiteSearchByKeyResponse, error) {
 	v, opts := query.encode(opts)
-	var out DeliverySiteSearch1Response
+	var out DeliverySiteSearchByKeyResponse
 	if err := s.c.do(ctx, "GET", "/delivery/v1/k/"+pathEscape(keyID)+"/search", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Search1AutoPaging walks every item of Search1 across all pages.
-func (s *DeliverySiteService) Search1AutoPaging(ctx context.Context, keyID string, query *DeliverySiteSearch1Query, opts ...RequestOption) *Iter[DeliverySiteSearch1ResponseDataItem] {
-	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteSearch1ResponseDataItem, string, error) {
+// SearchByKeyAutoPaging walks every item of SearchByKey across all pages.
+func (s *DeliverySiteService) SearchByKeyAutoPaging(ctx context.Context, keyID string, query *DeliverySiteSearchByKeyQuery, opts ...RequestOption) *Iter[DeliverySiteSearchByKeyResponseDataItem] {
+	return newIter(ctx, func(ctx context.Context, cursor string) ([]DeliverySiteSearchByKeyResponseDataItem, string, error) {
 		v, opts := query.encode(opts)
 		if cursor != "" {
 			v.Set("cursor", cursor)
@@ -609,6 +689,6 @@ func (s *DeliverySiteService) Search1AutoPaging(ctx context.Context, keyID strin
 		if err != nil {
 			return nil, "", err
 		}
-		return decodePage[DeliverySiteSearch1ResponseDataItem](raw, "data")
+		return decodePage[DeliverySiteSearchByKeyResponseDataItem](raw, "data")
 	})
 }

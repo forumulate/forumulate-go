@@ -16,11 +16,16 @@ type MyActivityService struct {
 // MyActivityListQuery are the optional query parameters of MyActivityService.List.
 type MyActivityListQuery struct {
 	// Rows per page.
-	Limit   *int64
+	Limit *int64
+	Type  *string
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
 	SpaceID *string
 	Q       *string
 	Cursor  *string
-	Type    *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *MyActivityListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +36,9 @@ func (p *MyActivityListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
+	if p.Type != nil {
+		v.Set("type", *p.Type)
+	}
 	if p.SpaceID != nil {
 		v.Set("spaceId", *p.SpaceID)
 	}
@@ -40,8 +48,11 @@ func (p *MyActivityListQuery) encode(opts []RequestOption) (url.Values, []Reques
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
-	if p.Type != nil {
-		v.Set("type", *p.Type)
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

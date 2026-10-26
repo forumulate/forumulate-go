@@ -14,12 +14,45 @@ type StatusService struct {
 	Monitors *StatusMonitorsService
 }
 
+// StatusUpdateIncidentQuery are the optional query parameters of StatusService.UpdateIncident.
+type StatusUpdateIncidentQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusUpdateIncidentQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UpdateIncident update the incident
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}
+func (s *StatusService) UpdateIncident(ctx context.Context, orgID string, spaceID string, incidentID string, body StatusUpdateIncidentParams, query *StatusUpdateIncidentQuery, opts ...RequestOption) (*StatusUpdateIncidentResponse, error) {
+	v, opts := query.encode(opts)
+	var out StatusUpdateIncidentResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID), v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // StatusListChannelsQuery are the optional query parameters of StatusService.ListChannels.
 type StatusListChannelsQuery struct {
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusListChannelsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -33,10 +66,16 @@ func (p *StatusListChannelsQuery) encode(opts []RequestOption) (url.Values, []Re
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
-// ListChannels list channels in a space
+// ListChannels list channels in a space (status)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/status/channels
 func (s *StatusService) ListChannels(ctx context.Context, orgID string, spaceID string, query *StatusListChannelsQuery, opts ...RequestOption) (*StatusListChannelsResponse, error) {
@@ -63,23 +102,59 @@ func (s *StatusService) ListChannelsAutoPaging(ctx context.Context, orgID string
 	})
 }
 
-// AddChannel create a channel in a space
+// StatusAddChannelQuery are the optional query parameters of StatusService.AddChannel.
+type StatusAddChannelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusAddChannelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// AddChannel create a channel in a space (status)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/channels
-func (s *StatusService) AddChannel(ctx context.Context, orgID string, spaceID string, body StatusAddChannelParams, opts ...RequestOption) (*StatusAddChannelResponse, error) {
+func (s *StatusService) AddChannel(ctx context.Context, orgID string, spaceID string, body StatusAddChannelParams, query *StatusAddChannelQuery, opts ...RequestOption) (*StatusAddChannelResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusAddChannelResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/channels", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/channels", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RemoveChannel delete the channel
+// StatusRemoveChannelQuery are the optional query parameters of StatusService.RemoveChannel.
+type StatusRemoveChannelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusRemoveChannelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RemoveChannel delete the channel (status)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/channels/{channelId}
-func (s *StatusService) RemoveChannel(ctx context.Context, orgID string, spaceID string, channelID string, opts ...RequestOption) (*StatusRemoveChannelResponse, error) {
+func (s *StatusService) RemoveChannel(ctx context.Context, orgID string, spaceID string, channelID string, query *StatusRemoveChannelQuery, opts ...RequestOption) (*StatusRemoveChannelResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusRemoveChannelResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/channels/"+pathEscape(channelID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/channels/"+pathEscape(channelID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -87,10 +162,16 @@ func (s *StatusService) RemoveChannel(ctx context.Context, orgID string, spaceID
 
 // StatusMonitorsStatusQuery are the optional query parameters of StatusService.MonitorsStatus.
 type StatusMonitorsStatusQuery struct {
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusMonitorsStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -98,11 +179,20 @@ func (p *StatusMonitorsStatusQuery) encode(opts []RequestOption) (url.Values, []
 	if p == nil {
 		return v, opts
 	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -134,34 +224,88 @@ func (s *StatusService) MonitorsStatusAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// StatusAddMonitorQuery are the optional query parameters of StatusService.AddMonitor.
+type StatusAddMonitorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusAddMonitorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AddMonitor add a status monitor
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/monitors
-func (s *StatusService) AddMonitor(ctx context.Context, orgID string, spaceID string, body StatusAddMonitorParams, opts ...RequestOption) (*StatusAddMonitorResponse, error) {
+func (s *StatusService) AddMonitor(ctx context.Context, orgID string, spaceID string, body StatusAddMonitorParams, query *StatusAddMonitorQuery, opts ...RequestOption) (*StatusAddMonitorResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusAddMonitorResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/monitors", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/monitors", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// StatusUpdateMonitorQuery are the optional query parameters of StatusService.UpdateMonitor.
+type StatusUpdateMonitorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusUpdateMonitorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // UpdateMonitor update the monitor
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/status/monitors/{monitorId}
-func (s *StatusService) UpdateMonitor(ctx context.Context, orgID string, spaceID string, monitorID string, body StatusUpdateMonitorParams, opts ...RequestOption) (*StatusUpdateMonitorResponse, error) {
+func (s *StatusService) UpdateMonitor(ctx context.Context, orgID string, spaceID string, monitorID string, body StatusUpdateMonitorParams, query *StatusUpdateMonitorQuery, opts ...RequestOption) (*StatusUpdateMonitorResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusUpdateMonitorResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/monitors/"+pathEscape(monitorID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/monitors/"+pathEscape(monitorID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// StatusRemoveMonitorQuery are the optional query parameters of StatusService.RemoveMonitor.
+type StatusRemoveMonitorQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusRemoveMonitorQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveMonitor delete the monitor
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/monitors/{monitorId}
-func (s *StatusService) RemoveMonitor(ctx context.Context, orgID string, spaceID string, monitorID string, opts ...RequestOption) (*StatusRemoveMonitorResponse, error) {
+func (s *StatusService) RemoveMonitor(ctx context.Context, orgID string, spaceID string, monitorID string, query *StatusRemoveMonitorQuery, opts ...RequestOption) (*StatusRemoveMonitorResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusRemoveMonitorResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/monitors/"+pathEscape(monitorID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/monitors/"+pathEscape(monitorID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -178,15 +322,67 @@ func (s *StatusService) GetSettings(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
+// StatusSetSettingsQuery are the optional query parameters of StatusService.SetSettings.
+type StatusSetSettingsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *StatusSetSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetSettings replace settings in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/status/settings
-func (s *StatusService) SetSettings(ctx context.Context, orgID string, spaceID string, body StatusSetSettingsParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/settings", nil, body, &out, opts); err != nil {
+func (s *StatusService) SetSettings(ctx context.Context, orgID string, spaceID string, body StatusSetSettingsParams, query *StatusSetSettingsQuery, opts ...RequestOption) (*StatusPatchSettingsResponse, error) {
+	v, opts := query.encode(opts)
+	var out StatusPatchSettingsResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/settings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// StatusPatchSettingsQuery are the optional query parameters of StatusService.PatchSettings.
+type StatusPatchSettingsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *StatusPatchSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchSettings update settings in a space (status)
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/status/settings
+func (s *StatusService) PatchSettings(ctx context.Context, orgID string, spaceID string, body StatusPatchSettingsParams, query *StatusPatchSettingsQuery, opts ...RequestOption) (*StatusPatchSettingsResponse, error) {
+	v, opts := query.encode(opts)
+	var out StatusPatchSettingsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/settings", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // StatusGetGroupsQuery are the optional query parameters of StatusService.GetGroups.
@@ -195,6 +391,10 @@ type StatusGetGroupsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusGetGroupsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -207,6 +407,12 @@ func (p *StatusGetGroupsQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -238,12 +444,64 @@ func (s *StatusService) GetGroupsAutoPaging(ctx context.Context, orgID string, s
 	})
 }
 
+// StatusSetGroupsQuery are the optional query parameters of StatusService.SetGroups.
+type StatusSetGroupsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *StatusSetGroupsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetGroups replace groups in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/status/groups
-func (s *StatusService) SetGroups(ctx context.Context, orgID string, spaceID string, body StatusSetGroupsParams, opts ...RequestOption) (*StatusSetGroupsResponse, error) {
+func (s *StatusService) SetGroups(ctx context.Context, orgID string, spaceID string, body StatusSetGroupsParams, query *StatusSetGroupsQuery, opts ...RequestOption) (*StatusSetGroupsResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusSetGroupsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/groups", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/groups", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// StatusPatchGroupsQuery are the optional query parameters of StatusService.PatchGroups.
+type StatusPatchGroupsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *StatusPatchGroupsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchGroups update groups in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/status/groups
+func (s *StatusService) PatchGroups(ctx context.Context, orgID string, spaceID string, body any, query *StatusPatchGroupsQuery, opts ...RequestOption) (*StatusPatchGroupsResponse, error) {
+	v, opts := query.encode(opts)
+	var out StatusPatchGroupsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/groups", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -260,34 +518,59 @@ func (s *StatusService) Board(ctx context.Context, orgID string, spaceID string,
 	return &out, nil
 }
 
+// StatusCreateIncidentQuery are the optional query parameters of StatusService.CreateIncident.
+type StatusCreateIncidentQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusCreateIncidentQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateIncident create an incident in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/incidents
-func (s *StatusService) CreateIncident(ctx context.Context, orgID string, spaceID string, body StatusCreateIncidentParams, opts ...RequestOption) (*StatusCreateIncidentResponse, error) {
+func (s *StatusService) CreateIncident(ctx context.Context, orgID string, spaceID string, body StatusCreateIncidentParams, query *StatusCreateIncidentQuery, opts ...RequestOption) (*StatusCreateIncidentResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusCreateIncidentResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// UpdateIncident update the incident
-//
-// PATCH /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}
-func (s *StatusService) UpdateIncident(ctx context.Context, orgID string, spaceID string, incidentID string, body StatusUpdateIncidentParams, opts ...RequestOption) (*StatusUpdateIncidentResponse, error) {
-	var out StatusUpdateIncidentResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID), nil, body, &out, opts); err != nil {
-		return nil, err
+// StatusAddIncidentUpdateQuery are the optional query parameters of StatusService.AddIncidentUpdate.
+type StatusAddIncidentUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusAddIncidentUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
 	}
-	return &out, nil
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // AddIncidentUpdate create an update in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/incidents/{incidentId}/updates
-func (s *StatusService) AddIncidentUpdate(ctx context.Context, orgID string, spaceID string, incidentID string, body StatusAddIncidentUpdateParams, opts ...RequestOption) (*StatusAddIncidentUpdateResponse, error) {
+func (s *StatusService) AddIncidentUpdate(ctx context.Context, orgID string, spaceID string, incidentID string, body StatusAddIncidentUpdateParams, query *StatusAddIncidentUpdateQuery, opts ...RequestOption) (*StatusAddIncidentUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusAddIncidentUpdateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/updates", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/incidents/"+pathEscape(incidentID)+"/updates", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // VersioningService holds the operations under client.Versioning.
@@ -22,12 +24,30 @@ func (s *VersioningService) Get(ctx context.Context, orgID string, spaceID strin
 	return &out, nil
 }
 
+// VersioningSetQuery are the optional query parameters of VersioningService.Set.
+type VersioningSetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *VersioningSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Set replace the versioning in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/docs/versioning
-func (s *VersioningService) Set(ctx context.Context, orgID string, spaceID string, body VersioningSetParams, opts ...RequestOption) (any, error) {
+func (s *VersioningService) Set(ctx context.Context, orgID string, spaceID string, body VersioningSetParams, query *VersioningSetQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/versioning", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/docs/versioning", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // SiteFrontPageService holds the operations under client.SiteFrontPage.
@@ -11,34 +13,137 @@ type SiteFrontPageService struct {
 	c *Client
 }
 
-// Get get the front page in an organization
+// SiteFrontPageGetQuery are the optional query parameters of SiteFrontPageService.Get.
+type SiteFrontPageGetQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+}
+
+func (p *SiteFrontPageGetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	return v, opts
+}
+
+// Get the site front page
 //
 // GET /orgs/{orgId}/sites/{siteId}/front-page
-func (s *SiteFrontPageService) Get(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*SiteFrontPageGetResponse, error) {
+func (s *SiteFrontPageService) Get(ctx context.Context, orgID string, siteID string, query *SiteFrontPageGetQuery, opts ...RequestOption) (*SiteFrontPageGetResponse, error) {
+	v, opts := query.encode(opts)
 	var out SiteFrontPageGetResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Set replace the front page in an organization
+// SiteFrontPageSetQuery are the optional query parameters of SiteFrontPageService.Set.
+type SiteFrontPageSetQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *SiteFrontPageSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Set replace the site front page
 //
 // PUT /orgs/{orgId}/sites/{siteId}/front-page
-func (s *SiteFrontPageService) Set(ctx context.Context, orgID string, siteID string, body SiteFrontPageSetParams, opts ...RequestOption) (*SiteFrontPageSetResponse, error) {
-	var out SiteFrontPageSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", nil, body, &out, opts); err != nil {
+func (s *SiteFrontPageService) Set(ctx context.Context, orgID string, siteID string, body SiteFrontPageSetBody, query *SiteFrontPageSetQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
-// Remove delete the front page in an organization
+// SiteFrontPagePatchQuery are the optional query parameters of SiteFrontPageService.Patch.
+type SiteFrontPagePatchQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *SiteFrontPagePatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch change part of the site front page
+//
+// PATCH /orgs/{orgId}/sites/{siteId}/front-page
+func (s *SiteFrontPageService) Patch(ctx context.Context, orgID string, siteID string, body any, query *SiteFrontPagePatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SiteFrontPageRemoveQuery are the optional query parameters of SiteFrontPageService.Remove.
+type SiteFrontPageRemoveQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Draft *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SiteFrontPageRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Draft != nil {
+		v.Set("draft", *p.Draft)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Remove reset the site front page
 //
 // DELETE /orgs/{orgId}/sites/{siteId}/front-page
-func (s *SiteFrontPageService) Remove(ctx context.Context, orgID string, siteID string, opts ...RequestOption) (*SiteFrontPageRemoveResponse, error) {
+func (s *SiteFrontPageService) Remove(ctx context.Context, orgID string, siteID string, query *SiteFrontPageRemoveQuery, opts ...RequestOption) (*SiteFrontPageRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SiteFrontPageRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/sites/"+pathEscape(siteID)+"/front-page", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

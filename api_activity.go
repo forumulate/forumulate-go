@@ -20,6 +20,10 @@ type APIActivityMineQuery struct {
 	Cursor *string
 	// Which page of results to return, 1-based.
 	Page *int64
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *APIActivityMineQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +39,12 @@ func (p *APIActivityMineQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Page != nil {
 		v.Set("page", strconv.FormatInt(*p.Page, 10))
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

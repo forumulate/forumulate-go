@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // MCPService holds the operations under client.MCP.
@@ -11,7 +13,7 @@ type MCPService struct {
 	c *Client
 }
 
-// Info get the MCP server in an organization
+// Info describe the organization’s agent MCP server
 //
 // GET /orgs/{orgId}/mcp
 func (s *MCPService) Info(ctx context.Context, orgID string, opts ...RequestOption) (*MCPInfoResponse, error) {
@@ -22,12 +24,30 @@ func (s *MCPService) Info(ctx context.Context, orgID string, opts ...RequestOpti
 	return &out, nil
 }
 
-// RPC create the MCP server in an organization
+// MCPRPCQuery are the optional query parameters of MCPService.RPC.
+type MCPRPCQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MCPRPCQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RPC send a JSON-RPC request to the organization’s agent MCP server
 //
 // POST /orgs/{orgId}/mcp
-func (s *MCPService) RPC(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
+func (s *MCPService) RPC(ctx context.Context, orgID string, query *MCPRPCQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mcp", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mcp", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -44,12 +64,30 @@ func (s *MCPService) InfoReadOnly(ctx context.Context, orgID string, opts ...Req
 	return &out, nil
 }
 
-// RPCReadOnly create the readonly in an organization
+// MCPRPCReadOnlyQuery are the optional query parameters of MCPService.RPCReadOnly.
+type MCPRPCReadOnlyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *MCPRPCReadOnlyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RPCReadOnly send a JSON-RPC request to the read-only agent MCP server
 //
 // POST /orgs/{orgId}/mcp/readonly
-func (s *MCPService) RPCReadOnly(ctx context.Context, orgID string, opts ...RequestOption) (any, error) {
+func (s *MCPService) RPCReadOnly(ctx context.Context, orgID string, query *MCPRPCReadOnlyQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mcp/readonly", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/mcp/readonly", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

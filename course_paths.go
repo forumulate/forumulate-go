@@ -19,6 +19,10 @@ type CoursePathsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CoursePathsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *CoursePathsListQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *CoursePathsService) ListAutoPaging(ctx context.Context, orgID string, q
 	})
 }
 
+// CoursePathsCreateQuery are the optional query parameters of CoursePathsService.Create.
+type CoursePathsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursePathsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a course path in an organization
 //
 // POST /orgs/{orgId}/course-paths
-func (s *CoursePathsService) Create(ctx context.Context, orgID string, body CoursePathsCreateParams, opts ...RequestOption) (*CoursePathsCreateResponse, error) {
+func (s *CoursePathsService) Create(ctx context.Context, orgID string, body CoursePathsCreateParams, query *CoursePathsCreateQuery, opts ...RequestOption) (*CoursePathsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursePathsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/course-paths", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/course-paths", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CoursePathsReplaceQuery are the optional query parameters of CoursePathsService.Replace.
+type CoursePathsReplaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursePathsReplaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Replace replace the course path
 //
 // PUT /orgs/{orgId}/course-paths/{pathId}
-func (s *CoursePathsService) Replace(ctx context.Context, orgID string, pathID string, body CoursePathsReplaceParams, opts ...RequestOption) (*CoursePathsReplaceResponse, error) {
+func (s *CoursePathsService) Replace(ctx context.Context, orgID string, pathID string, body CoursePathsReplaceParams, query *CoursePathsReplaceQuery, opts ...RequestOption) (*CoursePathsReplaceResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursePathsReplaceResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/course-paths/"+pathEscape(pathID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/course-paths/"+pathEscape(pathID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CoursePathsRemoveQuery are the optional query parameters of CoursePathsService.Remove.
+type CoursePathsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursePathsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the course path
 //
 // DELETE /orgs/{orgId}/course-paths/{pathId}
-func (s *CoursePathsService) Remove(ctx context.Context, orgID string, pathID string, opts ...RequestOption) (*CoursePathsRemoveResponse, error) {
+func (s *CoursePathsService) Remove(ctx context.Context, orgID string, pathID string, query *CoursePathsRemoveQuery, opts ...RequestOption) (*CoursePathsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursePathsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/course-paths/"+pathEscape(pathID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/course-paths/"+pathEscape(pathID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

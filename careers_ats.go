@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // CareersAtsService holds the operations under client.CareersAts.
@@ -22,35 +24,123 @@ func (s *CareersAtsService) Get(ctx context.Context, orgID string, spaceID strin
 	return &out, nil
 }
 
+// CareersAtsSetQuery are the optional query parameters of CareersAtsService.Set.
+type CareersAtsSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *CareersAtsSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace ats in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/careers/ats
-func (s *CareersAtsService) Set(ctx context.Context, orgID string, spaceID string, body CareersAtsSetParams, opts ...RequestOption) (*CareersAtsSetResponse, error) {
+func (s *CareersAtsService) Set(ctx context.Context, orgID string, spaceID string, body CareersAtsSetParams, query *CareersAtsSetQuery, opts ...RequestOption) (*CareersAtsSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersAtsSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CareersAtsPatchQuery are the optional query parameters of CareersAtsService.Patch.
+type CareersAtsPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *CareersAtsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update ats in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/careers/ats
+func (s *CareersAtsService) Patch(ctx context.Context, orgID string, spaceID string, body any, query *CareersAtsPatchQuery, opts ...RequestOption) (*CareersAtsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out CareersAtsPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CareersAtsRemoveQuery are the optional query parameters of CareersAtsService.Remove.
+type CareersAtsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersAtsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete ats in a space
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/careers/ats
-func (s *CareersAtsService) Remove(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*CareersAtsRemoveResponse, error) {
+func (s *CareersAtsService) Remove(ctx context.Context, orgID string, spaceID string, query *CareersAtsRemoveQuery, opts ...RequestOption) (*CareersAtsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out CareersAtsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CareersAtsSyncQuery are the optional query parameters of CareersAtsService.Sync.
+type CareersAtsSyncQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CareersAtsSyncQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Sync sync roles from the connected job board
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/careers/ats/sync
-func (s *CareersAtsService) Sync(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats/sync", nil, nil, &out, opts); err != nil {
+func (s *CareersAtsService) Sync(ctx context.Context, orgID string, spaceID string, query *CareersAtsSyncQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/careers/ats/sync", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

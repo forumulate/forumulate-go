@@ -4,6 +4,7 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
 )
 
 // WebhookSettingsService holds the operations under client.WebhookSettings.
@@ -22,12 +23,64 @@ func (s *WebhookSettingsService) Get(ctx context.Context, orgID string, opts ...
 	return &out, nil
 }
 
+// WebhookSettingsSetQuery are the optional query parameters of WebhookSettingsService.Set.
+type WebhookSettingsSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *WebhookSettingsSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace webhook settings in an organization
 //
 // PUT /orgs/{orgId}/webhook-settings
-func (s *WebhookSettingsService) Set(ctx context.Context, orgID string, body WebhookSettingsSetParams, opts ...RequestOption) (*WebhookSettingsSetResponse, error) {
+func (s *WebhookSettingsService) Set(ctx context.Context, orgID string, body WebhookSettingsSetParams, query *WebhookSettingsSetQuery, opts ...RequestOption) (*WebhookSettingsSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out WebhookSettingsSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/webhook-settings", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/webhook-settings", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// WebhookSettingsPatchQuery are the optional query parameters of WebhookSettingsService.Patch.
+type WebhookSettingsPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *WebhookSettingsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update webhook settings in an organization
+//
+// PATCH /orgs/{orgId}/webhook-settings
+func (s *WebhookSettingsService) Patch(ctx context.Context, orgID string, body WebhookSettingsPatchParams, query *WebhookSettingsPatchQuery, opts ...RequestOption) (*WebhookSettingsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out WebhookSettingsPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/webhook-settings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

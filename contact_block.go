@@ -11,7 +11,7 @@ type ContactBlockService struct {
 	c *Client
 }
 
-// Submit create a submission in a space
+// Submit create a submission in a space (contact)
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/contact/submissions
 func (s *ContactBlockService) Submit(ctx context.Context, orgID string, spaceID string, body any, opts ...RequestOption) (*ContactBlockSubmitResponse, error) {

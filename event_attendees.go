@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // EventAttendeesService holds the operations under client.EventAttendees.
@@ -51,26 +52,62 @@ func (s *EventAttendeesService) CSV(ctx context.Context, orgID string, spaceID s
 	return out, nil
 }
 
+// EventAttendeesPatchQuery are the optional query parameters of EventAttendeesService.Patch.
+type EventAttendeesPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventAttendeesPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Patch update the attendee
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/events/{handle}/attendees/{rsvpId}
-func (s *EventAttendeesService) Patch(ctx context.Context, orgID string, spaceID string, handle string, rsvpID string, body EventAttendeesPatchParams, opts ...RequestOption) (any, error) {
+func (s *EventAttendeesService) Patch(ctx context.Context, orgID string, spaceID string, handle string, rsvpID string, body EventAttendeesPatchParams, query *EventAttendeesPatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/attendees/"+pathEscape(rsvpID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/attendees/"+pathEscape(rsvpID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Message create the message in a space
+// EventAttendeesMessageQuery are the optional query parameters of EventAttendeesService.Message.
+type EventAttendeesMessageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventAttendeesMessageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Message message an attendee
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/attendees/message
-func (s *EventAttendeesService) Message(ctx context.Context, orgID string, spaceID string, handle string, body EventAttendeesMessageParams, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/attendees/message", nil, body, &out, opts); err != nil {
+func (s *EventAttendeesService) Message(ctx context.Context, orgID string, spaceID string, handle string, body EventAttendeesMessageParams, query *EventAttendeesMessageQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/attendees/message", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // Settings get the event attendance in a space
@@ -84,12 +121,64 @@ func (s *EventAttendeesService) Settings(ctx context.Context, orgID string, spac
 	return &out, nil
 }
 
+// EventAttendeesSaveSettingsQuery are the optional query parameters of EventAttendeesService.SaveSettings.
+type EventAttendeesSaveSettingsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *EventAttendeesSaveSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SaveSettings replace the event attendance in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/event-attendance
-func (s *EventAttendeesService) SaveSettings(ctx context.Context, orgID string, spaceID string, body EventAttendeesSaveSettingsParams, opts ...RequestOption) (*EventAttendeesSaveSettingsResponse, error) {
+func (s *EventAttendeesService) SaveSettings(ctx context.Context, orgID string, spaceID string, body EventAttendeesSaveSettingsParams, query *EventAttendeesSaveSettingsQuery, opts ...RequestOption) (*EventAttendeesSaveSettingsResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventAttendeesSaveSettingsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-attendance", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-attendance", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// EventAttendeesPatchSettingsQuery are the optional query parameters of EventAttendeesService.PatchSettings.
+type EventAttendeesPatchSettingsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *EventAttendeesPatchSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchSettings update the event attendance in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/event-attendance
+func (s *EventAttendeesService) PatchSettings(ctx context.Context, orgID string, spaceID string, body any, query *EventAttendeesPatchSettingsQuery, opts ...RequestOption) (*EventAttendeesPatchSettingsResponse, error) {
+	v, opts := query.encode(opts)
+	var out EventAttendeesPatchSettingsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-attendance", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

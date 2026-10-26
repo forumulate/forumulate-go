@@ -53,15 +53,15 @@ func (s *EventAttendeesPublicService) List(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
-// Request create the rsvp in a space
+// Request rSVP to an event by email
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/events/{handle}/rsvp
-func (s *EventAttendeesPublicService) Request(ctx context.Context, orgID string, spaceID string, handle string, body EventAttendeesPublicRequestParams, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
+func (s *EventAttendeesPublicService) Request(ctx context.Context, orgID string, spaceID string, handle string, body EventAttendeesPublicRequestParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/rsvp", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // Confirm confirm the rsvp

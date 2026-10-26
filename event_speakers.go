@@ -19,6 +19,10 @@ type EventSpeakersListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EventSpeakersListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *EventSpeakersListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *EventSpeakersService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// EventSpeakersCreateQuery are the optional query parameters of EventSpeakersService.Create.
+type EventSpeakersCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventSpeakersCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an event speaker in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/event-speakers
-func (s *EventSpeakersService) Create(ctx context.Context, orgID string, spaceID string, body EventSpeakersCreateParams, opts ...RequestOption) (*EventSpeakersCreateResponse, error) {
+func (s *EventSpeakersService) Create(ctx context.Context, orgID string, spaceID string, body EventSpeakersCreateParams, query *EventSpeakersCreateQuery, opts ...RequestOption) (*EventSpeakersCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventSpeakersCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-speakers", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-speakers", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// EventSpeakersUpdateQuery are the optional query parameters of EventSpeakersService.Update.
+type EventSpeakersUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventSpeakersUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the event speaker
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/event-speakers/{speaker}
-func (s *EventSpeakersService) Update(ctx context.Context, orgID string, spaceID string, speaker string, body EventSpeakersUpdateParams, opts ...RequestOption) (any, error) {
+func (s *EventSpeakersService) Update(ctx context.Context, orgID string, spaceID string, speaker string, body EventSpeakersUpdateParams, query *EventSpeakersUpdateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-speakers/"+pathEscape(speaker), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-speakers/"+pathEscape(speaker), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// EventSpeakersRemoveQuery are the optional query parameters of EventSpeakersService.Remove.
+type EventSpeakersRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventSpeakersRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the event speaker
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/event-speakers/{speaker}
-func (s *EventSpeakersService) Remove(ctx context.Context, orgID string, spaceID string, speaker string, opts ...RequestOption) (*EventSpeakersRemoveResponse, error) {
+func (s *EventSpeakersService) Remove(ctx context.Context, orgID string, spaceID string, speaker string, query *EventSpeakersRemoveQuery, opts ...RequestOption) (*EventSpeakersRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventSpeakersRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-speakers/"+pathEscape(speaker), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-speakers/"+pathEscape(speaker), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

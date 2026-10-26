@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // PreviewSessionsService holds the operations under client.PreviewSessions.
@@ -11,12 +13,30 @@ type PreviewSessionsService struct {
 	c *Client
 }
 
+// PreviewSessionsMintQuery are the optional query parameters of PreviewSessionsService.Mint.
+type PreviewSessionsMintQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *PreviewSessionsMintQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Mint mint a preview token for an entry
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/preview/sessions
-func (s *PreviewSessionsService) Mint(ctx context.Context, orgID string, libraryID string, body PreviewSessionsMintParams, opts ...RequestOption) (*PreviewSessionsMintResponse, error) {
+func (s *PreviewSessionsService) Mint(ctx context.Context, orgID string, libraryID string, body PreviewSessionsMintParams, query *PreviewSessionsMintQuery, opts ...RequestOption) (*PreviewSessionsMintResponse, error) {
+	v, opts := query.encode(opts)
 	var out PreviewSessionsMintResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/preview/sessions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/preview/sessions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

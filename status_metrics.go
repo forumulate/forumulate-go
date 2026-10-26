@@ -19,6 +19,10 @@ type StatusMetricsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusMetricsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *StatusMetricsListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *StatusMetricsService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// StatusMetricsUpsertQuery are the optional query parameters of StatusMetricsService.Upsert.
+type StatusMetricsUpsertQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusMetricsUpsertQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Upsert create a custom metric, or change what it says about itself
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/status/metrics/{key}
-func (s *StatusMetricsService) Upsert(ctx context.Context, orgID string, spaceID string, key string, body StatusMetricsUpsertParams, opts ...RequestOption) (*StatusMetricsUpsertResponse, error) {
+func (s *StatusMetricsService) Upsert(ctx context.Context, orgID string, spaceID string, key string, body StatusMetricsUpsertParams, query *StatusMetricsUpsertQuery, opts ...RequestOption) (*StatusMetricsUpsertResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusMetricsUpsertResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// StatusMetricsRemoveQuery are the optional query parameters of StatusMetricsService.Remove.
+type StatusMetricsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusMetricsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete a custom metric and every point of it
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/metrics/{key}
-func (s *StatusMetricsService) Remove(ctx context.Context, orgID string, spaceID string, key string, opts ...RequestOption) (*StatusMetricsRemoveResponse, error) {
+func (s *StatusMetricsService) Remove(ctx context.Context, orgID string, spaceID string, key string, query *StatusMetricsRemoveQuery, opts ...RequestOption) (*StatusMetricsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusMetricsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// StatusMetricsPushQuery are the optional query parameters of StatusMetricsService.Push.
+type StatusMetricsPushQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusMetricsPushQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Push push points to a custom metric
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/metrics/{key}/points
-func (s *StatusMetricsService) Push(ctx context.Context, orgID string, spaceID string, key string, body StatusMetricsPushParams, opts ...RequestOption) (any, error) {
+func (s *StatusMetricsService) Push(ctx context.Context, orgID string, spaceID string, key string, body StatusMetricsPushParams, query *StatusMetricsPushQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics/"+pathEscape(key)+"/points", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/metrics/"+pathEscape(key)+"/points", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

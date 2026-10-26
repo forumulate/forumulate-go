@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // CoursesService holds the operations under client.Courses.
@@ -23,34 +25,88 @@ func (s *CoursesService) Outline(ctx context.Context, orgID string, spaceID stri
 	return &out, nil
 }
 
+// CoursesCompleteQuery are the optional query parameters of CoursesService.Complete.
+type CoursesCompleteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesCompleteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Complete complete the lesson
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/lessons/{slug}/complete
-func (s *CoursesService) Complete(ctx context.Context, orgID string, spaceID string, slug string, body CoursesCompleteParams, opts ...RequestOption) (*CoursesCompleteResponse, error) {
+func (s *CoursesService) Complete(ctx context.Context, orgID string, spaceID string, slug string, body CoursesCompleteParams, query *CoursesCompleteQuery, opts ...RequestOption) (*CoursesCompleteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursesCompleteResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/lessons/"+pathEscape(slug)+"/complete", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/lessons/"+pathEscape(slug)+"/complete", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Enrol replace the enrolment in a space
+// CoursesEnrolQuery are the optional query parameters of CoursesService.Enrol.
+type CoursesEnrolQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesEnrolQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Enrol enrol the course
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/enrolment
-func (s *CoursesService) Enrol(ctx context.Context, orgID string, spaceID string, body CoursesEnrolParams, opts ...RequestOption) (any, error) {
+func (s *CoursesService) Enrol(ctx context.Context, orgID string, spaceID string, body CoursesEnrolParams, query *CoursesEnrolQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/enrolment", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/enrolment", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// CoursesMergeQuery are the optional query parameters of CoursesService.Merge.
+type CoursesMergeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesMergeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Merge merge the progress
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/progress/merge
-func (s *CoursesService) Merge(ctx context.Context, orgID string, spaceID string, body CoursesMergeParams, opts ...RequestOption) (*CoursesMergeResponse, error) {
+func (s *CoursesService) Merge(ctx context.Context, orgID string, spaceID string, body CoursesMergeParams, query *CoursesMergeQuery, opts ...RequestOption) (*CoursesMergeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursesMergeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/progress/merge", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/progress/merge", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -72,12 +128,30 @@ func (s *CoursesQuizzesService) AuthorLessonQuiz(ctx context.Context, orgID stri
 	return &out, nil
 }
 
+// CoursesQuizzesSaveLessonQuizQuery are the optional query parameters of CoursesQuizzesService.SaveLessonQuiz.
+type CoursesQuizzesSaveLessonQuizQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesQuizzesSaveLessonQuizQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SaveLessonQuiz replace the quiz in a space (lessons)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/lessons/{pageId}/quiz
-func (s *CoursesQuizzesService) SaveLessonQuiz(ctx context.Context, orgID string, spaceID string, pageID string, body CoursesQuizzesSaveLessonQuizParams, opts ...RequestOption) (*CoursesQuizzesSaveLessonQuizResponse, error) {
+func (s *CoursesQuizzesService) SaveLessonQuiz(ctx context.Context, orgID string, spaceID string, pageID string, body CourseQuizSaveLessonQuizBody, query *CoursesQuizzesSaveLessonQuizQuery, opts ...RequestOption) (*CoursesQuizzesSaveLessonQuizResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursesQuizzesSaveLessonQuizResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/lessons/"+pathEscape(pageID)+"/quiz", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/lessons/"+pathEscape(pageID)+"/quiz", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -94,23 +168,59 @@ func (s *CoursesQuizzesService) AuthorModuleQuiz(ctx context.Context, orgID stri
 	return &out, nil
 }
 
+// CoursesQuizzesSaveModuleQuizQuery are the optional query parameters of CoursesQuizzesService.SaveModuleQuiz.
+type CoursesQuizzesSaveModuleQuizQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesQuizzesSaveModuleQuizQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SaveModuleQuiz replace the quiz in a space (modules)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/modules/{collectionId}/quiz
-func (s *CoursesQuizzesService) SaveModuleQuiz(ctx context.Context, orgID string, spaceID string, collectionID string, body CoursesQuizzesSaveModuleQuizParams, opts ...RequestOption) (*CoursesQuizzesSaveModuleQuizResponse, error) {
+func (s *CoursesQuizzesService) SaveModuleQuiz(ctx context.Context, orgID string, spaceID string, collectionID string, body CourseQuizSaveLessonQuizBody, query *CoursesQuizzesSaveModuleQuizQuery, opts ...RequestOption) (*CoursesQuizzesSaveModuleQuizResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursesQuizzesSaveModuleQuizResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/modules/"+pathEscape(collectionID)+"/quiz", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/modules/"+pathEscape(collectionID)+"/quiz", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CoursesQuizzesDeleteQuizQuery are the optional query parameters of CoursesQuizzesService.DeleteQuiz.
+type CoursesQuizzesDeleteQuizQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesQuizzesDeleteQuizQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteQuiz delete the quiz
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/course/authoring/quizzes/{quizId}
-func (s *CoursesQuizzesService) DeleteQuiz(ctx context.Context, orgID string, spaceID string, quizID string, opts ...RequestOption) (*CoursesQuizzesDeleteQuizResponse, error) {
+func (s *CoursesQuizzesService) DeleteQuiz(ctx context.Context, orgID string, spaceID string, quizID string, query *CoursesQuizzesDeleteQuizQuery, opts ...RequestOption) (*CoursesQuizzesDeleteQuizResponse, error) {
+	v, opts := query.encode(opts)
 	var out CoursesQuizzesDeleteQuizResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/quizzes/"+pathEscape(quizID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/quizzes/"+pathEscape(quizID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -127,15 +237,67 @@ func (s *CoursesQuizzesService) QuizPolicy(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
+// CoursesQuizzesSetQuizPolicyQuery are the optional query parameters of CoursesQuizzesService.SetQuizPolicy.
+type CoursesQuizzesSetQuizPolicyQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *CoursesQuizzesSetQuizPolicyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetQuizPolicy replace the quiz policy in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/quiz-policy
-func (s *CoursesQuizzesService) SetQuizPolicy(ctx context.Context, orgID string, spaceID string, body CoursesQuizzesSetQuizPolicyParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/quiz-policy", nil, body, &out, opts); err != nil {
+func (s *CoursesQuizzesService) SetQuizPolicy(ctx context.Context, orgID string, spaceID string, body CoursesQuizzesSetQuizPolicyParams, query *CoursesQuizzesSetQuizPolicyQuery, opts ...RequestOption) (*CoursesQuizzesSetQuizPolicyResponse, error) {
+	v, opts := query.encode(opts)
+	var out CoursesQuizzesSetQuizPolicyResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/quiz-policy", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// CoursesQuizzesPatchQuizPolicyQuery are the optional query parameters of CoursesQuizzesService.PatchQuizPolicy.
+type CoursesQuizzesPatchQuizPolicyQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *CoursesQuizzesPatchQuizPolicyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchQuizPolicy update the quiz policy in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/course/authoring/quiz-policy
+func (s *CoursesQuizzesService) PatchQuizPolicy(ctx context.Context, orgID string, spaceID string, body any, query *CoursesQuizzesPatchQuizPolicyQuery, opts ...RequestOption) (*CoursesQuizzesPatchQuizPolicyResponse, error) {
+	v, opts := query.encode(opts)
+	var out CoursesQuizzesPatchQuizPolicyResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/quiz-policy", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // Details list details in a space
@@ -149,12 +311,64 @@ func (s *CoursesQuizzesService) Details(ctx context.Context, orgID string, space
 	return &out, nil
 }
 
+// CoursesQuizzesSetDetailsQuery are the optional query parameters of CoursesQuizzesService.SetDetails.
+type CoursesQuizzesSetDetailsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *CoursesQuizzesSetDetailsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetDetails replace details in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/details
-func (s *CoursesQuizzesService) SetDetails(ctx context.Context, orgID string, spaceID string, body CoursesQuizzesSetDetailsParams, opts ...RequestOption) (*CoursesQuizzesSetDetailsResponse, error) {
-	var out CoursesQuizzesSetDetailsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/details", nil, body, &out, opts); err != nil {
+func (s *CoursesQuizzesService) SetDetails(ctx context.Context, orgID string, spaceID string, body CoursesQuizzesSetDetailsParams, query *CoursesQuizzesSetDetailsQuery, opts ...RequestOption) (*CourseQuizPatchDetailsResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseQuizPatchDetailsResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/details", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CoursesQuizzesPatchDetailsQuery are the optional query parameters of CoursesQuizzesService.PatchDetails.
+type CoursesQuizzesPatchDetailsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *CoursesQuizzesPatchDetailsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchDetails update details in a space (course authoring)
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/course/authoring/details
+func (s *CoursesQuizzesService) PatchDetails(ctx context.Context, orgID string, spaceID string, body any, query *CoursesQuizzesPatchDetailsQuery, opts ...RequestOption) (*CourseQuizPatchDetailsResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseQuizPatchDetailsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/details", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -182,18 +396,36 @@ func (s *CoursesQuizzesService) Quiz(ctx context.Context, orgID string, spaceID 
 	return &out, nil
 }
 
+// CoursesQuizzesSubmitQuery are the optional query parameters of CoursesQuizzesService.Submit.
+type CoursesQuizzesSubmitQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CoursesQuizzesSubmitQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Submit create an attempt in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/quizzes/{quizId}/attempts
-func (s *CoursesQuizzesService) Submit(ctx context.Context, orgID string, spaceID string, quizID string, body CoursesQuizzesSubmitParams, opts ...RequestOption) (any, error) {
+func (s *CoursesQuizzesService) Submit(ctx context.Context, orgID string, spaceID string, quizID string, body CoursesQuizzesSubmitParams, query *CoursesQuizzesSubmitQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/quizzes/"+pathEscape(quizID)+"/attempts", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/quizzes/"+pathEscape(quizID)+"/attempts", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MyCertificate get the certificate in a space
+// MyCertificate get the certificate in a space (course)
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/course/certificate
 func (s *CoursesQuizzesService) MyCertificate(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*MyCertificate, error) {

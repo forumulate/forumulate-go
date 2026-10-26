@@ -25,15 +25,67 @@ func (s *AnalyticsService) Get(ctx context.Context, orgID string, opts ...Reques
 	return &out, nil
 }
 
+// AnalyticsSetQuery are the optional query parameters of AnalyticsService.Set.
+type AnalyticsSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *AnalyticsSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace analytics tags in an organization
 //
 // PUT /orgs/{orgId}/analytics-tags
-func (s *AnalyticsService) Set(ctx context.Context, orgID string, body AnalyticsSetParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/analytics-tags", nil, body, &out, opts); err != nil {
+func (s *AnalyticsService) Set(ctx context.Context, orgID string, body AnalyticsSetParams, query *AnalyticsSetQuery, opts ...RequestOption) (*OrgAnalyticsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgAnalyticsPatchResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/analytics-tags", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// AnalyticsPatchQuery are the optional query parameters of AnalyticsService.Patch.
+type AnalyticsPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *AnalyticsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update analytics tags in an organization
+//
+// PATCH /orgs/{orgId}/analytics-tags
+func (s *AnalyticsService) Patch(ctx context.Context, orgID string, body any, query *AnalyticsPatchQuery, opts ...RequestOption) (*OrgAnalyticsPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgAnalyticsPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/analytics-tags", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // AnalyticsEventsQuery are the optional query parameters of AnalyticsService.Events.
@@ -126,7 +178,7 @@ func (p *AnalyticsGrowthReportsQuery) encode(opts []RequestOption) (url.Values, 
 	return v, opts
 }
 
-// Reports list reports in an organization
+// Reports list reports in an organization (growth)
 //
 // GET /orgs/{orgId}/growth/reports
 func (s *AnalyticsGrowthService) Reports(ctx context.Context, orgID string, query *AnalyticsGrowthReportsQuery, opts ...RequestOption) (*GrowthReport, error) {

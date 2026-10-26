@@ -19,6 +19,10 @@ type OrgImportJobListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *OrgImportJobListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *OrgImportJobListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,35 +72,71 @@ func (s *OrgImportJobService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
+// OrgImportJobEnqueueQuery are the optional query parameters of OrgImportJobService.Enqueue.
+type OrgImportJobEnqueueQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgImportJobEnqueueQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Enqueue queue an import of an export document
 //
 // POST /orgs/{orgId}/imports
-func (s *OrgImportJobService) Enqueue(ctx context.Context, orgID string, body OrgImportJobEnqueueParams, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/imports", nil, body, &out, opts); err != nil {
+func (s *OrgImportJobService) Enqueue(ctx context.Context, orgID string, body OrgImportBody, query *OrgImportJobEnqueueQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/imports", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
+}
+
+// OrgImportJobEnqueueRoadmapQuery are the optional query parameters of OrgImportJobService.EnqueueRoadmap.
+type OrgImportJobEnqueueRoadmapQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgImportJobEnqueueRoadmapQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // EnqueueRoadmap queue a Canny or Featurebase roadmap import
 //
 // POST /orgs/{orgId}/imports/roadmap
-func (s *OrgImportJobService) EnqueueRoadmap(ctx context.Context, orgID string, body OrgImportJobEnqueueRoadmapParams, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/imports/roadmap", nil, body, &out, opts); err != nil {
+func (s *OrgImportJobService) EnqueueRoadmap(ctx context.Context, orgID string, body OrgImportJobEnqueueRoadmapParams, query *OrgImportJobEnqueueRoadmapQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/imports/roadmap", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
-// Get get the import
+// Get get a queued import
 //
 // GET /orgs/{orgId}/imports/{jobId}
-func (s *OrgImportJobService) Get(ctx context.Context, orgID string, jobID string, opts ...RequestOption) (*OrgImportJobGetResponse, error) {
-	var out OrgImportJobGetResponse
+func (s *OrgImportJobService) Get(ctx context.Context, orgID string, jobID string, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/imports/"+pathEscape(jobID), nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

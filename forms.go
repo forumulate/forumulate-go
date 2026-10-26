@@ -21,6 +21,10 @@ type FormsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *FormsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -33,6 +37,12 @@ func (p *FormsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpti
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -64,12 +74,30 @@ func (s *FormsService) ListAutoPaging(ctx context.Context, orgID string, query *
 	})
 }
 
+// FormsCreateQuery are the optional query parameters of FormsService.Create.
+type FormsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a form in an organization
 //
 // POST /orgs/{orgId}/forms
-func (s *FormsService) Create(ctx context.Context, orgID string, body FormsCreateParams, opts ...RequestOption) (*FormsCreateResponse, error) {
+func (s *FormsService) Create(ctx context.Context, orgID string, body FormsCreateParams, query *FormsCreateQuery, opts ...RequestOption) (*FormsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forms", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forms", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -86,26 +114,62 @@ func (s *FormsService) Get(ctx context.Context, orgID string, formID string, opt
 	return &out, nil
 }
 
+// FormsUpdateQuery are the optional query parameters of FormsService.Update.
+type FormsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the form
 //
 // PATCH /orgs/{orgId}/forms/{formId}
-func (s *FormsService) Update(ctx context.Context, orgID string, formID string, body FormsUpdateParams, opts ...RequestOption) (*FormsUpdateResponse, error) {
+func (s *FormsService) Update(ctx context.Context, orgID string, formID string, body FormsUpdateParams, query *FormsUpdateQuery, opts ...RequestOption) (*FormsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// FormsRemoveQuery are the optional query parameters of FormsService.Remove.
+type FormsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the form
 //
 // DELETE /orgs/{orgId}/forms/{formId}
-func (s *FormsService) Remove(ctx context.Context, orgID string, formID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID), nil, nil, &out, opts); err != nil {
+func (s *FormsService) Remove(ctx context.Context, orgID string, formID string, query *FormsRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // FormsListSubmissionsQuery are the optional query parameters of FormsService.ListSubmissions.
@@ -115,6 +179,10 @@ type FormsListSubmissionsQuery struct {
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Spam   *string
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *FormsListSubmissionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -130,6 +198,12 @@ func (p *FormsListSubmissionsQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -172,26 +246,62 @@ func (s *FormsService) ExportCSV(ctx context.Context, orgID string, formID strin
 	return out, nil
 }
 
-// SetSpam update the submission
+// FormsSetSpamQuery are the optional query parameters of FormsService.SetSpam.
+type FormsSetSpamQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsSetSpamQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetSpam update the submission (forms)
 //
 // PATCH /orgs/{orgId}/forms/{formId}/submissions/{submissionId}
-func (s *FormsService) SetSpam(ctx context.Context, orgID string, formID string, submissionID string, body FormsSetSpamParams, opts ...RequestOption) (*FormsSetSpamResponse, error) {
+func (s *FormsService) SetSpam(ctx context.Context, orgID string, formID string, submissionID string, body FormsSetSpamParams, query *FormsSetSpamQuery, opts ...RequestOption) (*FormsSetSpamResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsSetSpamResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID)+"/submissions/"+pathEscape(submissionID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID)+"/submissions/"+pathEscape(submissionID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// FormsDeleteSubmissionQuery are the optional query parameters of FormsService.DeleteSubmission.
+type FormsDeleteSubmissionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsDeleteSubmissionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteSubmission delete the submission
 //
 // DELETE /orgs/{orgId}/forms/{formId}/submissions/{submissionId}
-func (s *FormsService) DeleteSubmission(ctx context.Context, orgID string, formID string, submissionID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID)+"/submissions/"+pathEscape(submissionID), nil, nil, &out, opts); err != nil {
+func (s *FormsService) DeleteSubmission(ctx context.Context, orgID string, formID string, submissionID string, query *FormsDeleteSubmissionQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forms/"+pathEscape(formID)+"/submissions/"+pathEscape(submissionID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // FormsSubmissionsService holds the operations under client.Forms.Submissions.
@@ -206,6 +316,10 @@ type FormsSubmissionsByEmailQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *FormsSubmissionsByEmailQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -221,6 +335,12 @@ func (p *FormsSubmissionsByEmailQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -255,6 +375,8 @@ func (s *FormsSubmissionsService) ByEmailAutoPaging(ctx context.Context, orgID s
 // FormsSubmissionsEraseByEmailQuery are the optional query parameters of FormsSubmissionsService.EraseByEmail.
 type FormsSubmissionsEraseByEmailQuery struct {
 	Email *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *FormsSubmissionsEraseByEmailQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -265,10 +387,13 @@ func (p *FormsSubmissionsEraseByEmailQuery) encode(opts []RequestOption) (url.Va
 	if p.Email != nil {
 		v.Set("email", *p.Email)
 	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
 	return v, opts
 }
 
-// EraseByEmail delete form submissions in an organization
+// EraseByEmail erase form submissions by email
 //
 // DELETE /orgs/{orgId}/form-submissions
 func (s *FormsSubmissionsService) EraseByEmail(ctx context.Context, orgID string, query *FormsSubmissionsEraseByEmailQuery, opts ...RequestOption) (*FormsSubmissionsEraseByEmailResponse, error) {
@@ -291,6 +416,10 @@ type FormsTemplatesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *FormsTemplatesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -303,6 +432,12 @@ func (p *FormsTemplatesListQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -334,12 +469,30 @@ func (s *FormsTemplatesService) ListAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// FormsTemplatesCreateQuery are the optional query parameters of FormsTemplatesService.Create.
+type FormsTemplatesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsTemplatesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a form template in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/form-templates
-func (s *FormsTemplatesService) Create(ctx context.Context, orgID string, spaceID string, body FormsTemplatesCreateParams, opts ...RequestOption) (*FormsTemplatesCreateResponse, error) {
+func (s *FormsTemplatesService) Create(ctx context.Context, orgID string, spaceID string, body FormsTemplatesCreateParams, query *FormsTemplatesCreateQuery, opts ...RequestOption) (*FormsTemplatesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsTemplatesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -356,34 +509,88 @@ func (s *FormsTemplatesService) Get(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
+// FormsTemplatesUpdateQuery are the optional query parameters of FormsTemplatesService.Update.
+type FormsTemplatesUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsTemplatesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the form template
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/form-templates/{id}
-func (s *FormsTemplatesService) Update(ctx context.Context, orgID string, spaceID string, id string, body FormsTemplatesUpdateParams, opts ...RequestOption) (*FormsTemplatesUpdateResponse, error) {
+func (s *FormsTemplatesService) Update(ctx context.Context, orgID string, spaceID string, id string, body FormsTemplatesUpdateParams, query *FormsTemplatesUpdateQuery, opts ...RequestOption) (*FormsTemplatesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsTemplatesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// FormsTemplatesRemoveQuery are the optional query parameters of FormsTemplatesService.Remove.
+type FormsTemplatesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsTemplatesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the form template
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/form-templates/{id}
-func (s *FormsTemplatesService) Remove(ctx context.Context, orgID string, spaceID string, id string, opts ...RequestOption) (*FormsTemplatesRemoveResponse, error) {
+func (s *FormsTemplatesService) Remove(ctx context.Context, orgID string, spaceID string, id string, query *FormsTemplatesRemoveQuery, opts ...RequestOption) (*FormsTemplatesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsTemplatesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// FormsTemplatesAttachQuery are the optional query parameters of FormsTemplatesService.Attach.
+type FormsTemplatesAttachQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *FormsTemplatesAttachQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Attach attach the form template
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/form-templates/attach
-func (s *FormsTemplatesService) Attach(ctx context.Context, orgID string, spaceID string, body FormsTemplatesAttachParams, opts ...RequestOption) (*FormsTemplatesAttachResponse, error) {
+func (s *FormsTemplatesService) Attach(ctx context.Context, orgID string, spaceID string, body FormsTemplatesAttachParams, query *FormsTemplatesAttachQuery, opts ...RequestOption) (*FormsTemplatesAttachResponse, error) {
+	v, opts := query.encode(opts)
 	var out FormsTemplatesAttachResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates/attach", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/form-templates/attach", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

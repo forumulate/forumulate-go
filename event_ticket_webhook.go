@@ -11,7 +11,7 @@ type EventTicketWebhookService struct {
 	c *Client
 }
 
-// Webhook create the webhook (public reader payments stripe)
+// Webhook receive a stripe webhook (public reader payments)
 //
 // POST /public/payments/stripe/{orgId}/webhook
 func (s *EventTicketWebhookService) Webhook(ctx context.Context, orgID string, opts ...RequestOption) (*EventTicketWebhookWebhookResponse, error) {

@@ -19,6 +19,10 @@ type ReleaseTranslationListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ReleaseTranslationListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *ReleaseTranslationListQuery) encode(opts []RequestOption) (url.Values, 
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -73,34 +83,88 @@ func (s *ReleaseTranslationService) Get(ctx context.Context, orgID string, space
 	return &out, nil
 }
 
+// ReleaseTranslationPutQuery are the optional query parameters of ReleaseTranslationService.Put.
+type ReleaseTranslationPutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseTranslationPutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Put replace the translation (changelog)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/translations/{locale}
-func (s *ReleaseTranslationService) Put(ctx context.Context, orgID string, spaceID string, releaseID string, locale string, body ReleaseTranslationPutParams, opts ...RequestOption) (*ReleaseTranslationPutResponse, error) {
+func (s *ReleaseTranslationService) Put(ctx context.Context, orgID string, spaceID string, releaseID string, locale string, body BlogPostTranslationPutBody, query *ReleaseTranslationPutQuery, opts ...RequestOption) (*ReleaseTranslationPutResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseTranslationPutResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/translations/"+pathEscape(locale), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/translations/"+pathEscape(locale), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ReleaseTranslationRemoveQuery are the optional query parameters of ReleaseTranslationService.Remove.
+type ReleaseTranslationRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseTranslationRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the translation (changelog)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/translations/{locale}
-func (s *ReleaseTranslationService) Remove(ctx context.Context, orgID string, spaceID string, releaseID string, locale string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/translations/"+pathEscape(locale), nil, nil, &out, opts); err != nil {
+func (s *ReleaseTranslationService) Remove(ctx context.Context, orgID string, spaceID string, releaseID string, locale string, query *ReleaseTranslationRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/translations/"+pathEscape(locale), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
-// Auto create the auto in a space (changelog)
+// ReleaseTranslationAutoQuery are the optional query parameters of ReleaseTranslationService.Auto.
+type ReleaseTranslationAutoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReleaseTranslationAutoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Auto send an auto request in a space (changelog)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/changelog/{releaseId}/translations/{locale}/auto
-func (s *ReleaseTranslationService) Auto(ctx context.Context, orgID string, spaceID string, releaseID string, locale string, body ReleaseTranslationAutoParams, opts ...RequestOption) (*ReleaseTranslationAutoResponse, error) {
+func (s *ReleaseTranslationService) Auto(ctx context.Context, orgID string, spaceID string, releaseID string, locale string, body ReleaseTranslationAutoParams, query *ReleaseTranslationAutoQuery, opts ...RequestOption) (*ReleaseTranslationAutoResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReleaseTranslationAutoResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/changelog/"+pathEscape(releaseID)+"/translations/"+pathEscape(locale)+"/auto", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

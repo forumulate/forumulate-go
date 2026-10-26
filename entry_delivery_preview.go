@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // EntryDeliveryPreviewService holds the operations under client.EntryDeliveryPreview.
@@ -51,6 +52,8 @@ type EntryDeliveryPreviewResolveQuery struct {
 	Locale *string
 	// How deep references are populated (the plan caps it).
 	Depth *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *EntryDeliveryPreviewResolveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -63,6 +66,9 @@ func (p *EntryDeliveryPreviewResolveQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.Depth != nil {
 		v.Set("depth", *p.Depth)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
 	}
 	return v, opts
 }

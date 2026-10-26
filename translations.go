@@ -26,6 +26,10 @@ type TranslationsOverridesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *TranslationsOverridesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -41,6 +45,12 @@ func (p *TranslationsOverridesListQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -72,12 +82,30 @@ func (s *TranslationsOverridesService) ListAutoPaging(ctx context.Context, orgID
 	})
 }
 
+// TranslationsOverridesSetQuery are the optional query parameters of TranslationsOverridesService.Set.
+type TranslationsOverridesSetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *TranslationsOverridesSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Set replace translation overrides in an organization
 //
 // PUT /orgs/{orgId}/translation-overrides
-func (s *TranslationsOverridesService) Set(ctx context.Context, orgID string, body TranslationsOverridesSetParams, opts ...RequestOption) (*TranslationsOverridesSetResponse, error) {
+func (s *TranslationsOverridesService) Set(ctx context.Context, orgID string, body TranslationsOverridesSetParams, query *TranslationsOverridesSetQuery, opts ...RequestOption) (*TranslationsOverridesSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out TranslationsOverridesSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/translation-overrides", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/translation-overrides", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -89,6 +117,8 @@ type TranslationsOverridesRemoveQuery struct {
 	Key *string
 	// The language whose override to remove, as set with PUT.
 	Locale *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *TranslationsOverridesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -101,6 +131,9 @@ func (p *TranslationsOverridesRemoveQuery) encode(opts []RequestOption) (url.Val
 	}
 	if p.Locale != nil {
 		v.Set("locale", *p.Locale)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
 	}
 	return v, opts
 }

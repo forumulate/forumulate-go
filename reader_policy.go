@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // ReaderPolicyService holds the operations under client.ReaderPolicy.
@@ -22,23 +24,93 @@ func (s *ReaderPolicyService) GetLegalGate(ctx context.Context, orgID string, sp
 	return &out, nil
 }
 
+// ReaderPolicySetLegalGateQuery are the optional query parameters of ReaderPolicyService.SetLegalGate.
+type ReaderPolicySetLegalGateQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *ReaderPolicySetLegalGateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetLegalGate replace one space's legal-acceptance gate override
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/legal-gate
-func (s *ReaderPolicyService) SetLegalGate(ctx context.Context, orgID string, spaceID string, body ReaderPolicySetLegalGateParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/legal-gate", nil, body, &out, opts); err != nil {
+func (s *ReaderPolicyService) SetLegalGate(ctx context.Context, orgID string, spaceID string, body ReaderPolicySetLegalGateParams, query *ReaderPolicySetLegalGateQuery, opts ...RequestOption) (*ReaderPolicySetLegalGateResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderPolicySetLegalGateResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/legal-gate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// ReaderPolicyPatchLegalGateQuery are the optional query parameters of ReaderPolicyService.PatchLegalGate.
+type ReaderPolicyPatchLegalGateQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ReaderPolicyPatchLegalGateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchLegalGate change part of one space's legal-acceptance gate override
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/legal-gate
+func (s *ReaderPolicyService) PatchLegalGate(ctx context.Context, orgID string, spaceID string, body any, query *ReaderPolicyPatchLegalGateQuery, opts ...RequestOption) (*ReaderPolicyPatchLegalGateResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderPolicyPatchLegalGateResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/legal-gate", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ReaderPolicyDeleteLegalGateQuery are the optional query parameters of ReaderPolicyService.DeleteLegalGate.
+type ReaderPolicyDeleteLegalGateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderPolicyDeleteLegalGateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DeleteLegalGate remove one space's legal-acceptance gate override
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/legal-gate
-func (s *ReaderPolicyService) DeleteLegalGate(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ReaderPolicyDeleteLegalGateResponse, error) {
+func (s *ReaderPolicyService) DeleteLegalGate(ctx context.Context, orgID string, spaceID string, query *ReaderPolicyDeleteLegalGateQuery, opts ...RequestOption) (*ReaderPolicyDeleteLegalGateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderPolicyDeleteLegalGateResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/legal-gate", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/legal-gate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -55,23 +127,93 @@ func (s *ReaderPolicyService) GetReaderIdentity(ctx context.Context, orgID strin
 	return &out, nil
 }
 
+// ReaderPolicySetReaderIdentityQuery are the optional query parameters of ReaderPolicyService.SetReaderIdentity.
+type ReaderPolicySetReaderIdentityQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *ReaderPolicySetReaderIdentityQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetReaderIdentity replace one space's reader-identity scope override
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/reader-identity
-func (s *ReaderPolicyService) SetReaderIdentity(ctx context.Context, orgID string, spaceID string, body ReaderPolicySetReaderIdentityParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-identity", nil, body, &out, opts); err != nil {
+func (s *ReaderPolicyService) SetReaderIdentity(ctx context.Context, orgID string, spaceID string, body ReaderPolicySetReaderIdentityParams, query *ReaderPolicySetReaderIdentityQuery, opts ...RequestOption) (*ReaderPolicySetReaderIdentityResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderPolicySetReaderIdentityResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-identity", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// ReaderPolicyPatchReaderIdentityQuery are the optional query parameters of ReaderPolicyService.PatchReaderIdentity.
+type ReaderPolicyPatchReaderIdentityQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ReaderPolicyPatchReaderIdentityQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchReaderIdentity change part of one space's reader-identity scope override
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/reader-identity
+func (s *ReaderPolicyService) PatchReaderIdentity(ctx context.Context, orgID string, spaceID string, body any, query *ReaderPolicyPatchReaderIdentityQuery, opts ...RequestOption) (*ReaderPolicyPatchReaderIdentityResponse, error) {
+	v, opts := query.encode(opts)
+	var out ReaderPolicyPatchReaderIdentityResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-identity", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ReaderPolicyDeleteReaderIdentityQuery are the optional query parameters of ReaderPolicyService.DeleteReaderIdentity.
+type ReaderPolicyDeleteReaderIdentityQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ReaderPolicyDeleteReaderIdentityQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DeleteReaderIdentity remove one space's reader-identity scope override
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/reader-identity
-func (s *ReaderPolicyService) DeleteReaderIdentity(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ReaderPolicyDeleteReaderIdentityResponse, error) {
+func (s *ReaderPolicyService) DeleteReaderIdentity(ctx context.Context, orgID string, spaceID string, query *ReaderPolicyDeleteReaderIdentityQuery, opts ...RequestOption) (*ReaderPolicyDeleteReaderIdentityResponse, error) {
+	v, opts := query.encode(opts)
 	var out ReaderPolicyDeleteReaderIdentityResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-identity", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/reader-identity", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

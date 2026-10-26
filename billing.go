@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // BillingService holds the operations under client.Billing.
@@ -22,23 +24,59 @@ func (s *BillingService) View(ctx context.Context, orgID string, opts ...Request
 	return &out, nil
 }
 
-// Checkout create the checkout in an organization
+// BillingCheckoutQuery are the optional query parameters of BillingService.Checkout.
+type BillingCheckoutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BillingCheckoutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Checkout start a checkout in an organization
 //
 // POST /orgs/{orgId}/billing/checkout
-func (s *BillingService) Checkout(ctx context.Context, orgID string, body BillingCheckoutParams, opts ...RequestOption) (*BillingCheckoutResponse, error) {
+func (s *BillingService) Checkout(ctx context.Context, orgID string, body BillingCheckoutParams, query *BillingCheckoutQuery, opts ...RequestOption) (*BillingCheckoutResponse, error) {
+	v, opts := query.encode(opts)
 	var out BillingCheckoutResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/billing/checkout", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/billing/checkout", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Portal create the portal in an organization
+// BillingPortalQuery are the optional query parameters of BillingService.Portal.
+type BillingPortalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *BillingPortalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Portal send a portal request in an organization
 //
 // POST /orgs/{orgId}/billing/portal
-func (s *BillingService) Portal(ctx context.Context, orgID string, opts ...RequestOption) (*BillingPortalResponse, error) {
+func (s *BillingService) Portal(ctx context.Context, orgID string, query *BillingPortalQuery, opts ...RequestOption) (*BillingPortalResponse, error) {
+	v, opts := query.encode(opts)
 	var out BillingPortalResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/billing/portal", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/billing/portal", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

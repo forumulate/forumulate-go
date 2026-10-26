@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // GoogleIndexingService holds the operations under client.GoogleIndexing.
@@ -22,23 +24,93 @@ func (s *GoogleIndexingService) Status(ctx context.Context, orgID string, opts .
 	return &out, nil
 }
 
-// Configure replace the google indexing in an organization
+// GoogleIndexingConfigureQuery are the optional query parameters of GoogleIndexingService.Configure.
+type GoogleIndexingConfigureQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *GoogleIndexingConfigureQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Configure configure the google indexing
 //
 // PUT /orgs/{orgId}/google-indexing
-func (s *GoogleIndexingService) Configure(ctx context.Context, orgID string, body GoogleIndexingConfigureParams, opts ...RequestOption) (any, error) {
-	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/google-indexing", nil, body, &out, opts); err != nil {
+func (s *GoogleIndexingService) Configure(ctx context.Context, orgID string, body GoogleIndexingConfigureParams, query *GoogleIndexingConfigureQuery, opts ...RequestOption) (*GoogleIndexingConfigureResponse, error) {
+	v, opts := query.encode(opts)
+	var out GoogleIndexingConfigureResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/google-indexing", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return &out, nil
+}
+
+// GoogleIndexingPatchQuery are the optional query parameters of GoogleIndexingService.Patch.
+type GoogleIndexingPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *GoogleIndexingPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the google indexing in an organization
+//
+// PATCH /orgs/{orgId}/google-indexing
+func (s *GoogleIndexingService) Patch(ctx context.Context, orgID string, body any, query *GoogleIndexingPatchQuery, opts ...RequestOption) (*GoogleIndexingPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out GoogleIndexingPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/google-indexing", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GoogleIndexingClearQuery are the optional query parameters of GoogleIndexingService.Clear.
+type GoogleIndexingClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GoogleIndexingClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Clear delete the google indexing in an organization
 //
 // DELETE /orgs/{orgId}/google-indexing
-func (s *GoogleIndexingService) Clear(ctx context.Context, orgID string, opts ...RequestOption) (*GoogleIndexingClearResponse, error) {
+func (s *GoogleIndexingService) Clear(ctx context.Context, orgID string, query *GoogleIndexingClearQuery, opts ...RequestOption) (*GoogleIndexingClearResponse, error) {
+	v, opts := query.encode(opts)
 	var out GoogleIndexingClearResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/google-indexing", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/google-indexing", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

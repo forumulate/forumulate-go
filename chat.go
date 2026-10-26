@@ -25,6 +25,10 @@ type ChatChannelsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatChannelsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -40,6 +44,12 @@ func (p *ChatChannelsQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -71,12 +81,30 @@ func (s *ChatService) ChannelsAutoPaging(ctx context.Context, orgID string, quer
 	})
 }
 
+// ChatCreateChannelQuery are the optional query parameters of ChatService.CreateChannel.
+type ChatCreateChannelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatCreateChannelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateChannel create a channel in an organization
 //
 // POST /orgs/{orgId}/chat/channels
-func (s *ChatService) CreateChannel(ctx context.Context, orgID string, body ChatCreateChannelParams, opts ...RequestOption) (*ChatCreateChannelResponse, error) {
+func (s *ChatService) CreateChannel(ctx context.Context, orgID string, body ChatCreateChannelParams, query *ChatCreateChannelQuery, opts ...RequestOption) (*ChatCreateChannelResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatCreateChannelResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -110,67 +138,175 @@ func (s *ChatService) Search(ctx context.Context, orgID string, query *ChatSearc
 	return &out, nil
 }
 
+// ChatArchiveQuery are the optional query parameters of ChatService.Archive.
+type ChatArchiveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatArchiveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Archive archive the channel
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/archive
-func (s *ChatService) Archive(ctx context.Context, orgID string, channelID string, body ChatArchiveParams, opts ...RequestOption) (*ChatArchiveResponse, error) {
+func (s *ChatService) Archive(ctx context.Context, orgID string, channelID string, body ChatArchiveParams, query *ChatArchiveQuery, opts ...RequestOption) (*ChatArchiveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatArchiveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/archive", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/archive", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatCloseQuery are the optional query parameters of ChatService.Close.
+type ChatCloseQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatCloseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Close close the channel
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/close
-func (s *ChatService) Close(ctx context.Context, orgID string, channelID string, body ChatCloseParams, opts ...RequestOption) (*ChatCloseResponse, error) {
+func (s *ChatService) Close(ctx context.Context, orgID string, channelID string, body ChatCloseParams, query *ChatCloseQuery, opts ...RequestOption) (*ChatCloseResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatCloseResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/close", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/close", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatArchiveToTopicQuery are the optional query parameters of ChatService.ArchiveToTopic.
+type ChatArchiveToTopicQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatArchiveToTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // ArchiveToTopic archive to topic in an organization
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/archive-to-topic
-func (s *ChatService) ArchiveToTopic(ctx context.Context, orgID string, channelID string, body ChatArchiveToTopicParams, opts ...RequestOption) (*ChatArchiveToTopicResponse, error) {
+func (s *ChatService) ArchiveToTopic(ctx context.Context, orgID string, channelID string, body ChatArchiveToTopicParams, query *ChatArchiveToTopicQuery, opts ...RequestOption) (*ChatArchiveToTopicResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatArchiveToTopicResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/archive-to-topic", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/archive-to-topic", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatSetNotificationQuery are the optional query parameters of ChatService.SetNotification.
+type ChatSetNotificationQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatSetNotificationQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetNotification update notifications in an organization
 //
 // PATCH /orgs/{orgId}/chat/channels/{channelId}/notifications
-func (s *ChatService) SetNotification(ctx context.Context, orgID string, channelID string, body ChatSetNotificationParams, opts ...RequestOption) (*ChatSetNotificationResponse, error) {
+func (s *ChatService) SetNotification(ctx context.Context, orgID string, channelID string, body ChatSetNotificationParams, query *ChatSetNotificationQuery, opts ...RequestOption) (*ChatSetNotificationResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatSetNotificationResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/notifications", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/notifications", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatJoinQuery are the optional query parameters of ChatService.Join.
+type ChatJoinQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatJoinQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Join join the channel
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/join
-func (s *ChatService) Join(ctx context.Context, orgID string, channelID string, opts ...RequestOption) (*ChatJoinResponse, error) {
+func (s *ChatService) Join(ctx context.Context, orgID string, channelID string, query *ChatJoinQuery, opts ...RequestOption) (*ChatJoinResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatJoinResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/join", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/join", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ChatAddMemberQuery are the optional query parameters of ChatService.AddMember.
+type ChatAddMemberQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatAddMemberQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AddMember create a member in an organization (chat channels)
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/members
-func (s *ChatService) AddMember(ctx context.Context, orgID string, channelID string, body ChatAddMemberParams, opts ...RequestOption) (*ChatAddMemberResponse, error) {
+func (s *ChatService) AddMember(ctx context.Context, orgID string, channelID string, body ChatAddMemberParams, query *ChatAddMemberQuery, opts ...RequestOption) (*ChatAddMemberResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatAddMemberResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/members", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/members", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -182,6 +318,10 @@ type ChatListMessagesQuery struct {
 	Limit  *int64
 	Before *string
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatListMessagesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -197,6 +337,12 @@ func (p *ChatListMessagesQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -228,23 +374,59 @@ func (s *ChatService) ListMessagesAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
-// Send create a message in an organization (chat channels)
+// ChatSendQuery are the optional query parameters of ChatService.Send.
+type ChatSendQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatSendQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Send send a message (chat channels)
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/messages
-func (s *ChatService) Send(ctx context.Context, orgID string, channelID string, body ChatSendParams, opts ...RequestOption) (*ChatSendResponse, error) {
+func (s *ChatService) Send(ctx context.Context, orgID string, channelID string, body ChatSendParams, query *ChatSendQuery, opts ...RequestOption) (*ChatSendResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatSendResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/messages", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/messages", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ChatUpdateSettingsQuery are the optional query parameters of ChatService.UpdateSettings.
+type ChatUpdateSettingsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatUpdateSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // UpdateSettings update settings in an organization
 //
 // PATCH /orgs/{orgId}/chat/channels/{channelId}/settings
-func (s *ChatService) UpdateSettings(ctx context.Context, orgID string, channelID string, body ChatUpdateSettingsParams, opts ...RequestOption) (*ChatUpdateSettingsResponse, error) {
+func (s *ChatService) UpdateSettings(ctx context.Context, orgID string, channelID string, body ChatUpdateSettingsParams, query *ChatUpdateSettingsQuery, opts ...RequestOption) (*ChatUpdateSettingsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatUpdateSettingsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/settings", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/settings", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -256,6 +438,10 @@ type ChatListIncomingWebhooksQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatListIncomingWebhooksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -268,6 +454,12 @@ func (p *ChatListIncomingWebhooksQuery) encode(opts []RequestOption) (url.Values
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -299,23 +491,59 @@ func (s *ChatService) ListIncomingWebhooksAutoPaging(ctx context.Context, orgID 
 	})
 }
 
+// ChatCreateIncomingWebhookQuery are the optional query parameters of ChatService.CreateIncomingWebhook.
+type ChatCreateIncomingWebhookQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatCreateIncomingWebhookQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateIncomingWebhook create an incoming webhook in an organization
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/incoming-webhooks
-func (s *ChatService) CreateIncomingWebhook(ctx context.Context, orgID string, channelID string, body ChatCreateIncomingWebhookParams, opts ...RequestOption) (any, error) {
+func (s *ChatService) CreateIncomingWebhook(ctx context.Context, orgID string, channelID string, body ChatCreateIncomingWebhookParams, query *ChatCreateIncomingWebhookQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/incoming-webhooks", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/incoming-webhooks", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RevokeIncomingWebhook delete the incoming webhook
+// ChatRevokeIncomingWebhookQuery are the optional query parameters of ChatService.RevokeIncomingWebhook.
+type ChatRevokeIncomingWebhookQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatRevokeIncomingWebhookQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeIncomingWebhook revoke the incoming webhook
 //
 // DELETE /orgs/{orgId}/chat/incoming-webhooks/{webhookId}
-func (s *ChatService) RevokeIncomingWebhook(ctx context.Context, orgID string, webhookID string, opts ...RequestOption) (*ChatRevokeIncomingWebhookResponse, error) {
+func (s *ChatService) RevokeIncomingWebhook(ctx context.Context, orgID string, webhookID string, query *ChatRevokeIncomingWebhookQuery, opts ...RequestOption) (*ChatRevokeIncomingWebhookResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatRevokeIncomingWebhookResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/chat/incoming-webhooks/"+pathEscape(webhookID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/chat/incoming-webhooks/"+pathEscape(webhookID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -327,6 +555,10 @@ type ChatReceiptsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatReceiptsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -339,6 +571,12 @@ func (p *ChatReceiptsQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -376,6 +614,10 @@ type ChatPinsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatPinsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -388,6 +630,12 @@ func (p *ChatPinsQuery) encode(opts []RequestOption) (url.Values, []RequestOptio
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -419,23 +667,59 @@ func (s *ChatService) PinsAutoPaging(ctx context.Context, orgID string, channelI
 	})
 }
 
+// ChatPinQuery are the optional query parameters of ChatService.Pin.
+type ChatPinQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatPinQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Pin pin the message
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/messages/{messageId}/pin
-func (s *ChatService) Pin(ctx context.Context, orgID string, channelID string, messageID string, body ChatPinParams, opts ...RequestOption) (*ChatPinResponse, error) {
+func (s *ChatService) Pin(ctx context.Context, orgID string, channelID string, messageID string, body ChatPinParams, query *ChatPinQuery, opts ...RequestOption) (*ChatPinResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatPinResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/messages/"+pathEscape(messageID)+"/pin", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/messages/"+pathEscape(messageID)+"/pin", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Read create the read in an organization (chat channels)
+// ChatReadQuery are the optional query parameters of ChatService.Read.
+type ChatReadQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatReadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Read mark the channel read
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/read
-func (s *ChatService) Read(ctx context.Context, orgID string, channelID string, opts ...RequestOption) (*ChatReadResponse, error) {
+func (s *ChatService) Read(ctx context.Context, orgID string, channelID string, query *ChatReadQuery, opts ...RequestOption) (*ChatReadResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatReadResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/read", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/read", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -443,6 +727,7 @@ func (s *ChatService) Read(ctx context.Context, orgID string, channelID string, 
 
 // ChatGetDraftQuery are the optional query parameters of ChatService.GetDraft.
 type ChatGetDraftQuery struct {
+	// The parent uuid (uuid only — a slug is not resolved in a query parameter).
 	ParentID *string
 }
 
@@ -469,12 +754,30 @@ func (s *ChatService) GetDraft(ctx context.Context, orgID string, channelID stri
 	return &out, nil
 }
 
+// ChatPutDraftQuery are the optional query parameters of ChatService.PutDraft.
+type ChatPutDraftQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatPutDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PutDraft list draft channels in an organization (replace)
 //
 // PUT /orgs/{orgId}/chat/channels/{channelId}/draft
-func (s *ChatService) PutDraft(ctx context.Context, orgID string, channelID string, body ChatPutDraftParams, opts ...RequestOption) (*ChatPutDraftResponse, error) {
+func (s *ChatService) PutDraft(ctx context.Context, orgID string, channelID string, body ChatPutDraftParams, query *ChatPutDraftQuery, opts ...RequestOption) (*ChatPutDraftResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatPutDraftResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/draft", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/draft", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -482,7 +785,10 @@ func (s *ChatService) PutDraft(ctx context.Context, orgID string, channelID stri
 
 // ChatDeleteDraftQuery are the optional query parameters of ChatService.DeleteDraft.
 type ChatDeleteDraftQuery struct {
+	// The parent uuid (uuid only — a slug is not resolved in a query parameter).
 	ParentID *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *ChatDeleteDraftQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -492,6 +798,9 @@ func (p *ChatDeleteDraftQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.ParentID != nil {
 		v.Set("parentId", *p.ParentID)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
 	}
 	return v, opts
 }
@@ -508,12 +817,30 @@ func (s *ChatService) DeleteDraft(ctx context.Context, orgID string, channelID s
 	return &out, nil
 }
 
-// Heartbeat create the heartbeat in an organization (chat channels)
+// ChatHeartbeatQuery are the optional query parameters of ChatService.Heartbeat.
+type ChatHeartbeatQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatHeartbeatQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Heartbeat send a presence heartbeat for the channel
 //
 // POST /orgs/{orgId}/chat/channels/{channelId}/heartbeat
-func (s *ChatService) Heartbeat(ctx context.Context, orgID string, channelID string, body ChatHeartbeatParams, opts ...RequestOption) (*ChatHeartbeatResponse, error) {
+func (s *ChatService) Heartbeat(ctx context.Context, orgID string, channelID string, body ChatHeartbeatParams, query *ChatHeartbeatQuery, opts ...RequestOption) (*ChatHeartbeatResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatHeartbeatResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/heartbeat", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/channels/"+pathEscape(channelID)+"/heartbeat", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -525,6 +852,10 @@ type ChatOnlineQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatOnlineQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -537,6 +868,12 @@ func (p *ChatOnlineQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -605,7 +942,7 @@ func (p *ChatIncomingWebhooksPostQuery) encode(opts []RequestOption) (url.Values
 	return v, opts
 }
 
-// Post create the incoming
+// Post post a chat message through an incoming webhook
 //
 // POST /chat/incoming/{webhookId}
 func (s *ChatIncomingWebhooksService) Post(ctx context.Context, webhookID string, body ChatIncomingWebhooksPostParams, query *ChatIncomingWebhooksPostQuery, opts ...RequestOption) (*ChatIncomingWebhooksPostResponse, error) {
@@ -628,6 +965,10 @@ type ChatMessagesThreadQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatMessagesThreadQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -640,6 +981,12 @@ func (p *ChatMessagesThreadQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -671,56 +1018,146 @@ func (s *ChatMessagesService) ThreadAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// ChatMessagesEditQuery are the optional query parameters of ChatMessagesService.Edit.
+type ChatMessagesEditQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesEditQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Edit update the message
 //
 // PATCH /orgs/{orgId}/chat/messages/{messageId}
-func (s *ChatMessagesService) Edit(ctx context.Context, orgID string, messageID string, body ChatMessagesEditParams, opts ...RequestOption) (*ChatMessagesEditResponse, error) {
+func (s *ChatMessagesService) Edit(ctx context.Context, orgID string, messageID string, body ChatMessagesEditParams, query *ChatMessagesEditQuery, opts ...RequestOption) (*ChatMessagesEditResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesEditResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Remove delete the message
+// ChatMessagesRemoveQuery are the optional query parameters of ChatMessagesService.Remove.
+type ChatMessagesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Remove delete the message (chat)
 //
 // DELETE /orgs/{orgId}/chat/messages/{messageId}
-func (s *ChatMessagesService) Remove(ctx context.Context, orgID string, messageID string, opts ...RequestOption) (*ChatMessagesRemoveResponse, error) {
+func (s *ChatMessagesService) Remove(ctx context.Context, orgID string, messageID string, query *ChatMessagesRemoveQuery, opts ...RequestOption) (*ChatMessagesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// React create the react in an organization
+// ChatMessagesReactQuery are the optional query parameters of ChatMessagesService.React.
+type ChatMessagesReactQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesReactQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// React react to the message
 //
 // POST /orgs/{orgId}/chat/messages/{messageId}/react
-func (s *ChatMessagesService) React(ctx context.Context, orgID string, messageID string, body ChatMessagesReactParams, opts ...RequestOption) (*ChatMessagesReactResponse, error) {
+func (s *ChatMessagesService) React(ctx context.Context, orgID string, messageID string, body ChatMessagesReactParams, query *ChatMessagesReactQuery, opts ...RequestOption) (*ChatMessagesReactResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesReactResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/react", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/react", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatMessagesDmQuery are the optional query parameters of ChatMessagesService.Dm.
+type ChatMessagesDmQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesDmQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Dm open a direct message
 //
 // POST /orgs/{orgId}/chat/dm
-func (s *ChatMessagesService) Dm(ctx context.Context, orgID string, body ChatMessagesDmParams, opts ...RequestOption) (*ChatMessagesDmResponse, error) {
+func (s *ChatMessagesService) Dm(ctx context.Context, orgID string, body ChatMessagesDmParams, query *ChatMessagesDmQuery, opts ...RequestOption) (*ChatMessagesDmResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesDmResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/dm", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/dm", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ChatMessagesGroupDmQuery are the optional query parameters of ChatMessagesService.GroupDm.
+type ChatMessagesGroupDmQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesGroupDmQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // GroupDm open a group direct message
 //
 // POST /orgs/{orgId}/chat/dm/group
-func (s *ChatMessagesService) GroupDm(ctx context.Context, orgID string, body ChatMessagesGroupDmParams, opts ...RequestOption) (*ChatMessagesGroupDmResponse, error) {
+func (s *ChatMessagesService) GroupDm(ctx context.Context, orgID string, body ChatMessagesGroupDmParams, query *ChatMessagesGroupDmQuery, opts ...RequestOption) (*ChatMessagesGroupDmResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesGroupDmResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/dm/group", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/dm/group", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -737,56 +1174,146 @@ func (s *ChatMessagesService) MessageLink(ctx context.Context, orgID string, mes
 	return &out, nil
 }
 
-// QuoteToTopic create the quote to topic in an organization
+// ChatMessagesQuoteToTopicQuery are the optional query parameters of ChatMessagesService.QuoteToTopic.
+type ChatMessagesQuoteToTopicQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesQuoteToTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// QuoteToTopic quote to the topic
 //
 // POST /orgs/{orgId}/chat/messages/{messageId}/quote-to-topic
-func (s *ChatMessagesService) QuoteToTopic(ctx context.Context, orgID string, messageID string, body ChatMessagesQuoteToTopicParams, opts ...RequestOption) (*ChatMessagesQuoteToTopicResponse, error) {
+func (s *ChatMessagesService) QuoteToTopic(ctx context.Context, orgID string, messageID string, body ChatMessagesQuoteToTopicParams, query *ChatMessagesQuoteToTopicQuery, opts ...RequestOption) (*ChatMessagesQuoteToTopicResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesQuoteToTopicResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/quote-to-topic", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/quote-to-topic", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatMessagesFlagQuery are the optional query parameters of ChatMessagesService.Flag.
+type ChatMessagesFlagQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesFlagQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Flag flag the message
 //
 // POST /orgs/{orgId}/chat/messages/{messageId}/flag
-func (s *ChatMessagesService) Flag(ctx context.Context, orgID string, messageID string, body ChatMessagesFlagParams, opts ...RequestOption) (*ChatMessagesFlagResponse, error) {
+func (s *ChatMessagesService) Flag(ctx context.Context, orgID string, messageID string, body ChatMessagesFlagParams, query *ChatMessagesFlagQuery, opts ...RequestOption) (*ChatMessagesFlagResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesFlagResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/flag", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/flag", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Bookmark create the bookmark in an organization
+// ChatMessagesBookmarkQuery are the optional query parameters of ChatMessagesService.Bookmark.
+type ChatMessagesBookmarkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesBookmarkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Bookmark bookmark the message
 //
 // POST /orgs/{orgId}/chat/messages/{messageId}/bookmark
-func (s *ChatMessagesService) Bookmark(ctx context.Context, orgID string, messageID string, opts ...RequestOption) (*ChatMessagesBookmarkResponse, error) {
+func (s *ChatMessagesService) Bookmark(ctx context.Context, orgID string, messageID string, query *ChatMessagesBookmarkQuery, opts ...RequestOption) (*ChatMessagesBookmarkResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesBookmarkResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/bookmark", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/bookmark", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ChatMessagesRemoveBookmarkQuery are the optional query parameters of ChatMessagesService.RemoveBookmark.
+type ChatMessagesRemoveBookmarkQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesRemoveBookmarkQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveBookmark delete the bookmark in an organization
 //
 // DELETE /orgs/{orgId}/chat/messages/{messageId}/bookmark
-func (s *ChatMessagesService) RemoveBookmark(ctx context.Context, orgID string, messageID string, opts ...RequestOption) (*ChatMessagesRemoveBookmarkResponse, error) {
+func (s *ChatMessagesService) RemoveBookmark(ctx context.Context, orgID string, messageID string, query *ChatMessagesRemoveBookmarkQuery, opts ...RequestOption) (*ChatMessagesRemoveBookmarkResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesRemoveBookmarkResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/bookmark", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/bookmark", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ChatMessagesBookmarkReminderQuery are the optional query parameters of ChatMessagesService.BookmarkReminder.
+type ChatMessagesBookmarkReminderQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesBookmarkReminderQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // BookmarkReminder update the reminder in an organization
 //
 // PATCH /orgs/{orgId}/chat/messages/{messageId}/bookmark/reminder
-func (s *ChatMessagesService) BookmarkReminder(ctx context.Context, orgID string, messageID string, body ChatMessagesBookmarkReminderParams, opts ...RequestOption) (*ChatMessagesBookmarkReminderResponse, error) {
+func (s *ChatMessagesService) BookmarkReminder(ctx context.Context, orgID string, messageID string, body ChatMessagesBookmarkReminderParams, query *ChatMessagesBookmarkReminderQuery, opts ...RequestOption) (*ChatMessagesBookmarkReminderResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesBookmarkReminderResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/bookmark/reminder", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/chat/messages/"+pathEscape(messageID)+"/bookmark/reminder", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -798,6 +1325,10 @@ type ChatMessagesListBookmarksQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatMessagesListBookmarksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -810,6 +1341,12 @@ func (p *ChatMessagesListBookmarksQuery) encode(opts []RequestOption) (url.Value
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -841,12 +1378,30 @@ func (s *ChatMessagesService) ListBookmarksAutoPaging(ctx context.Context, orgID
 	})
 }
 
+// ChatMessagesMoveQuery are the optional query parameters of ChatMessagesService.Move.
+type ChatMessagesMoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatMessagesMoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Move move the message
 //
 // POST /orgs/{orgId}/chat/messages/move
-func (s *ChatMessagesService) Move(ctx context.Context, orgID string, body ChatMessagesMoveParams, opts ...RequestOption) (*ChatMessagesMoveResponse, error) {
+func (s *ChatMessagesService) Move(ctx context.Context, orgID string, body ChatMessagesMoveParams, query *ChatMessagesMoveQuery, opts ...RequestOption) (*ChatMessagesMoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatMessagesMoveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/move", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/chat/messages/move", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -863,6 +1418,10 @@ type ChatProvidersListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ChatProvidersListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -875,6 +1434,12 @@ func (p *ChatProvidersListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -906,34 +1471,133 @@ func (s *ChatProvidersService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// ChatProvidersCreateQuery are the optional query parameters of ChatProvidersService.Create.
+type ChatProvidersCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatProvidersCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a custom chat provider in an organization
 //
 // POST /orgs/{orgId}/custom-chat-providers
-func (s *ChatProvidersService) Create(ctx context.Context, orgID string, body ChatProvidersCreateParams, opts ...RequestOption) (*ChatProvidersCreateResponse, error) {
+func (s *ChatProvidersService) Create(ctx context.Context, orgID string, body CustomProvidersCreateBody, query *ChatProvidersCreateQuery, opts ...RequestOption) (*ChatProvidersCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatProvidersCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// Get one custom chat provider definition
+//
+// GET /orgs/{orgId}/custom-chat-providers/{slug}
+func (s *ChatProvidersService) Get(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ChatProvidersGetResponse, error) {
+	var out ChatProvidersGetResponse
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ChatProvidersUpdateQuery are the optional query parameters of ChatProvidersService.Update.
+type ChatProvidersUpdateQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *ChatProvidersUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
 }
 
 // Update replace the custom chat provider
 //
 // PUT /orgs/{orgId}/custom-chat-providers/{slug}
-func (s *ChatProvidersService) Update(ctx context.Context, orgID string, slug string, body ChatProvidersUpdateParams, opts ...RequestOption) (*ChatProvidersUpdateResponse, error) {
+func (s *ChatProvidersService) Update(ctx context.Context, orgID string, slug string, body CustomProvidersCreateBody, query *ChatProvidersUpdateQuery, opts ...RequestOption) (*ChatProvidersUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatProvidersUpdateResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers/"+pathEscape(slug), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers/"+pathEscape(slug), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ChatProvidersPatchQuery are the optional query parameters of ChatProvidersService.Patch.
+type ChatProvidersPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ChatProvidersPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the custom chat provider
+//
+// PATCH /orgs/{orgId}/custom-chat-providers/{slug}
+func (s *ChatProvidersService) Patch(ctx context.Context, orgID string, slug string, body any, query *ChatProvidersPatchQuery, opts ...RequestOption) (*ChatProvidersPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out ChatProvidersPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers/"+pathEscape(slug), v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ChatProvidersRemoveQuery are the optional query parameters of ChatProvidersService.Remove.
+type ChatProvidersRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ChatProvidersRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the custom chat provider
 //
 // DELETE /orgs/{orgId}/custom-chat-providers/{slug}
-func (s *ChatProvidersService) Remove(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*ChatProvidersRemoveResponse, error) {
+func (s *ChatProvidersService) Remove(ctx context.Context, orgID string, slug string, query *ChatProvidersRemoveQuery, opts ...RequestOption) (*ChatProvidersRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ChatProvidersRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-chat-providers/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

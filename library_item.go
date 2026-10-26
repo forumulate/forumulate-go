@@ -13,23 +13,59 @@ type LibraryItemService struct {
 	c *Client
 }
 
+// LibraryItemCreateQuery are the optional query parameters of LibraryItemService.Create.
+type LibraryItemCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryItemCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an item in an organization
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/items
-func (s *LibraryItemService) Create(ctx context.Context, orgID string, libraryID string, body LibraryItemCreateParams, opts ...RequestOption) (*LibraryItemCreateResponse, error) {
+func (s *LibraryItemService) Create(ctx context.Context, orgID string, libraryID string, body LibraryItemCreateParams, query *LibraryItemCreateQuery, opts ...RequestOption) (*LibraryItemCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryItemCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Lookup create the lookup in an organization
+// LibraryItemLookupQuery are the optional query parameters of LibraryItemService.Lookup.
+type LibraryItemLookupQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryItemLookupQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Lookup lookup an item
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/items/lookup
-func (s *LibraryItemService) Lookup(ctx context.Context, orgID string, libraryID string, body LibraryItemLookupParams, opts ...RequestOption) (*LibraryItemLookupResponse, error) {
+func (s *LibraryItemService) Lookup(ctx context.Context, orgID string, libraryID string, body LibraryItemLookupParams, query *LibraryItemLookupQuery, opts ...RequestOption) (*LibraryItemLookupResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryItemLookupResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/lookup", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/lookup", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -46,12 +82,30 @@ func (s *LibraryItemService) Read(ctx context.Context, orgID string, libraryID s
 	return out, nil
 }
 
+// LibraryItemPatchQuery are the optional query parameters of LibraryItemService.Patch.
+type LibraryItemPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryItemPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Patch update the item (content libraries)
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/items/{itemId}
-func (s *LibraryItemService) Patch(ctx context.Context, orgID string, libraryID string, itemID string, body LibraryItemPatchParams, opts ...RequestOption) (*LibraryItemPatchResponse, error) {
+func (s *LibraryItemService) Patch(ctx context.Context, orgID string, libraryID string, itemID string, body ItemPatchBody, query *LibraryItemPatchQuery, opts ...RequestOption) (*LibraryItemPatchResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryItemPatchResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/"+pathEscape(itemID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/"+pathEscape(itemID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -61,6 +115,8 @@ func (s *LibraryItemService) Patch(ctx context.Context, orgID string, libraryID 
 type LibraryItemRemoveQuery struct {
 	// Delete even though other entries reference this one.
 	Force *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *LibraryItemRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -70,6 +126,9 @@ func (p *LibraryItemRemoveQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Force != nil {
 		v.Set("force", *p.Force)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
 	}
 	return v, opts
 }
@@ -97,23 +156,59 @@ func (s *LibraryItemService) Fields(ctx context.Context, orgID string, libraryID
 	return &out, nil
 }
 
+// LibraryItemSetFieldsQuery are the optional query parameters of LibraryItemService.SetFields.
+type LibraryItemSetFieldsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryItemSetFieldsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetFields update fields in an organization (items)
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/items/{itemId}/fields
-func (s *LibraryItemService) SetFields(ctx context.Context, orgID string, libraryID string, itemID string, body LibraryItemSetFieldsParams, opts ...RequestOption) (*LibraryItemSetFieldsResponse, error) {
+func (s *LibraryItemService) SetFields(ctx context.Context, orgID string, libraryID string, itemID string, body LibraryItemSetFieldsParams, query *LibraryItemSetFieldsQuery, opts ...RequestOption) (*LibraryItemSetFieldsResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryItemSetFieldsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/"+pathEscape(itemID)+"/fields", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/"+pathEscape(itemID)+"/fields", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// LibraryItemPublishQuery are the optional query parameters of LibraryItemService.Publish.
+type LibraryItemPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryItemPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the item (content libraries)
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/items/{itemId}/publish
-func (s *LibraryItemService) Publish(ctx context.Context, orgID string, libraryID string, itemID string, opts ...RequestOption) (*LibraryItemPublishResponse, error) {
+func (s *LibraryItemService) Publish(ctx context.Context, orgID string, libraryID string, itemID string, query *LibraryItemPublishQuery, opts ...RequestOption) (*LibraryItemPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryItemPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/"+pathEscape(itemID)+"/publish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/items/"+pathEscape(itemID)+"/publish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -125,6 +220,10 @@ type LibraryItemTrashQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibraryItemTrashQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -137,6 +236,12 @@ func (p *LibraryItemTrashQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -168,12 +273,30 @@ func (s *LibraryItemService) TrashAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
+// LibraryItemRestoreQuery are the optional query parameters of LibraryItemService.Restore.
+type LibraryItemRestoreQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryItemRestoreQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Restore restore the trash
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/trash/{itemId}/restore
-func (s *LibraryItemService) Restore(ctx context.Context, orgID string, libraryID string, itemID string, opts ...RequestOption) (*LibraryItemRestoreResponse, error) {
+func (s *LibraryItemService) Restore(ctx context.Context, orgID string, libraryID string, itemID string, query *LibraryItemRestoreQuery, opts ...RequestOption) (*LibraryItemRestoreResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryItemRestoreResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/trash/"+pathEscape(itemID)+"/restore", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/trash/"+pathEscape(itemID)+"/restore", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

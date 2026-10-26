@@ -82,12 +82,30 @@ func (s *ItemsService) ListAutoPaging(ctx context.Context, orgID string, spaceID
 	})
 }
 
+// ItemsCreateQuery are the optional query parameters of ItemsService.Create.
+type ItemsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an item in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/items
-func (s *ItemsService) Create(ctx context.Context, orgID string, spaceID string, body ItemsCreateParams, opts ...RequestOption) (*ItemsCreateResponse, error) {
+func (s *ItemsService) Create(ctx context.Context, orgID string, spaceID string, body ItemsCreateParams, query *ItemsCreateQuery, opts ...RequestOption) (*ItemsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -104,23 +122,59 @@ func (s *ItemsService) Read(ctx context.Context, orgID string, spaceID string, i
 	return out, nil
 }
 
+// ItemsPatchQuery are the optional query parameters of ItemsService.Patch.
+type ItemsPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Patch update the item (spaces)
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/items/{itemId}
-func (s *ItemsService) Patch(ctx context.Context, orgID string, spaceID string, itemID string, body ItemsPatchParams, opts ...RequestOption) (*ItemsPatchResponse, error) {
+func (s *ItemsService) Patch(ctx context.Context, orgID string, spaceID string, itemID string, body ItemPatchBody, query *ItemsPatchQuery, opts ...RequestOption) (*ItemsPatchResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsPatchResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ItemsRemoveQuery are the optional query parameters of ItemsService.Remove.
+type ItemsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the item (spaces)
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/items/{itemId}
-func (s *ItemsService) Remove(ctx context.Context, orgID string, spaceID string, itemID string, opts ...RequestOption) (*ItemsRemoveResponse, error) {
+func (s *ItemsService) Remove(ctx context.Context, orgID string, spaceID string, itemID string, query *ItemsRemoveQuery, opts ...RequestOption) (*ItemsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -137,12 +191,30 @@ func (s *ItemsService) GetContent(ctx context.Context, orgID string, spaceID str
 	return &out, nil
 }
 
+// ItemsPutContentQuery are the optional query parameters of ItemsService.PutContent.
+type ItemsPutContentQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsPutContentQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PutContent replace the content in a space (items)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/items/{itemId}/content
-func (s *ItemsService) PutContent(ctx context.Context, orgID string, spaceID string, itemID string, body ItemsPutContentParams, opts ...RequestOption) (*ItemsPutContentResponse, error) {
+func (s *ItemsService) PutContent(ctx context.Context, orgID string, spaceID string, itemID string, body ItemsPutContentParams, query *ItemsPutContentQuery, opts ...RequestOption) (*ItemsPutContentResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsPutContentResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/content", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/content", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -159,23 +231,59 @@ func (s *ItemsService) Chunks(ctx context.Context, orgID string, spaceID string,
 	return &out, nil
 }
 
+// ItemsVerifyQuery are the optional query parameters of ItemsService.Verify.
+type ItemsVerifyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsVerifyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Verify verify the item
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/items/{itemId}/verify
-func (s *ItemsService) Verify(ctx context.Context, orgID string, spaceID string, itemID string, opts ...RequestOption) (*ItemsVerifyResponse, error) {
+func (s *ItemsService) Verify(ctx context.Context, orgID string, spaceID string, itemID string, query *ItemsVerifyQuery, opts ...RequestOption) (*ItemsVerifyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsVerifyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/verify", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/verify", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ItemsPublishQuery are the optional query parameters of ItemsService.Publish.
+type ItemsPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the item (spaces)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/items/{itemId}/publish
-func (s *ItemsService) Publish(ctx context.Context, orgID string, spaceID string, itemID string, opts ...RequestOption) (*ItemsPublishResponse, error) {
+func (s *ItemsService) Publish(ctx context.Context, orgID string, spaceID string, itemID string, query *ItemsPublishQuery, opts ...RequestOption) (*ItemsPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/publish", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/publish", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -192,23 +300,59 @@ func (s *ItemsService) Fields(ctx context.Context, orgID string, spaceID string,
 	return &out, nil
 }
 
+// ItemsSetFieldsQuery are the optional query parameters of ItemsService.SetFields.
+type ItemsSetFieldsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsSetFieldsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetFields update fields in a space
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/items/{itemId}/fields
-func (s *ItemsService) SetFields(ctx context.Context, orgID string, spaceID string, itemID string, body ItemsSetFieldsParams, opts ...RequestOption) (*ItemsSetFieldsResponse, error) {
+func (s *ItemsService) SetFields(ctx context.Context, orgID string, spaceID string, itemID string, body ItemsSetFieldsParams, query *ItemsSetFieldsQuery, opts ...RequestOption) (*ItemsSetFieldsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsSetFieldsResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/fields", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/fields", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// ItemsPutSectionQuery are the optional query parameters of ItemsService.PutSection.
+type ItemsPutSectionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ItemsPutSectionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PutSection replace the section (items)
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/items/{itemId}/sections/{key}
-func (s *ItemsService) PutSection(ctx context.Context, orgID string, spaceID string, itemID string, key string, body ItemsPutSectionParams, opts ...RequestOption) (*ItemsPutSectionResponse, error) {
+func (s *ItemsService) PutSection(ctx context.Context, orgID string, spaceID string, itemID string, key string, body ItemsPutSectionParams, query *ItemsPutSectionQuery, opts ...RequestOption) (*ItemsPutSectionResponse, error) {
+	v, opts := query.encode(opts)
 	var out ItemsPutSectionResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/sections/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/items/"+pathEscape(itemID)+"/sections/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

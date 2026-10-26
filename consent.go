@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // ConsentService holds the operations under client.Consent.
@@ -27,6 +28,10 @@ func (s *ConsentService) GetOrg(ctx context.Context, orgID string, opts ...Reque
 type ConsentSetOrgQuery struct {
 	// Set true for a dry run: validate the body and return the resulting `ResolvedConsentConfig`, writing NOTHING.
 	Validate *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
 }
 
 func (p *ConsentSetOrgQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -36,6 +41,12 @@ func (p *ConsentSetOrgQuery) encode(opts []RequestOption) (url.Values, []Request
 	}
 	if p.Validate != nil {
 		v.Set("validate", *p.Validate)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
 	}
 	return v, opts
 }
@@ -52,12 +63,59 @@ func (s *ConsentService) SetOrg(ctx context.Context, orgID string, body ConsentC
 	return out, nil
 }
 
-// RotateWebhookSecret create the webhook secret in an organization
+// ConsentPatchOrgQuery are the optional query parameters of ConsentService.PatchOrg.
+type ConsentPatchOrgQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ConsentPatchOrgQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchOrg update the consent in an organization
+//
+// PATCH /orgs/{orgId}/consent
+func (s *ConsentService) PatchOrg(ctx context.Context, orgID string, body any, query *ConsentPatchOrgQuery, opts ...RequestOption) (*ConsentPatchOrgResponse, error) {
+	v, opts := query.encode(opts)
+	var out ConsentPatchOrgResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/consent", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ConsentRotateWebhookSecretQuery are the optional query parameters of ConsentService.RotateWebhookSecret.
+type ConsentRotateWebhookSecretQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConsentRotateWebhookSecretQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RotateWebhookSecret rotate the webhook secret
 //
 // POST /orgs/{orgId}/consent/webhook-secret
-func (s *ConsentService) RotateWebhookSecret(ctx context.Context, orgID string, opts ...RequestOption) (*ConsentRotateWebhookSecretResponse, error) {
+func (s *ConsentService) RotateWebhookSecret(ctx context.Context, orgID string, query *ConsentRotateWebhookSecretQuery, opts ...RequestOption) (*ConsentRotateWebhookSecretResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConsentRotateWebhookSecretResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/consent/webhook-secret", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/consent/webhook-secret", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -74,37 +132,91 @@ func (s *ConsentService) ExecutorKeyStatus(ctx context.Context, orgID string, op
 	return &out, nil
 }
 
+// ConsentRotateExecutorKeyQuery are the optional query parameters of ConsentService.RotateExecutorKey.
+type ConsentRotateExecutorKeyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConsentRotateExecutorKeyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RotateExecutorKey mint this organization’s privacy-executor credential
 //
 // POST /orgs/{orgId}/privacy/executor-key
-func (s *ConsentService) RotateExecutorKey(ctx context.Context, orgID string, opts ...RequestOption) (*ConsentRotateExecutorKeyResponse, error) {
+func (s *ConsentService) RotateExecutorKey(ctx context.Context, orgID string, body ConsentRotateExecutorKeyParams, query *ConsentRotateExecutorKeyQuery, opts ...RequestOption) (*ConsentRotateExecutorKeyResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConsentRotateExecutorKeyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/privacy/executor-key", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/privacy/executor-key", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SendTestEvent create the webhook test in an organization
+// ConsentSendTestEventQuery are the optional query parameters of ConsentService.SendTestEvent.
+type ConsentSendTestEventQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConsentSendTestEventQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SendTestEvent send the test event
 //
 // POST /orgs/{orgId}/consent/webhook-test
-func (s *ConsentService) SendTestEvent(ctx context.Context, orgID string, opts ...RequestOption) (*ConsentSendTestEventResponse, error) {
+func (s *ConsentService) SendTestEvent(ctx context.Context, orgID string, query *ConsentSendTestEventQuery, opts ...RequestOption) (*ConsentSendTestEventResponse, error) {
+	v, opts := query.encode(opts)
 	var out ConsentSendTestEventResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/consent/webhook-test", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/consent/webhook-test", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// PurgeOrg purge the cache (consent)
+// ConsentPurgeOrgQuery are the optional query parameters of ConsentService.PurgeOrg.
+type ConsentPurgeOrgQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConsentPurgeOrgQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PurgeOrg purge the org cache (deprecated alias)
 //
 // POST /orgs/{orgId}/consent/cache/purge
-func (s *ConsentService) PurgeOrg(ctx context.Context, orgID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/consent/cache/purge", nil, nil, &out, opts); err != nil {
+func (s *ConsentService) PurgeOrg(ctx context.Context, orgID string, query *ConsentPurgeOrgQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/consent/cache/purge", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // GetSpace get the consent in a space
@@ -122,6 +234,10 @@ func (s *ConsentService) GetSpace(ctx context.Context, orgID string, spaceID str
 type ConsentSetSpaceQuery struct {
 	// Set true for a dry run: validate the body and return the resulting `ResolvedConsentConfig`, writing NOTHING.
 	Validate *string
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
 }
 
 func (p *ConsentSetSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -131,6 +247,12 @@ func (p *ConsentSetSpaceQuery) encode(opts []RequestOption) (url.Values, []Reque
 	}
 	if p.Validate != nil {
 		v.Set("validate", *p.Validate)
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
 	}
 	return v, opts
 }
@@ -147,13 +269,60 @@ func (s *ConsentService) SetSpace(ctx context.Context, orgID string, spaceID str
 	return out, nil
 }
 
-// PurgeSpace purge the cache (spaces)
+// ConsentPatchSpaceQuery are the optional query parameters of ConsentService.PatchSpace.
+type ConsentPatchSpaceQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ConsentPatchSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchSpace update the consent in a space
 //
-// POST /orgs/{orgId}/spaces/{spaceId}/cache/purge
-func (s *ConsentService) PurgeSpace(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/cache/purge", nil, nil, &out, opts); err != nil {
+// PATCH /orgs/{orgId}/spaces/{spaceId}/consent
+func (s *ConsentService) PatchSpace(ctx context.Context, orgID string, spaceID string, body any, query *ConsentPatchSpaceQuery, opts ...RequestOption) (*ConsentPatchSpaceResponse, error) {
+	v, opts := query.encode(opts)
+	var out ConsentPatchSpaceResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/consent", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ConsentPurgeSpaceQuery are the optional query parameters of ConsentService.PurgeSpace.
+type ConsentPurgeSpaceQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ConsentPurgeSpaceQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// PurgeSpace purge the space cache (deprecated alias)
+//
+// POST /orgs/{orgId}/spaces/{spaceId}/consent/cache/purge
+func (s *ConsentService) PurgeSpace(ctx context.Context, orgID string, spaceID string, query *ConsentPurgeSpaceQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/consent/cache/purge", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

@@ -19,6 +19,10 @@ type CustomFieldsListDefsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CustomFieldsListDefsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *CustomFieldsListDefsQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,23 +72,59 @@ func (s *CustomFieldsService) ListDefsAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
-// CreateDef create the custom field
+// CustomFieldsCreateDefQuery are the optional query parameters of CustomFieldsService.CreateDef.
+type CustomFieldsCreateDefQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CustomFieldsCreateDefQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// CreateDef create a field definition in an organization
 //
 // POST /orgs/{orgId}/custom-fields/{entityType}
-func (s *CustomFieldsService) CreateDef(ctx context.Context, orgID string, entityType string, body CustomFieldsCreateDefParams, opts ...RequestOption) (*CustomFieldsCreateDefResponse, error) {
+func (s *CustomFieldsService) CreateDef(ctx context.Context, orgID string, entityType string, body CustomFieldsCreateDefParams, query *CustomFieldsCreateDefQuery, opts ...RequestOption) (*CustomFieldsCreateDefResponse, error) {
+	v, opts := query.encode(opts)
 	var out CustomFieldsCreateDefResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-fields/"+pathEscape(entityType), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-fields/"+pathEscape(entityType), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CustomFieldsDeleteDefQuery are the optional query parameters of CustomFieldsService.DeleteDef.
+type CustomFieldsDeleteDefQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CustomFieldsDeleteDefQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteDef delete the field definition
 //
 // DELETE /orgs/{orgId}/custom-fields/defs/{id}
-func (s *CustomFieldsService) DeleteDef(ctx context.Context, orgID string, id string, opts ...RequestOption) (*CustomFieldsDeleteDefResponse, error) {
+func (s *CustomFieldsService) DeleteDef(ctx context.Context, orgID string, id string, query *CustomFieldsDeleteDefQuery, opts ...RequestOption) (*CustomFieldsDeleteDefResponse, error) {
+	v, opts := query.encode(opts)
 	var out CustomFieldsDeleteDefResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-fields/defs/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/custom-fields/defs/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -90,6 +136,10 @@ type CustomFieldsGetValuesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CustomFieldsGetValuesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -102,6 +152,12 @@ func (p *CustomFieldsGetValuesQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -133,23 +189,59 @@ func (s *CustomFieldsService) GetValuesAutoPaging(ctx context.Context, orgID str
 	})
 }
 
+// CustomFieldsSetValueQuery are the optional query parameters of CustomFieldsService.SetValue.
+type CustomFieldsSetValueQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CustomFieldsSetValueQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetValue create a value in an organization
 //
 // POST /orgs/{orgId}/custom-fields/{entityType}/{entityId}/values
-func (s *CustomFieldsService) SetValue(ctx context.Context, orgID string, entityType string, entityID string, body CustomFieldsSetValueParams, opts ...RequestOption) (*CustomFieldsSetValueResponse, error) {
+func (s *CustomFieldsService) SetValue(ctx context.Context, orgID string, entityType string, entityID string, body CustomFieldsSetValueParams, query *CustomFieldsSetValueQuery, opts ...RequestOption) (*CustomFieldsSetValueResponse, error) {
+	v, opts := query.encode(opts)
 	var out CustomFieldsSetValueResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-fields/"+pathEscape(entityType)+"/"+pathEscape(entityID)+"/values", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/custom-fields/"+pathEscape(entityType)+"/"+pathEscape(entityID)+"/values", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CustomFieldsSetOwnValuesQuery are the optional query parameters of CustomFieldsService.SetOwnValues.
+type CustomFieldsSetOwnValuesQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CustomFieldsSetOwnValuesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetOwnValues set your own member fields
 //
 // PUT /orgs/{orgId}/custom-fields/member/me
-func (s *CustomFieldsService) SetOwnValues(ctx context.Context, orgID string, body CustomFieldsSetOwnValuesParams, opts ...RequestOption) (*CustomFieldsSetOwnValuesResponse, error) {
+func (s *CustomFieldsService) SetOwnValues(ctx context.Context, orgID string, body CustomFieldsSetOwnValuesParams, query *CustomFieldsSetOwnValuesQuery, opts ...RequestOption) (*CustomFieldsSetOwnValuesResponse, error) {
+	v, opts := query.encode(opts)
 	var out CustomFieldsSetOwnValuesResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/custom-fields/member/me", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/custom-fields/member/me", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

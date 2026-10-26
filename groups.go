@@ -23,6 +23,10 @@ type GroupsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *GroupsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +39,12 @@ func (p *GroupsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -66,12 +76,30 @@ func (s *GroupsService) ListAutoPaging(ctx context.Context, orgID string, query 
 	})
 }
 
+// GroupsCreateQuery are the optional query parameters of GroupsService.Create.
+type GroupsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a group in an organization
 //
 // POST /orgs/{orgId}/groups
-func (s *GroupsService) Create(ctx context.Context, orgID string, body GroupsCreateParams, opts ...RequestOption) (*GroupsCreateResponse, error) {
+func (s *GroupsService) Create(ctx context.Context, orgID string, body GroupsCreateParams, query *GroupsCreateQuery, opts ...RequestOption) (*GroupsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -88,67 +116,175 @@ func (s *GroupsService) Get(ctx context.Context, orgID string, groupID string, o
 	return &out, nil
 }
 
+// GroupsUpdateQuery are the optional query parameters of GroupsService.Update.
+type GroupsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the group (orgs groups)
 //
 // PATCH /orgs/{orgId}/groups/{groupId}
-func (s *GroupsService) Update(ctx context.Context, orgID string, groupID string, body GroupsUpdateParams, opts ...RequestOption) (*GroupsUpdateResponse, error) {
+func (s *GroupsService) Update(ctx context.Context, orgID string, groupID string, body GroupsUpdateParams, query *GroupsUpdateQuery, opts ...RequestOption) (*GroupsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// GroupsRemoveQuery are the optional query parameters of GroupsService.Remove.
+type GroupsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the group (orgs groups)
 //
 // DELETE /orgs/{orgId}/groups/{groupId}
-func (s *GroupsService) Remove(ctx context.Context, orgID string, groupID string, opts ...RequestOption) (*GroupsRemoveResponse, error) {
+func (s *GroupsService) Remove(ctx context.Context, orgID string, groupID string, query *GroupsRemoveQuery, opts ...RequestOption) (*GroupsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// GroupsAddMemberQuery are the optional query parameters of GroupsService.AddMember.
+type GroupsAddMemberQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsAddMemberQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // AddMember create a member in an organization (groups)
 //
 // POST /orgs/{orgId}/groups/{groupId}/members
-func (s *GroupsService) AddMember(ctx context.Context, orgID string, groupID string, body GroupsAddMemberParams, opts ...RequestOption) (*GroupsAddMemberResponse, error) {
+func (s *GroupsService) AddMember(ctx context.Context, orgID string, groupID string, body GroupsAddMemberParams, query *GroupsAddMemberQuery, opts ...RequestOption) (*GroupsAddMemberResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsAddMemberResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/members", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/members", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// GroupsRemoveMemberQuery are the optional query parameters of GroupsService.RemoveMember.
+type GroupsRemoveMemberQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsRemoveMemberQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveMember delete the member (groups)
 //
 // DELETE /orgs/{orgId}/groups/{groupId}/members/{userId}
-func (s *GroupsService) RemoveMember(ctx context.Context, orgID string, groupID string, userID string, opts ...RequestOption) (*GroupsRemoveMemberResponse, error) {
+func (s *GroupsService) RemoveMember(ctx context.Context, orgID string, groupID string, userID string, query *GroupsRemoveMemberQuery, opts ...RequestOption) (*GroupsRemoveMemberResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsRemoveMemberResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/members/"+pathEscape(userID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/members/"+pathEscape(userID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// GroupsJoinQuery are the optional query parameters of GroupsService.Join.
+type GroupsJoinQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsJoinQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Join join the group
 //
 // POST /orgs/{orgId}/groups/{groupId}/join
-func (s *GroupsService) Join(ctx context.Context, orgID string, groupID string, opts ...RequestOption) (*GroupsJoinResponse, error) {
+func (s *GroupsService) Join(ctx context.Context, orgID string, groupID string, query *GroupsJoinQuery, opts ...RequestOption) (*GroupsJoinResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsJoinResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/join", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/join", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// GroupsLeaveQuery are the optional query parameters of GroupsService.Leave.
+type GroupsLeaveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsLeaveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Leave leave the group
 //
 // POST /orgs/{orgId}/groups/{groupId}/leave
-func (s *GroupsService) Leave(ctx context.Context, orgID string, groupID string, opts ...RequestOption) (*GroupsLeaveResponse, error) {
+func (s *GroupsService) Leave(ctx context.Context, orgID string, groupID string, query *GroupsLeaveQuery, opts ...RequestOption) (*GroupsLeaveResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsLeaveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/leave", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/leave", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -160,6 +296,10 @@ type GroupsRequestsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *GroupsRequestsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -172,6 +312,12 @@ func (p *GroupsRequestsQuery) encode(opts []RequestOption) (url.Values, []Reques
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -203,12 +349,30 @@ func (s *GroupsService) RequestsAutoPaging(ctx context.Context, orgID string, gr
 	})
 }
 
-// Review create the request
+// GroupsReviewQuery are the optional query parameters of GroupsService.Review.
+type GroupsReviewQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsReviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Review review the request
 //
 // POST /orgs/{orgId}/groups/{groupId}/requests/{requestId}
-func (s *GroupsService) Review(ctx context.Context, orgID string, groupID string, requestID string, body GroupsReviewParams, opts ...RequestOption) (*GroupsReviewResponse, error) {
+func (s *GroupsService) Review(ctx context.Context, orgID string, groupID string, requestID string, body GroupsReviewParams, query *GroupsReviewQuery, opts ...RequestOption) (*GroupsReviewResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsReviewResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/requests/"+pathEscape(requestID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/requests/"+pathEscape(requestID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -221,12 +385,18 @@ type GroupsGrantsService struct {
 
 // GroupsGrantsListQuery are the optional query parameters of GroupsGrantsService.List.
 type GroupsGrantsListQuery struct {
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
 	SpaceID *string
+	// The group uuid (uuid only — a slug is not resolved in a query parameter).
 	GroupID *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *GroupsGrantsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -245,6 +415,12 @@ func (p *GroupsGrantsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -276,23 +452,59 @@ func (s *GroupsGrantsService) ListAutoPaging(ctx context.Context, orgID string, 
 	})
 }
 
+// GroupsGrantsGrantQuery are the optional query parameters of GroupsGrantsService.Grant.
+type GroupsGrantsGrantQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsGrantsGrantQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Grant create a group grant in an organization
 //
 // POST /orgs/{orgId}/group-grants
-func (s *GroupsGrantsService) Grant(ctx context.Context, orgID string, body GroupsGrantsGrantParams, opts ...RequestOption) (*GroupsGrantsGrantResponse, error) {
+func (s *GroupsGrantsService) Grant(ctx context.Context, orgID string, body GroupsGrantsGrantParams, query *GroupsGrantsGrantQuery, opts ...RequestOption) (*GroupsGrantsGrantResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsGrantsGrantResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/group-grants", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/group-grants", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Revoke delete the group grant
+// GroupsGrantsRevokeQuery are the optional query parameters of GroupsGrantsService.Revoke.
+type GroupsGrantsRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsGrantsRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the group grant
 //
 // DELETE /orgs/{orgId}/group-grants/{id}
-func (s *GroupsGrantsService) Revoke(ctx context.Context, orgID string, id string, opts ...RequestOption) (*GroupsGrantsRevokeResponse, error) {
+func (s *GroupsGrantsService) Revoke(ctx context.Context, orgID string, id string, query *GroupsGrantsRevokeQuery, opts ...RequestOption) (*GroupsGrantsRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsGrantsRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/group-grants/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/group-grants/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -314,12 +526,30 @@ func (s *GroupsIdentityService) Options(ctx context.Context, orgID string, opts 
 	return &out, nil
 }
 
+// GroupsIdentitySetQuery are the optional query parameters of GroupsIdentityService.Set.
+type GroupsIdentitySetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsIdentitySetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Set replace the group identity in an organization
 //
 // PUT /orgs/{orgId}/group-identity
-func (s *GroupsIdentityService) Set(ctx context.Context, orgID string, body GroupsIdentitySetParams, opts ...RequestOption) (any, error) {
+func (s *GroupsIdentityService) Set(ctx context.Context, orgID string, body GroupsIdentitySetParams, query *GroupsIdentitySetQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/group-identity", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/group-identity", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -341,23 +571,93 @@ func (s *GroupsMailboxService) Get(ctx context.Context, orgID string, groupID st
 	return &out, nil
 }
 
+// GroupsMailboxSetQuery are the optional query parameters of GroupsMailboxService.Set.
+type GroupsMailboxSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *GroupsMailboxSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // Set replace the mailbox in an organization
 //
 // PUT /orgs/{orgId}/groups/{groupId}/mailbox
-func (s *GroupsMailboxService) Set(ctx context.Context, orgID string, groupID string, body GroupsMailboxSetParams, opts ...RequestOption) (*GroupsMailboxSetResponse, error) {
+func (s *GroupsMailboxService) Set(ctx context.Context, orgID string, groupID string, body GroupsMailboxSetParams, query *GroupsMailboxSetQuery, opts ...RequestOption) (*GroupsMailboxSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsMailboxSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/mailbox", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/mailbox", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// GroupsMailboxPatchQuery are the optional query parameters of GroupsMailboxService.Patch.
+type GroupsMailboxPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *GroupsMailboxPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the mailbox in an organization
+//
+// PATCH /orgs/{orgId}/groups/{groupId}/mailbox
+func (s *GroupsMailboxService) Patch(ctx context.Context, orgID string, groupID string, body GroupsMailboxPatchParams, query *GroupsMailboxPatchQuery, opts ...RequestOption) (*GroupsMailboxPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out GroupsMailboxPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/mailbox", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GroupsMailboxClearQuery are the optional query parameters of GroupsMailboxService.Clear.
+type GroupsMailboxClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsMailboxClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Clear delete the mailbox in an organization
 //
 // DELETE /orgs/{orgId}/groups/{groupId}/mailbox
-func (s *GroupsMailboxService) Clear(ctx context.Context, orgID string, groupID string, opts ...RequestOption) (*GroupsMailboxClearResponse, error) {
+func (s *GroupsMailboxService) Clear(ctx context.Context, orgID string, groupID string, query *GroupsMailboxClearQuery, opts ...RequestOption) (*GroupsMailboxClearResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsMailboxClearResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/mailbox", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/mailbox", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -368,12 +668,30 @@ type GroupsMessagesService struct {
 	c *Client
 }
 
-// Message create the message in an organization
+// GroupsMessagesMessageQuery are the optional query parameters of GroupsMessagesService.Message.
+type GroupsMessagesMessageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *GroupsMessagesMessageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Message message the group
 //
 // POST /orgs/{orgId}/groups/{groupId}/message
-func (s *GroupsMessagesService) Message(ctx context.Context, orgID string, groupID string, body GroupsMessagesMessageParams, opts ...RequestOption) (*GroupsMessagesMessageResponse, error) {
+func (s *GroupsMessagesService) Message(ctx context.Context, orgID string, groupID string, body GroupsMessagesMessageParams, query *GroupsMessagesMessageQuery, opts ...RequestOption) (*GroupsMessagesMessageResponse, error) {
+	v, opts := query.encode(opts)
 	var out GroupsMessagesMessageResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/message", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/groups/"+pathEscape(groupID)+"/message", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -385,6 +703,10 @@ type GroupsMessagesInboxQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *GroupsMessagesInboxQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -397,6 +719,12 @@ func (p *GroupsMessagesInboxQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

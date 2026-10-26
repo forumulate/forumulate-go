@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // EntryFieldsService holds the operations under client.EntryFields.
@@ -22,12 +24,30 @@ func (s *EntryFieldsService) Read(ctx context.Context, orgID string, libraryID s
 	return &out, nil
 }
 
+// EntryFieldsPatchQuery are the optional query parameters of EntryFieldsService.Patch.
+type EntryFieldsPatchQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryFieldsPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Patch update fields in an organization (entries)
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/fields
-func (s *EntryFieldsService) Patch(ctx context.Context, orgID string, libraryID string, entryID string, body EntryFieldsPatchParams, opts ...RequestOption) (any, error) {
+func (s *EntryFieldsService) Patch(ctx context.Context, orgID string, libraryID string, entryID string, body EntryFieldsPatchParams, query *EntryFieldsPatchQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/fields", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/fields", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -44,34 +64,88 @@ func (s *EntryFieldsService) Lock(ctx context.Context, orgID string, libraryID s
 	return &out, nil
 }
 
+// EntryFieldsTakeLockQuery are the optional query parameters of EntryFieldsService.TakeLock.
+type EntryFieldsTakeLockQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryFieldsTakeLockQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // TakeLock lock the entry (create)
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/lock
-func (s *EntryFieldsService) TakeLock(ctx context.Context, orgID string, libraryID string, entryID string, body EntryFieldsTakeLockParams, opts ...RequestOption) (any, error) {
+func (s *EntryFieldsService) TakeLock(ctx context.Context, orgID string, libraryID string, entryID string, body EntryFieldsTakeLockParams, query *EntryFieldsTakeLockQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/lock", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/lock", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ReleaseLock lock the entry (delete)
+// EntryFieldsReleaseLockQuery are the optional query parameters of EntryFieldsService.ReleaseLock.
+type EntryFieldsReleaseLockQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryFieldsReleaseLockQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ReleaseLock release the lock
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/lock
-func (s *EntryFieldsService) ReleaseLock(ctx context.Context, orgID string, libraryID string, entryID string, opts ...RequestOption) (*EntryLockState, error) {
+func (s *EntryFieldsService) ReleaseLock(ctx context.Context, orgID string, libraryID string, entryID string, query *EntryFieldsReleaseLockQuery, opts ...RequestOption) (*EntryLockState, error) {
+	v, opts := query.encode(opts)
 	var out EntryLockState
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/lock", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/lock", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Heartbeat create the heartbeat in an organization (content libraries entries lock)
+// EntryFieldsHeartbeatQuery are the optional query parameters of EntryFieldsService.Heartbeat.
+type EntryFieldsHeartbeatQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EntryFieldsHeartbeatQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Heartbeat send a presence heartbeat for the entry
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/entries/{entryId}/lock/heartbeat
-func (s *EntryFieldsService) Heartbeat(ctx context.Context, orgID string, libraryID string, entryID string, opts ...RequestOption) (*EntryLockState, error) {
+func (s *EntryFieldsService) Heartbeat(ctx context.Context, orgID string, libraryID string, entryID string, query *EntryFieldsHeartbeatQuery, opts ...RequestOption) (*EntryLockState, error) {
+	v, opts := query.encode(opts)
 	var out EntryLockState
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/lock/heartbeat", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/entries/"+pathEscape(entryID)+"/lock/heartbeat", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

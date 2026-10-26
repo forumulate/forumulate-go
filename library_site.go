@@ -30,6 +30,10 @@ type LibrarySiteGetRedirectsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibrarySiteGetRedirectsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -42,6 +46,12 @@ func (p *LibrarySiteGetRedirectsQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -73,12 +83,64 @@ func (s *LibrarySiteService) GetRedirectsAutoPaging(ctx context.Context, orgID s
 	})
 }
 
+// LibrarySiteSetRedirectsQuery are the optional query parameters of LibrarySiteService.SetRedirects.
+type LibrarySiteSetRedirectsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *LibrarySiteSetRedirectsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetRedirects replace a content library’s manual redirects
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/redirects
-func (s *LibrarySiteService) SetRedirects(ctx context.Context, orgID string, libraryID string, body LibrarySiteSetRedirectsParams, opts ...RequestOption) (*LibrarySiteSetRedirectsResponse, error) {
+func (s *LibrarySiteService) SetRedirects(ctx context.Context, orgID string, libraryID string, body LibrarySiteSetRedirectsBody, query *LibrarySiteSetRedirectsQuery, opts ...RequestOption) (*LibrarySiteSetRedirectsResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibrarySiteSetRedirectsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/redirects", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/redirects", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// LibrarySitePatchRedirectsQuery are the optional query parameters of LibrarySiteService.PatchRedirects.
+type LibrarySitePatchRedirectsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *LibrarySitePatchRedirectsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchRedirects change a content library’s manual redirects
+//
+// PATCH /orgs/{orgId}/content/libraries/{libraryId}/redirects
+func (s *LibrarySiteService) PatchRedirects(ctx context.Context, orgID string, libraryID string, body LibrarySitePatchRedirectsBody, query *LibrarySitePatchRedirectsQuery, opts ...RequestOption) (*LibrarySitePatchRedirectsResponse, error) {
+	v, opts := query.encode(opts)
+	var out LibrarySitePatchRedirectsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/redirects", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

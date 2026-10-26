@@ -20,6 +20,10 @@ type SpaceTemplatesListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *SpaceTemplatesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +39,12 @@ func (p *SpaceTemplatesListQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -66,45 +76,117 @@ func (s *SpaceTemplatesService) ListAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// SpaceTemplatesPublishQuery are the optional query parameters of SpaceTemplatesService.Publish.
+type SpaceTemplatesPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceTemplatesPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish update the space template
 //
 // PATCH /orgs/{orgId}/space-templates/{id}
-func (s *SpaceTemplatesService) Publish(ctx context.Context, orgID string, id string, body SpaceTemplatesPublishParams, opts ...RequestOption) (*SpaceTemplatesPublishResponse, error) {
+func (s *SpaceTemplatesService) Publish(ctx context.Context, orgID string, id string, body SpaceTemplatesPublishParams, query *SpaceTemplatesPublishQuery, opts ...RequestOption) (*SpaceTemplatesPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceTemplatesPublishResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/space-templates/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/space-templates/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpaceTemplatesRemoveQuery are the optional query parameters of SpaceTemplatesService.Remove.
+type SpaceTemplatesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceTemplatesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the space template
 //
 // DELETE /orgs/{orgId}/space-templates/{id}
-func (s *SpaceTemplatesService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*SpaceTemplatesRemoveResponse, error) {
+func (s *SpaceTemplatesService) Remove(ctx context.Context, orgID string, id string, query *SpaceTemplatesRemoveQuery, opts ...RequestOption) (*SpaceTemplatesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceTemplatesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/space-templates/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/space-templates/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Save create the save as template in a space
+// SpaceTemplatesSaveQuery are the optional query parameters of SpaceTemplatesService.Save.
+type SpaceTemplatesSaveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceTemplatesSaveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Save save a space as a template
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/save-as-template
-func (s *SpaceTemplatesService) Save(ctx context.Context, orgID string, spaceID string, body SpaceTemplatesSaveParams, opts ...RequestOption) (*SpaceTemplatesSaveResponse, error) {
+func (s *SpaceTemplatesService) Save(ctx context.Context, orgID string, spaceID string, body SpaceTemplatesSaveParams, query *SpaceTemplatesSaveQuery, opts ...RequestOption) (*SpaceTemplatesSaveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpaceTemplatesSaveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/save-as-template", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/save-as-template", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// SpaceTemplatesApplyQuery are the optional query parameters of SpaceTemplatesService.Apply.
+type SpaceTemplatesApplyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpaceTemplatesApplyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Apply apply template in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/apply-template
-func (s *SpaceTemplatesService) Apply(ctx context.Context, orgID string, spaceID string, body SpaceTemplatesApplyParams, opts ...RequestOption) (any, error) {
+func (s *SpaceTemplatesService) Apply(ctx context.Context, orgID string, spaceID string, body SpaceTemplatesApplyParams, query *SpaceTemplatesApplyQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/apply-template", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/apply-template", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

@@ -16,14 +16,20 @@ type AuditService struct {
 // AuditListQuery are the optional query parameters of AuditService.List.
 type AuditListQuery struct {
 	// Audit rows per page, newest first.
-	Limit       *int64
-	Cursor      *string
+	Limit  *int64
+	Cursor *string
+	// The actor user uuid (uuid only — a slug is not resolved in a query parameter).
 	ActorUserID *string
 	Action      *string
 	TargetType  *string
-	TargetID    *string
-	From        *string
-	To          *string
+	// The target uuid (uuid only — a slug is not resolved in a query parameter).
+	TargetID *string
+	From     *string
+	To       *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *AuditListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -54,6 +60,12 @@ func (p *AuditListQuery) encode(opts []RequestOption) (url.Values, []RequestOpti
 	}
 	if p.To != nil {
 		v.Set("to", *p.To)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -87,12 +99,14 @@ func (s *AuditService) ListAutoPaging(ctx context.Context, orgID string, query *
 
 // AuditExportCSVQuery are the optional query parameters of AuditService.ExportCSV.
 type AuditExportCSVQuery struct {
+	// The actor user uuid (uuid only — a slug is not resolved in a query parameter).
 	ActorUserID *string
 	Action      *string
 	TargetType  *string
-	TargetID    *string
-	From        *string
-	To          *string
+	// The target uuid (uuid only — a slug is not resolved in a query parameter).
+	TargetID *string
+	From     *string
+	To       *string
 }
 
 func (p *AuditExportCSVQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -139,6 +153,10 @@ type AuditActionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *AuditActionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -151,6 +169,12 @@ func (p *AuditActionsQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

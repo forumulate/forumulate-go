@@ -24,12 +24,30 @@ func (s *ContentModelService) Get(ctx context.Context, orgID string, libraryID s
 	return &out, nil
 }
 
+// ContentModelPutQuery are the optional query parameters of ContentModelService.Put.
+type ContentModelPutQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentModelPutQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Put replace the library's content model
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/model
-func (s *ContentModelService) Put(ctx context.Context, orgID string, libraryID string, body ContentModelPutParams, opts ...RequestOption) (*ContentModelPutResponse, error) {
+func (s *ContentModelService) Put(ctx context.Context, orgID string, libraryID string, body ContentModelPutParams, query *ContentModelPutQuery, opts ...RequestOption) (*ContentModelPutResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentModelPutResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/model", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/model", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -41,6 +59,10 @@ type ContentModelVersionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContentModelVersionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -53,6 +75,12 @@ func (p *ContentModelVersionsQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }

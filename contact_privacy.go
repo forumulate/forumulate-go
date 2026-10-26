@@ -20,6 +20,10 @@ type ContactPrivacyByEmailQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContactPrivacyByEmailQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,6 +39,12 @@ func (p *ContactPrivacyByEmailQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -69,6 +79,8 @@ func (s *ContactPrivacyService) ByEmailAutoPaging(ctx context.Context, orgID str
 // ContactPrivacyEraseByEmailQuery are the optional query parameters of ContactPrivacyService.EraseByEmail.
 type ContactPrivacyEraseByEmailQuery struct {
 	Email *string
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
 }
 
 func (p *ContactPrivacyEraseByEmailQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -79,10 +91,13 @@ func (p *ContactPrivacyEraseByEmailQuery) encode(opts []RequestOption) (url.Valu
 	if p.Email != nil {
 		v.Set("email", *p.Email)
 	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
 	return v, opts
 }
 
-// EraseByEmail delete contact submissions in an organization
+// EraseByEmail erase contact submissions by email
 //
 // DELETE /orgs/{orgId}/contact-submissions
 func (s *ContactPrivacyService) EraseByEmail(ctx context.Context, orgID string, query *ContactPrivacyEraseByEmailQuery, opts ...RequestOption) (*ContactPrivacyEraseByEmailResponse, error) {

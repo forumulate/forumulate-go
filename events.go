@@ -17,14 +17,18 @@ type EventsService struct {
 type EventsListQuery struct {
 	// Events per page, once a version is stated.
 	Limit *int64
+	Scope *string
 	Tag   *string
+	Mode  *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	From *string
 	// Use an ISO date (2026-01-31) or date-time (2026-01-31T09:00:00Z).
 	To     *string
 	Cursor *string
-	Mode   *string
-	Scope  *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -35,8 +39,14 @@ func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
+	if p.Scope != nil {
+		v.Set("scope", *p.Scope)
+	}
 	if p.Tag != nil {
 		v.Set("tag", *p.Tag)
+	}
+	if p.Mode != nil {
+		v.Set("mode", *p.Mode)
 	}
 	if p.From != nil {
 		v.Set("from", *p.From)
@@ -47,11 +57,11 @@ func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
-	if p.Mode != nil {
-		v.Set("mode", *p.Mode)
+	for _, x := range p.Include {
+		v.Add("include", x)
 	}
-	if p.Scope != nil {
-		v.Set("scope", *p.Scope)
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -59,13 +69,13 @@ func (p *EventsListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 // List list events in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/events
-func (s *EventsService) List(ctx context.Context, orgID string, spaceID string, query *EventsListQuery, opts ...RequestOption) (*EventsListResponse, error) {
+func (s *EventsService) List(ctx context.Context, orgID string, spaceID string, query *EventsListQuery, opts ...RequestOption) (any, error) {
 	v, opts := query.encode(opts)
-	var out EventsListResponse
+	var out any
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // ListAutoPaging walks every item of List across all pages.
@@ -83,12 +93,30 @@ func (s *EventsService) ListAutoPaging(ctx context.Context, orgID string, spaceI
 	})
 }
 
+// EventsCreateQuery are the optional query parameters of EventsService.Create.
+type EventsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an event in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events
-func (s *EventsService) Create(ctx context.Context, orgID string, spaceID string, body EventsCreateParams, opts ...RequestOption) (*EventsCreateResponse, error) {
+func (s *EventsService) Create(ctx context.Context, orgID string, spaceID string, body EventsCreateParams, query *EventsCreateQuery, opts ...RequestOption) (*EventsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -99,6 +127,10 @@ type EventsListAllEventsQuery struct {
 	// Events per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *EventsListAllEventsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -112,19 +144,25 @@ func (p *EventsListAllEventsQuery) encode(opts []RequestOption) (url.Values, []R
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
 	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
+	}
 	return v, opts
 }
 
 // ListAllEvents get the manage in a space
 //
 // GET /orgs/{orgId}/spaces/{spaceId}/events/manage
-func (s *EventsService) ListAllEvents(ctx context.Context, orgID string, spaceID string, query *EventsListAllEventsQuery, opts ...RequestOption) (*EventsListAllEventsResponse, error) {
+func (s *EventsService) ListAllEvents(ctx context.Context, orgID string, spaceID string, query *EventsListAllEventsQuery, opts ...RequestOption) (any, error) {
 	v, opts := query.encode(opts)
-	var out EventsListAllEventsResponse
+	var out any
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/manage", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // ListAllEventsAutoPaging walks every item of ListAllEvents across all pages.
@@ -153,34 +191,88 @@ func (s *EventsService) Get(ctx context.Context, orgID string, spaceID string, h
 	return &out, nil
 }
 
+// EventsUpdateQuery are the optional query parameters of EventsService.Update.
+type EventsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the event
 //
 // PATCH /orgs/{orgId}/spaces/{spaceId}/events/{handle}
-func (s *EventsService) Update(ctx context.Context, orgID string, spaceID string, handle string, body EventsUpdateParams, opts ...RequestOption) (any, error) {
+func (s *EventsService) Update(ctx context.Context, orgID string, spaceID string, handle string, body EventsUpdateParams, query *EventsUpdateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// EventsRemoveQuery are the optional query parameters of EventsService.Remove.
+type EventsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the event
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/events/{handle}
-func (s *EventsService) Remove(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle), nil, nil, &out, opts); err != nil {
+func (s *EventsService) Remove(ctx context.Context, orgID string, spaceID string, handle string, query *EventsRemoveQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
+}
+
+// EventsDuplicateQuery are the optional query parameters of EventsService.Duplicate.
+type EventsDuplicateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventsDuplicateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Duplicate duplicate the event
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/events/{handle}/duplicate
-func (s *EventsService) Duplicate(ctx context.Context, orgID string, spaceID string, handle string, body EventsDuplicateParams, opts ...RequestOption) (*EventsDuplicateResponse, error) {
+func (s *EventsService) Duplicate(ctx context.Context, orgID string, spaceID string, handle string, body EventsDuplicateParams, query *EventsDuplicateQuery, opts ...RequestOption) (*EventsDuplicateResponse, error) {
+	v, opts := query.encode(opts)
 	var out EventsDuplicateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/duplicate", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/duplicate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -197,23 +289,59 @@ func (s *EventsService) MyRsvp(ctx context.Context, orgID string, spaceID string
 	return &out, nil
 }
 
-// Rsvp replace the rsvp in a space
+// EventsRsvpQuery are the optional query parameters of EventsService.Rsvp.
+type EventsRsvpQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventsRsvpQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Rsvp rSVP to the event
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/events/{handle}/rsvp
-func (s *EventsService) Rsvp(ctx context.Context, orgID string, spaceID string, handle string, body EventsRsvpParams, opts ...RequestOption) (any, error) {
+func (s *EventsService) Rsvp(ctx context.Context, orgID string, spaceID string, handle string, body EventsRsvpParams, query *EventsRsvpQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/rsvp", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/rsvp", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// EventsClearRsvpQuery are the optional query parameters of EventsService.ClearRsvp.
+type EventsClearRsvpQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *EventsClearRsvpQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // ClearRsvp delete the rsvp in a space
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/events/{handle}/rsvp
-func (s *EventsService) ClearRsvp(ctx context.Context, orgID string, spaceID string, handle string, opts ...RequestOption) (*EventRsvpCleared, error) {
+func (s *EventsService) ClearRsvp(ctx context.Context, orgID string, spaceID string, handle string, query *EventsClearRsvpQuery, opts ...RequestOption) (*EventRsvpCleared, error) {
+	v, opts := query.encode(opts)
 	var out EventRsvpCleared
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/rsvp", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/events/"+pathEscape(handle)+"/rsvp", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

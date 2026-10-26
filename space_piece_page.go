@@ -4,6 +4,8 @@ package forumulate
 
 import (
 	"context"
+	"net/url"
+	"strconv"
 )
 
 // SpacePiecePageService holds the operations under client.SpacePiecePage.
@@ -22,23 +24,59 @@ func (s *SpacePiecePageService) Get(ctx context.Context, orgID string, spaceID s
 	return &out, nil
 }
 
+// SpacePiecePageSetQuery are the optional query parameters of SpacePiecePageService.Set.
+type SpacePiecePageSetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacePiecePageSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Set replace the piece page in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/piece-page
-func (s *SpacePiecePageService) Set(ctx context.Context, orgID string, spaceID string, body SpacePiecePageSetParams, opts ...RequestOption) (*SpacePiecePageSetResponse, error) {
+func (s *SpacePiecePageService) Set(ctx context.Context, orgID string, spaceID string, body SpacePiecePageSetParams, query *SpacePiecePageSetQuery, opts ...RequestOption) (*SpacePiecePageSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacePiecePageSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/piece-page", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/piece-page", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// SpacePiecePageRemoveQuery are the optional query parameters of SpacePiecePageService.Remove.
+type SpacePiecePageRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *SpacePiecePageRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the piece page in a space
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/piece-page
-func (s *SpacePiecePageService) Remove(ctx context.Context, orgID string, spaceID string, opts ...RequestOption) (*SpacePiecePageRemoveResponse, error) {
+func (s *SpacePiecePageService) Remove(ctx context.Context, orgID string, spaceID string, query *SpacePiecePageRemoveQuery, opts ...RequestOption) (*SpacePiecePageRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out SpacePiecePageRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/piece-page", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/piece-page", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

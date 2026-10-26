@@ -19,6 +19,10 @@ type ServiceAccountsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ServiceAccountsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *ServiceAccountsListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,34 +72,88 @@ func (s *ServiceAccountsService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// ServiceAccountsCreateQuery are the optional query parameters of ServiceAccountsService.Create.
+type ServiceAccountsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ServiceAccountsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a service account in an organization
 //
 // POST /orgs/{orgId}/service-accounts
-func (s *ServiceAccountsService) Create(ctx context.Context, orgID string, body ServiceAccountsCreateParams, opts ...RequestOption) (*ServiceAccountsCreateResponse, error) {
+func (s *ServiceAccountsService) Create(ctx context.Context, orgID string, body ServiceAccountsCreateParams, query *ServiceAccountsCreateQuery, opts ...RequestOption) (*ServiceAccountsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ServiceAccountsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/service-accounts", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/service-accounts", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ServiceAccountsRenameQuery are the optional query parameters of ServiceAccountsService.Rename.
+type ServiceAccountsRenameQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ServiceAccountsRenameQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Rename update the service account
 //
 // PATCH /orgs/{orgId}/service-accounts/{id}
-func (s *ServiceAccountsService) Rename(ctx context.Context, orgID string, id string, body ServiceAccountsRenameParams, opts ...RequestOption) (*ServiceAccountsRenameResponse, error) {
+func (s *ServiceAccountsService) Rename(ctx context.Context, orgID string, id string, body ServiceAccountsRenameParams, query *ServiceAccountsRenameQuery, opts ...RequestOption) (*ServiceAccountsRenameResponse, error) {
+	v, opts := query.encode(opts)
 	var out ServiceAccountsRenameResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Revoke delete the service account
+// ServiceAccountsRevokeQuery are the optional query parameters of ServiceAccountsService.Revoke.
+type ServiceAccountsRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ServiceAccountsRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the service account
 //
 // DELETE /orgs/{orgId}/service-accounts/{id}
-func (s *ServiceAccountsService) Revoke(ctx context.Context, orgID string, id string, opts ...RequestOption) (*ServiceAccountsRevokeResponse, error) {
+func (s *ServiceAccountsService) Revoke(ctx context.Context, orgID string, id string, query *ServiceAccountsRevokeQuery, opts ...RequestOption) (*ServiceAccountsRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out ServiceAccountsRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -101,6 +165,10 @@ type ServiceAccountsTokensQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ServiceAccountsTokensQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -113,6 +181,12 @@ func (p *ServiceAccountsTokensQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -144,23 +218,59 @@ func (s *ServiceAccountsService) TokensAutoPaging(ctx context.Context, orgID str
 	})
 }
 
-// Mint create a token in an organization
+// ServiceAccountsMintQuery are the optional query parameters of ServiceAccountsService.Mint.
+type ServiceAccountsMintQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ServiceAccountsMintQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Mint mint a token
 //
 // POST /orgs/{orgId}/service-accounts/{id}/tokens
-func (s *ServiceAccountsService) Mint(ctx context.Context, orgID string, id string, body ServiceAccountsMintParams, opts ...RequestOption) (*ServiceAccountsMintResponse, error) {
+func (s *ServiceAccountsService) Mint(ctx context.Context, orgID string, id string, body ServiceAccountsMintParams, query *ServiceAccountsMintQuery, opts ...RequestOption) (*ServiceAccountsMintResponse, error) {
+	v, opts := query.encode(opts)
 	var out ServiceAccountsMintResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id)+"/tokens", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id)+"/tokens", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RevokeToken delete the token
+// ServiceAccountsRevokeTokenQuery are the optional query parameters of ServiceAccountsService.RevokeToken.
+type ServiceAccountsRevokeTokenQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ServiceAccountsRevokeTokenQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeToken revoke the token
 //
 // DELETE /orgs/{orgId}/service-accounts/{id}/tokens/{tokenId}
-func (s *ServiceAccountsService) RevokeToken(ctx context.Context, orgID string, id string, tokenID string, opts ...RequestOption) (*ServiceAccountsRevokeTokenResponse, error) {
+func (s *ServiceAccountsService) RevokeToken(ctx context.Context, orgID string, id string, tokenID string, query *ServiceAccountsRevokeTokenQuery, opts ...RequestOption) (*ServiceAccountsRevokeTokenResponse, error) {
+	v, opts := query.encode(opts)
 	var out ServiceAccountsRevokeTokenResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id)+"/tokens/"+pathEscape(tokenID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/service-accounts/"+pathEscape(id)+"/tokens/"+pathEscape(tokenID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

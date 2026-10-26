@@ -11,15 +11,15 @@ type EventRsvpPrivacyService struct {
 	c *Client
 }
 
-// Request create the privacy in a space
+// Request request a copy or the deletion of email-only RSVPs
 //
 // POST /public/orgs/{orgId}/spaces/{spaceId}/event-rsvps/privacy
-func (s *EventRsvpPrivacyService) Request(ctx context.Context, orgID string, spaceID string, body EventRsvpPrivacyRequestParams, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
+func (s *EventRsvpPrivacyService) Request(ctx context.Context, orgID string, spaceID string, body EventRsvpPrivacyRequestParams, opts ...RequestOption) (any, error) {
+	var out any
 	if err := s.c.do(ctx, "POST", "/public/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/event-rsvps/privacy", nil, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }
 
 // Confirm confirm the privacy

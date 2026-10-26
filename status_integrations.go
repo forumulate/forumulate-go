@@ -19,6 +19,10 @@ type StatusIntegrationsListAlertsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusIntegrationsListAlertsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *StatusIntegrationsListAlertsQuery) encode(opts []RequestOption) (url.Va
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,12 +72,30 @@ func (s *StatusIntegrationsService) ListAlertsAutoPaging(ctx context.Context, or
 	})
 }
 
+// StatusIntegrationsRemoveAlertQuery are the optional query parameters of StatusIntegrationsService.RemoveAlert.
+type StatusIntegrationsRemoveAlertQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusIntegrationsRemoveAlertQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveAlert remove a reader’s alert subscription
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/alerts/{alertId}
-func (s *StatusIntegrationsService) RemoveAlert(ctx context.Context, orgID string, spaceID string, alertID string, opts ...RequestOption) (*StatusIntegrationsRemoveAlertResponse, error) {
+func (s *StatusIntegrationsService) RemoveAlert(ctx context.Context, orgID string, spaceID string, alertID string, query *StatusIntegrationsRemoveAlertQuery, opts ...RequestOption) (*StatusIntegrationsRemoveAlertResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusIntegrationsRemoveAlertResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts/"+pathEscape(alertID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/alerts/"+pathEscape(alertID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -79,6 +107,10 @@ type StatusIntegrationsListInboundQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *StatusIntegrationsListInboundQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -91,6 +123,12 @@ func (p *StatusIntegrationsListInboundQuery) encode(opts []RequestOption) (url.V
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -122,23 +160,59 @@ func (s *StatusIntegrationsService) ListInboundAutoPaging(ctx context.Context, o
 	})
 }
 
+// StatusIntegrationsCreateInboundQuery are the optional query parameters of StatusIntegrationsService.CreateInbound.
+type StatusIntegrationsCreateInboundQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusIntegrationsCreateInboundQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateInbound create an inbound address (email, Datadog or PagerDuty)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/status/inbound
-func (s *StatusIntegrationsService) CreateInbound(ctx context.Context, orgID string, spaceID string, body StatusIntegrationsCreateInboundParams, opts ...RequestOption) (*StatusIntegrationsCreateInboundResponse, error) {
+func (s *StatusIntegrationsService) CreateInbound(ctx context.Context, orgID string, spaceID string, body StatusIntegrationsCreateInboundParams, query *StatusIntegrationsCreateInboundQuery, opts ...RequestOption) (*StatusIntegrationsCreateInboundResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusIntegrationsCreateInboundResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/inbound", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/inbound", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// StatusIntegrationsRemoveInboundQuery are the optional query parameters of StatusIntegrationsService.RemoveInbound.
+type StatusIntegrationsRemoveInboundQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *StatusIntegrationsRemoveInboundQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveInbound revoke an inbound address
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/status/inbound/{hookId}
-func (s *StatusIntegrationsService) RemoveInbound(ctx context.Context, orgID string, spaceID string, hookID string, opts ...RequestOption) (*StatusIntegrationsRemoveInboundResponse, error) {
+func (s *StatusIntegrationsService) RemoveInbound(ctx context.Context, orgID string, spaceID string, hookID string, query *StatusIntegrationsRemoveInboundQuery, opts ...RequestOption) (*StatusIntegrationsRemoveInboundResponse, error) {
+	v, opts := query.encode(opts)
 	var out StatusIntegrationsRemoveInboundResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/inbound/"+pathEscape(hookID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/status/inbound/"+pathEscape(hookID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

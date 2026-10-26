@@ -19,6 +19,10 @@ type PageTranslationListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *PageTranslationListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *PageTranslationListQuery) encode(opts []RequestOption) (url.Values, []R
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,12 +72,30 @@ func (s *PageTranslationService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// PageTranslationAutoQuery are the optional query parameters of PageTranslationService.Auto.
+type PageTranslationAutoQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *PageTranslationAutoQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Auto machine-translate a page
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/pages/{pageId}/translations/{locale}/auto
-func (s *PageTranslationService) Auto(ctx context.Context, orgID string, spaceID string, pageID string, locale string, body PageTranslationAutoParams, opts ...RequestOption) (*PageTranslationAutoResponse, error) {
+func (s *PageTranslationService) Auto(ctx context.Context, orgID string, spaceID string, pageID string, locale string, body PageTranslationAutoParams, query *PageTranslationAutoQuery, opts ...RequestOption) (*PageTranslationAutoResponse, error) {
+	v, opts := query.encode(opts)
 	var out PageTranslationAutoResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/translations/"+pathEscape(locale)+"/auto", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/pages/"+pathEscape(pageID)+"/translations/"+pathEscape(locale)+"/auto", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

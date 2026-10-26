@@ -24,12 +24,64 @@ func (s *ContentWorkflowService) Settings(ctx context.Context, orgID string, lib
 	return &out, nil
 }
 
+// ContentWorkflowPutSettingsQuery are the optional query parameters of ContentWorkflowService.PutSettings.
+type ContentWorkflowPutSettingsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *ContentWorkflowPutSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // PutSettings replace the workflow in an organization
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/workflow
-func (s *ContentWorkflowService) PutSettings(ctx context.Context, orgID string, libraryID string, body ContentWorkflowPutSettingsParams, opts ...RequestOption) (*ContentWorkflowPutSettingsResponse, error) {
+func (s *ContentWorkflowService) PutSettings(ctx context.Context, orgID string, libraryID string, body ContentWorkflowPutSettingsParams, query *ContentWorkflowPutSettingsQuery, opts ...RequestOption) (*ContentWorkflowPutSettingsResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentWorkflowPutSettingsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/workflow", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/workflow", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ContentWorkflowPatchSettingsQuery are the optional query parameters of ContentWorkflowService.PatchSettings.
+type ContentWorkflowPatchSettingsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *ContentWorkflowPatchSettingsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchSettings update the workflow in an organization
+//
+// PATCH /orgs/{orgId}/content/libraries/{libraryId}/workflow
+func (s *ContentWorkflowService) PatchSettings(ctx context.Context, orgID string, libraryID string, body any, query *ContentWorkflowPatchSettingsQuery, opts ...RequestOption) (*ContentWorkflowPatchSettingsResponse, error) {
+	v, opts := query.encode(opts)
+	var out ContentWorkflowPatchSettingsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/workflow", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -37,21 +89,29 @@ func (s *ContentWorkflowService) PutSettings(ctx context.Context, orgID string, 
 
 // ContentWorkflowListQuery are the optional query parameters of ContentWorkflowService.List.
 type ContentWorkflowListQuery struct {
+	Stage *string
 	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
 	Open     *string
 	Assignee *string
-	EntryID  *string
-	Stage    *string
+	// The entry uuid (uuid only — a slug is not resolved in a query parameter).
+	EntryID *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *ContentWorkflowListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
 	v := url.Values{}
 	if p == nil {
 		return v, opts
+	}
+	if p.Stage != nil {
+		v.Set("stage", *p.Stage)
 	}
 	if p.Open != nil {
 		v.Set("open", *p.Open)
@@ -62,14 +122,17 @@ func (p *ContentWorkflowListQuery) encode(opts []RequestOption) (url.Values, []R
 	if p.EntryID != nil {
 		v.Set("entryId", *p.EntryID)
 	}
-	if p.Stage != nil {
-		v.Set("stage", *p.Stage)
-	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -101,12 +164,30 @@ func (s *ContentWorkflowService) ListAutoPaging(ctx context.Context, orgID strin
 	})
 }
 
+// ContentWorkflowCreateQuery are the optional query parameters of ContentWorkflowService.Create.
+type ContentWorkflowCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentWorkflowCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a change request in an organization
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/change-requests
-func (s *ContentWorkflowService) Create(ctx context.Context, orgID string, libraryID string, body ContentWorkflowCreateParams, opts ...RequestOption) (*ContentWorkflowCreateResponse, error) {
+func (s *ContentWorkflowService) Create(ctx context.Context, orgID string, libraryID string, body ContentWorkflowCreateParams, query *ContentWorkflowCreateQuery, opts ...RequestOption) (*ContentWorkflowCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentWorkflowCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/change-requests", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/change-requests", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -123,23 +204,59 @@ func (s *ContentWorkflowService) Get(ctx context.Context, orgID string, libraryI
 	return &out, nil
 }
 
+// ContentWorkflowUpdateQuery are the optional query parameters of ContentWorkflowService.Update.
+type ContentWorkflowUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentWorkflowUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the change request
 //
 // PATCH /orgs/{orgId}/content/libraries/{libraryId}/change-requests/{crId}
-func (s *ContentWorkflowService) Update(ctx context.Context, orgID string, libraryID string, crID string, body ContentWorkflowUpdateParams, opts ...RequestOption) (*ContentWorkflowUpdateResponse, error) {
+func (s *ContentWorkflowService) Update(ctx context.Context, orgID string, libraryID string, crID string, body ContentWorkflowUpdateParams, query *ContentWorkflowUpdateQuery, opts ...RequestOption) (*ContentWorkflowUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentWorkflowUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/change-requests/"+pathEscape(crID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/change-requests/"+pathEscape(crID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Transition create the transition in an organization
+// ContentWorkflowTransitionQuery are the optional query parameters of ContentWorkflowService.Transition.
+type ContentWorkflowTransitionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *ContentWorkflowTransitionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Transition transition the change request
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/change-requests/{crId}/transition
-func (s *ContentWorkflowService) Transition(ctx context.Context, orgID string, libraryID string, crID string, body ContentWorkflowTransitionParams, opts ...RequestOption) (*ContentWorkflowTransitionResponse, error) {
+func (s *ContentWorkflowService) Transition(ctx context.Context, orgID string, libraryID string, crID string, body ContentWorkflowTransitionParams, query *ContentWorkflowTransitionQuery, opts ...RequestOption) (*ContentWorkflowTransitionResponse, error) {
+	v, opts := query.encode(opts)
 	var out ContentWorkflowTransitionResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/change-requests/"+pathEscape(crID)+"/transition", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/change-requests/"+pathEscape(crID)+"/transition", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

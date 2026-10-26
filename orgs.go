@@ -27,12 +27,30 @@ func (s *OrgsService) EmailSettings(ctx context.Context, orgID string, opts ...R
 	return &out, nil
 }
 
+// OrgsSetEmailFromQuery are the optional query parameters of OrgsService.SetEmailFrom.
+type OrgsSetEmailFromQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSetEmailFromQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetEmailFrom update the email from in an organization
 //
 // PATCH /orgs/{orgId}/email-from
-func (s *OrgsService) SetEmailFrom(ctx context.Context, orgID string, body OrgsSetEmailFromParams, opts ...RequestOption) (*OrgsSetEmailFromResponse, error) {
+func (s *OrgsService) SetEmailFrom(ctx context.Context, orgID string, body OrgsSetEmailFromParams, query *OrgsSetEmailFromQuery, opts ...RequestOption) (*OrgsSetEmailFromResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsSetEmailFromResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/email-from", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/email-from", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -49,34 +67,30 @@ func (s *OrgsService) EmailBranding(ctx context.Context, orgID string, opts ...R
 	return &out, nil
 }
 
+// OrgsSetEmailBrandingQuery are the optional query parameters of OrgsService.SetEmailBranding.
+type OrgsSetEmailBrandingQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSetEmailBrandingQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetEmailBranding update the email branding in an organization
 //
 // PATCH /orgs/{orgId}/email-branding
-func (s *OrgsService) SetEmailBranding(ctx context.Context, orgID string, body OrgsSetEmailBrandingParams, opts ...RequestOption) (*OrgsSetEmailBrandingResponse, error) {
+func (s *OrgsService) SetEmailBranding(ctx context.Context, orgID string, body OrgsSetEmailBrandingParams, query *OrgsSetEmailBrandingQuery, opts ...RequestOption) (*OrgsSetEmailBrandingResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsSetEmailBrandingResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/email-branding", nil, body, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// GetSiem get the SIEM in an organization
-//
-// GET /orgs/{orgId}/siem
-func (s *OrgsService) GetSiem(ctx context.Context, orgID string, opts ...RequestOption) (*OrgsGetSiemResponse, error) {
-	var out OrgsGetSiemResponse
-	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/siem", nil, nil, &out, opts); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SetSiem replace the SIEM in an organization
-//
-// PUT /orgs/{orgId}/siem
-func (s *OrgsService) SetSiem(ctx context.Context, orgID string, body OrgsSetSiemParams, opts ...RequestOption) (*OrgsSetSiemResponse, error) {
-	var out OrgsSetSiemResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/siem", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/email-branding", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -93,12 +107,30 @@ func (s *OrgsService) LegalStatus(ctx context.Context, orgID string, opts ...Req
 	return &out, nil
 }
 
-// UpsertLegal create the legal in an organization
+// OrgsUpsertLegalQuery are the optional query parameters of OrgsService.UpsertLegal.
+type OrgsUpsertLegalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsUpsertLegalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UpsertLegal create or replace a legal document
 //
 // POST /orgs/{orgId}/legal
-func (s *OrgsService) UpsertLegal(ctx context.Context, orgID string, body OrgsUpsertLegalParams, opts ...RequestOption) (*OrgsUpsertLegalResponse, error) {
+func (s *OrgsService) UpsertLegal(ctx context.Context, orgID string, body OrgsUpsertLegalParams, query *OrgsUpsertLegalQuery, opts ...RequestOption) (*OrgsUpsertLegalResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsUpsertLegalResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -126,12 +158,30 @@ func (s *OrgsService) LegalAcceptanceGate(ctx context.Context, orgID string, opt
 	return &out, nil
 }
 
+// OrgsSetLegalAcceptanceGateQuery are the optional query parameters of OrgsService.SetLegalAcceptanceGate.
+type OrgsSetLegalAcceptanceGateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSetLegalAcceptanceGateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetLegalAcceptanceGate replace the acceptance in an organization
 //
 // PUT /orgs/{orgId}/legal/acceptance
-func (s *OrgsService) SetLegalAcceptanceGate(ctx context.Context, orgID string, body OrgsSetLegalAcceptanceGateParams, opts ...RequestOption) (*OrgsSetLegalAcceptanceGateResponse, error) {
+func (s *OrgsService) SetLegalAcceptanceGate(ctx context.Context, orgID string, body OrgsSetLegalAcceptanceGateParams, query *OrgsSetLegalAcceptanceGateQuery, opts ...RequestOption) (*OrgsSetLegalAcceptanceGateResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsSetLegalAcceptanceGateResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/legal/acceptance", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/legal/acceptance", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -165,12 +215,30 @@ func (s *OrgsService) LegalEditionDiff(ctx context.Context, orgID string, kind s
 	return &out, nil
 }
 
+// OrgsSetLegalEditionNoteQuery are the optional query parameters of OrgsService.SetLegalEditionNote.
+type OrgsSetLegalEditionNoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSetLegalEditionNoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetLegalEditionNote replace the edition
 //
 // PUT /orgs/{orgId}/legal/{kind}/editions/{version}
-func (s *OrgsService) SetLegalEditionNote(ctx context.Context, orgID string, kind string, version string, body OrgsSetLegalEditionNoteParams, opts ...RequestOption) (*OrgsSetLegalEditionNoteResponse, error) {
+func (s *OrgsService) SetLegalEditionNote(ctx context.Context, orgID string, kind string, version string, body OrgsSetLegalEditionNoteParams, query *OrgsSetLegalEditionNoteQuery, opts ...RequestOption) (*OrgsSetLegalEditionNoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsSetLegalEditionNoteResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind)+"/editions/"+pathEscape(version), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind)+"/editions/"+pathEscape(version), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -187,23 +255,59 @@ func (s *OrgsService) LegalEmbedAcceptancesCSV(ctx context.Context, orgID string
 	return out, nil
 }
 
+// OrgsBindLegalPageQuery are the optional query parameters of OrgsService.BindLegalPage.
+type OrgsBindLegalPageQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsBindLegalPageQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // BindLegalPage bind the legal
 //
 // POST /orgs/{orgId}/legal/bind
-func (s *OrgsService) BindLegalPage(ctx context.Context, orgID string, body OrgsBindLegalPageParams, opts ...RequestOption) (*OrgsBindLegalPageResponse, error) {
+func (s *OrgsService) BindLegalPage(ctx context.Context, orgID string, body OrgsBindLegalPageParams, query *OrgsBindLegalPageQuery, opts ...RequestOption) (*OrgsBindLegalPageResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsBindLegalPageResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal/bind", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal/bind", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// UnbindLegal delete the legal
+// OrgsUnbindLegalQuery are the optional query parameters of OrgsService.UnbindLegal.
+type OrgsUnbindLegalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsUnbindLegalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UnbindLegal unbind a legal document in an organization
 //
 // DELETE /orgs/{orgId}/legal/{kind}
-func (s *OrgsService) UnbindLegal(ctx context.Context, orgID string, kind string, opts ...RequestOption) (*OrgsUnbindLegalResponse, error) {
+func (s *OrgsService) UnbindLegal(ctx context.Context, orgID string, kind string, query *OrgsUnbindLegalQuery, opts ...RequestOption) (*OrgsUnbindLegalResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsUnbindLegalResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(kind), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -215,6 +319,10 @@ type OrgsSuggestedLegalQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *OrgsSuggestedLegalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -227,6 +335,12 @@ func (p *OrgsSuggestedLegalQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -258,23 +372,59 @@ func (s *OrgsService) SuggestedLegalAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// OrgsReorderLegalQuery are the optional query parameters of OrgsService.ReorderLegal.
+type OrgsReorderLegalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsReorderLegalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // ReorderLegal reorder the legal
 //
 // POST /orgs/{orgId}/legal/reorder
-func (s *OrgsService) ReorderLegal(ctx context.Context, orgID string, body OrgsReorderLegalParams, opts ...RequestOption) (*OrgsReorderLegalResponse, error) {
+func (s *OrgsService) ReorderLegal(ctx context.Context, orgID string, body OrgsReorderLegalParams, query *OrgsReorderLegalQuery, opts ...RequestOption) (*OrgsReorderLegalResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsReorderLegalResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal/reorder", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal/reorder", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// OrgsAcceptLegalQuery are the optional query parameters of OrgsService.AcceptLegal.
+type OrgsAcceptLegalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsAcceptLegalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AcceptLegal accept the legal
 //
 // POST /orgs/{orgId}/legal/{documentId}/accept
-func (s *OrgsService) AcceptLegal(ctx context.Context, orgID string, documentID string, opts ...RequestOption) (*LegalStatus, error) {
+func (s *OrgsService) AcceptLegal(ctx context.Context, orgID string, documentID string, query *OrgsAcceptLegalQuery, opts ...RequestOption) (*LegalStatus, error) {
+	v, opts := query.encode(opts)
 	var out LegalStatus
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(documentID)+"/accept", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/legal/"+pathEscape(documentID)+"/accept", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -291,23 +441,59 @@ func (s *OrgsService) Plan(ctx context.Context, orgID string, opts ...RequestOpt
 	return &out, nil
 }
 
+// OrgsSetPlanQuery are the optional query parameters of OrgsService.SetPlan.
+type OrgsSetPlanQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSetPlanQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetPlan update the plan in an organization
 //
 // PATCH /orgs/{orgId}/plan
-func (s *OrgsService) SetPlan(ctx context.Context, orgID string, body OrgsSetPlanParams, opts ...RequestOption) (any, error) {
+func (s *OrgsService) SetPlan(ctx context.Context, orgID string, body OrgsSetPlanParams, query *OrgsSetPlanQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/plan", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/plan", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// OrgsSetOverrideQuery are the optional query parameters of OrgsService.SetOverride.
+type OrgsSetOverrideQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSetOverrideQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetOverride update overrides in an organization
 //
 // PATCH /orgs/{orgId}/plan/overrides
-func (s *OrgsService) SetOverride(ctx context.Context, orgID string, body OrgsSetOverrideParams, opts ...RequestOption) (any, error) {
+func (s *OrgsService) SetOverride(ctx context.Context, orgID string, body OrgsSetOverrideParams, query *OrgsSetOverrideQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/plan/overrides", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/plan/overrides", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -324,12 +510,30 @@ func (s *OrgsService) Export(ctx context.Context, orgID string, opts ...RequestO
 	return &out, nil
 }
 
+// OrgsImportQuery are the optional query parameters of OrgsService.Import.
+type OrgsImportQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsImportQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Import import an export document into this organization
 //
 // POST /orgs/{orgId}/import
-func (s *OrgsService) Import(ctx context.Context, orgID string, body OrgsImportParams, opts ...RequestOption) (*OrgsImportResponse, error) {
+func (s *OrgsService) Import(ctx context.Context, orgID string, body OrgImportBody, query *OrgsImportQuery, opts ...RequestOption) (*OrgsImportResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsImportResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/import", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/import", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -340,6 +544,12 @@ type OrgsListQuery struct {
 	// Organizations per page, once a version is stated.
 	Limit  *int64
 	Cursor *string
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *OrgsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -352,6 +562,15 @@ func (p *OrgsListQuery) encode(opts []RequestOption) (url.Values, []RequestOptio
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -383,23 +602,59 @@ func (s *OrgsService) ListAutoPaging(ctx context.Context, query *OrgsListQuery, 
 	})
 }
 
+// OrgsCreateQuery are the optional query parameters of OrgsService.Create.
+type OrgsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create an org
 //
 // POST /orgs
-func (s *OrgsService) Create(ctx context.Context, body OrgsCreateParams, opts ...RequestOption) (*OrgsCreateResponse, error) {
-	var out OrgsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs", nil, body, &out, opts); err != nil {
+func (s *OrgsService) Create(ctx context.Context, body OrgsCreateParams, query *OrgsCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "POST", "/orgs", v, body, &out, opts); err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
+}
+
+// OrgsRenameSlugQuery are the optional query parameters of OrgsService.RenameSlug.
+type OrgsRenameSlugQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsRenameSlugQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RenameSlug rename the organization’s slug
 //
 // PATCH /orgs/{orgId}/slug
-func (s *OrgsService) RenameSlug(ctx context.Context, orgID string, body OrgsRenameSlugParams, opts ...RequestOption) (*OrgsRenameSlugResponse, error) {
+func (s *OrgsService) RenameSlug(ctx context.Context, orgID string, body OrgsRenameSlugParams, query *OrgsRenameSlugQuery, opts ...RequestOption) (*OrgsRenameSlugResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsRenameSlugResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/slug", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/slug", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -416,26 +671,136 @@ func (s *OrgsService) Get(ctx context.Context, orgID string, opts ...RequestOpti
 	return &out, nil
 }
 
+// OrgsUpdateQuery are the optional query parameters of OrgsService.Update.
+type OrgsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Update update the org
 //
 // PATCH /orgs/{orgId}
-func (s *OrgsService) Update(ctx context.Context, orgID string, body OrgsUpdateParams, opts ...RequestOption) (*OrgsUpdateResponse, error) {
+func (s *OrgsService) Update(ctx context.Context, orgID string, body OrgsUpdateParams, query *OrgsUpdateQuery, opts ...RequestOption) (*OrgsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Remove delete the org
+// GetSiem get the SIEM in an organization
 //
-// DELETE /orgs/{orgId}
-func (s *OrgsService) Remove(ctx context.Context, orgID string, opts ...RequestOption) (*OrgsRemoveResponse, error) {
-	var out OrgsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID), nil, nil, &out, opts); err != nil {
+// GET /orgs/{orgId}/siem
+func (s *OrgsService) GetSiem(ctx context.Context, orgID string, opts ...RequestOption) (*SiemView, error) {
+	var out SiemView
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/siem", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// OrgsSetSiemQuery are the optional query parameters of OrgsService.SetSiem.
+type OrgsSetSiemQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *OrgsSetSiemQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// SetSiem replace the SIEM in an organization
+//
+// PUT /orgs/{orgId}/siem
+func (s *OrgsService) SetSiem(ctx context.Context, orgID string, body OrgsSetSiemParams, query *OrgsSetSiemQuery, opts ...RequestOption) (*OrgsSetSiemResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsSetSiemResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/siem", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgsPatchSiemQuery are the optional query parameters of OrgsService.PatchSiem.
+type OrgsPatchSiemQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *OrgsPatchSiemQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchSiem update the SIEM in an organization
+//
+// PATCH /orgs/{orgId}/siem
+func (s *OrgsService) PatchSiem(ctx context.Context, orgID string, body OrgsPatchSiemParams, query *OrgsPatchSiemQuery, opts ...RequestOption) (*OrgsPatchSiemResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsPatchSiemResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/siem", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgsExportManifestQuery are the optional query parameters of OrgsService.ExportManifest.
+type OrgsExportManifestQuery struct {
+	// Use true or false (true/1/yes/on and false/0/no/off are accepted).
+	Export *string
+}
+
+func (p *OrgsExportManifestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.Export != nil {
+		v.Set("export", *p.Export)
+	}
+	return v, opts
+}
+
+// ExportManifest export the organization as a manifest (adopt)
+//
+// GET /orgs/{orgId}/manifest
+func (s *OrgsService) ExportManifest(ctx context.Context, orgID string, query *OrgsExportManifestQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/manifest", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // OrgsApplyQuery are the optional query parameters of OrgsService.Apply.
@@ -467,42 +832,255 @@ func (s *OrgsService) Apply(ctx context.Context, orgID string, body OrgsApplyPar
 	return out, nil
 }
 
+// RunStatus get a manifest apply run
+//
+// GET /orgs/{orgId}/manifest/runs/{runId}
+func (s *OrgsService) RunStatus(ctx context.Context, orgID string, runID string, opts ...RequestOption) (any, error) {
+	var out any
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/manifest/runs/"+pathEscape(runID), nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrgsCaptchaService holds the operations under client.Orgs.Captcha.
 type OrgsCaptchaService struct {
 	c *Client
 }
 
-// Get get the captcha in an organization
+// Get get the spam service in an organization
+//
+// GET /orgs/{orgId}/forum/spam-service
+func (s *OrgsCaptchaService) Get(ctx context.Context, orgID string, opts ...RequestOption) (*SpamServiceView, error) {
+	var out SpamServiceView
+	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/forum/spam-service", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgsCaptchaSetQuery are the optional query parameters of OrgsCaptchaService.Set.
+type OrgsCaptchaSetQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *OrgsCaptchaSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// Set replace the spam service in an organization
+//
+// PUT /orgs/{orgId}/forum/spam-service
+func (s *OrgsCaptchaService) Set(ctx context.Context, orgID string, body OrgsCaptchaSetParams, query *OrgsCaptchaSetQuery, opts ...RequestOption) (*OrgsCaptchaSetResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsCaptchaSetResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/forum/spam-service", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgsCaptchaPatchQuery are the optional query parameters of OrgsCaptchaService.Patch.
+type OrgsCaptchaPatchQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *OrgsCaptchaPatchQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// Patch update the spam service in an organization
+//
+// PATCH /orgs/{orgId}/forum/spam-service
+func (s *OrgsCaptchaService) Patch(ctx context.Context, orgID string, body any, query *OrgsCaptchaPatchQuery, opts ...RequestOption) (*OrgsCaptchaPatchResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsCaptchaPatchResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/forum/spam-service", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgsCaptchaClearQuery are the optional query parameters of OrgsCaptchaService.Clear.
+type OrgsCaptchaClearQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsCaptchaClearQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Clear delete the spam service in an organization
+//
+// DELETE /orgs/{orgId}/forum/spam-service
+func (s *OrgsCaptchaService) Clear(ctx context.Context, orgID string, query *OrgsCaptchaClearQuery, opts ...RequestOption) (*OrgsCaptchaClearResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsCaptchaClearResponse
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/forum/spam-service", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OrgsCaptchaTestQuery are the optional query parameters of OrgsCaptchaService.Test.
+type OrgsCaptchaTestQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsCaptchaTestQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Test test the spam service
+//
+// POST /orgs/{orgId}/forum/spam-service/test
+func (s *OrgsCaptchaService) Test(ctx context.Context, orgID string, query *OrgsCaptchaTestQuery, opts ...RequestOption) (*OrgsCaptchaTestResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsCaptchaTestResponse
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/forum/spam-service/test", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetCaptchaAdmin get the captcha in an organization
 //
 // GET /orgs/{orgId}/captcha
-func (s *OrgsCaptchaService) Get(ctx context.Context, orgID string, opts ...RequestOption) (*OrgsCaptchaGetResponse, error) {
-	var out OrgsCaptchaGetResponse
+func (s *OrgsCaptchaService) GetCaptchaAdmin(ctx context.Context, orgID string, opts ...RequestOption) (*OrgsCaptchaGetCaptchaAdminResponse, error) {
+	var out OrgsCaptchaGetCaptchaAdminResponse
 	if err := s.c.do(ctx, "GET", "/orgs/"+pathEscape(orgID)+"/captcha", nil, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Set replace the captcha in an organization
+// OrgsCaptchaSetCaptchaAdminQuery are the optional query parameters of OrgsCaptchaService.SetCaptchaAdmin.
+type OrgsCaptchaSetCaptchaAdminQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *OrgsCaptchaSetCaptchaAdminQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
+// SetCaptchaAdmin replace the captcha in an organization
 //
 // PUT /orgs/{orgId}/captcha
-func (s *OrgsCaptchaService) Set(ctx context.Context, orgID string, body OrgsCaptchaSetParams, opts ...RequestOption) (*OrgsCaptchaSetResponse, error) {
-	var out OrgsCaptchaSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/captcha", nil, body, &out, opts); err != nil {
+func (s *OrgsCaptchaService) SetCaptchaAdmin(ctx context.Context, orgID string, body OrgsCaptchaSetCaptchaAdminParams, query *OrgsCaptchaSetCaptchaAdminQuery, opts ...RequestOption) (*OrgsCaptchaSetCaptchaAdminResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsCaptchaSetCaptchaAdminResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/captcha", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Clear delete the captcha in an organization
+// OrgsCaptchaPatchCaptchaAdminQuery are the optional query parameters of OrgsCaptchaService.PatchCaptchaAdmin.
+type OrgsCaptchaPatchCaptchaAdminQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *OrgsCaptchaPatchCaptchaAdminQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchCaptchaAdmin update the captcha in an organization
 //
-// DELETE /orgs/{orgId}/captcha
-func (s *OrgsCaptchaService) Clear(ctx context.Context, orgID string, opts ...RequestOption) (*ErrorEnvelope, error) {
-	var out ErrorEnvelope
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/captcha", nil, nil, &out, opts); err != nil {
+// PATCH /orgs/{orgId}/captcha
+func (s *OrgsCaptchaService) PatchCaptchaAdmin(ctx context.Context, orgID string, body OrgsCaptchaPatchCaptchaAdminParams, query *OrgsCaptchaPatchCaptchaAdminQuery, opts ...RequestOption) (*OrgsCaptchaPatchCaptchaAdminResponse, error) {
+	v, opts := query.encode(opts)
+	var out OrgsCaptchaPatchCaptchaAdminResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/captcha", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// OrgsCaptchaClearCaptchaAdminQuery are the optional query parameters of OrgsCaptchaService.ClearCaptchaAdmin.
+type OrgsCaptchaClearCaptchaAdminQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsCaptchaClearCaptchaAdminQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// ClearCaptchaAdmin delete the captcha in an organization
+//
+// DELETE /orgs/{orgId}/captcha
+func (s *OrgsCaptchaService) ClearCaptchaAdmin(ctx context.Context, orgID string, query *OrgsCaptchaClearCaptchaAdminQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
+	var out any
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/captcha", v, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // OrgsHealthService holds the operations under client.Orgs.Health.
@@ -532,6 +1110,10 @@ type OrgsSettingsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *OrgsSettingsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -544,6 +1126,12 @@ func (p *OrgsSettingsListQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -586,23 +1174,59 @@ func (s *OrgsSettingsService) One(ctx context.Context, orgID string, key string,
 	return &out, nil
 }
 
+// OrgsSettingsSetQuery are the optional query parameters of OrgsSettingsService.Set.
+type OrgsSettingsSetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSettingsSetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Set set one org setting
 //
 // PUT /orgs/{orgId}/settings/{key}
-func (s *OrgsSettingsService) Set(ctx context.Context, orgID string, key string, body OrgsSettingsSetParams, opts ...RequestOption) (*OrgsSettingsSetResponse, error) {
+func (s *OrgsSettingsService) Set(ctx context.Context, orgID string, key string, body OrgsSettingsSetParams, query *OrgsSettingsSetQuery, opts ...RequestOption) (*OrgsSettingsSetResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsSettingsSetResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/settings/"+pathEscape(key), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/settings/"+pathEscape(key), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// OrgsSettingsResetQuery are the optional query parameters of OrgsSettingsService.Reset.
+type OrgsSettingsResetQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *OrgsSettingsResetQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Reset reset one org setting to its default
 //
 // DELETE /orgs/{orgId}/settings/{key}
-func (s *OrgsSettingsService) Reset(ctx context.Context, orgID string, key string, opts ...RequestOption) (*OrgsSettingsResetResponse, error) {
+func (s *OrgsSettingsService) Reset(ctx context.Context, orgID string, key string, query *OrgsSettingsResetQuery, opts ...RequestOption) (*OrgsSettingsResetResponse, error) {
+	v, opts := query.encode(opts)
 	var out OrgsSettingsResetResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/settings/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/settings/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

@@ -19,6 +19,10 @@ type LibraryListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibraryListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *LibraryListQuery) encode(opts []RequestOption) (url.Values, []RequestOp
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,23 +72,59 @@ func (s *LibraryService) ListAutoPaging(ctx context.Context, orgID string, query
 	})
 }
 
+// LibraryCreateQuery are the optional query parameters of LibraryService.Create.
+type LibraryCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a reusable in an organization
 //
 // POST /orgs/{orgId}/library/reusables
-func (s *LibraryService) Create(ctx context.Context, orgID string, body LibraryCreateParams, opts ...RequestOption) (*LibraryCreateResponse, error) {
+func (s *LibraryService) Create(ctx context.Context, orgID string, body LibraryCreateParams, query *LibraryCreateQuery, opts ...RequestOption) (*LibraryCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/library/reusables", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/library/reusables", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// LibraryRemoveQuery are the optional query parameters of LibraryService.Remove.
+type LibraryRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove delete the reusable
 //
 // DELETE /orgs/{orgId}/library/reusables/{id}
-func (s *LibraryService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*LibraryRemoveResponse, error) {
+func (s *LibraryService) Remove(ctx context.Context, orgID string, id string, query *LibraryRemoveQuery, opts ...RequestOption) (*LibraryRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/library/reusables/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/library/reusables/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -90,6 +136,10 @@ type LibraryListVariablesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibraryListVariablesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -102,6 +152,12 @@ func (p *LibraryListVariablesQuery) encode(opts []RequestOption) (url.Values, []
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -133,23 +189,59 @@ func (s *LibraryService) ListVariablesAutoPaging(ctx context.Context, orgID stri
 	})
 }
 
+// LibrarySetVariableQuery are the optional query parameters of LibraryService.SetVariable.
+type LibrarySetVariableQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibrarySetVariableQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetVariable replace variables in an organization
 //
 // PUT /orgs/{orgId}/library/variables
-func (s *LibraryService) SetVariable(ctx context.Context, orgID string, body LibrarySetVariableParams, opts ...RequestOption) (*LibrarySetVariableResponse, error) {
+func (s *LibraryService) SetVariable(ctx context.Context, orgID string, body LibrarySetVariableParams, query *LibrarySetVariableQuery, opts ...RequestOption) (*LibrarySetVariableResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibrarySetVariableResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/library/variables", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/library/variables", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// LibraryDeleteVariableQuery are the optional query parameters of LibraryService.DeleteVariable.
+type LibraryDeleteVariableQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDeleteVariableQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteVariable delete the variable (library)
 //
 // DELETE /orgs/{orgId}/library/variables/{key}
-func (s *LibraryService) DeleteVariable(ctx context.Context, orgID string, key string, opts ...RequestOption) (*LibraryDeleteVariableResponse, error) {
+func (s *LibraryService) DeleteVariable(ctx context.Context, orgID string, key string, query *LibraryDeleteVariableQuery, opts ...RequestOption) (*LibraryDeleteVariableResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryDeleteVariableResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/library/variables/"+pathEscape(key), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/library/variables/"+pathEscape(key), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

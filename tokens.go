@@ -18,6 +18,12 @@ type TokensListQuery struct {
 	// Tokens per page, newest first.
 	Limit  *int64
 	Cursor *string
+	// `revoked` adds revoked tokens, each with `revokedAt`, `revokedBy` (the user, or null for a leak report or a policy), `revokedReason` and, after a rotation, `replacedById`.
+	Include *string
+	// Filter by your tags: `?metadata[env]=sandbox&metadata[team]=growth` keeps only items whose `metadata` has every named key with that value (compared as text, so `metadata[tier]=2` matches `tier: 2`).
+	Metadata *string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *TokensListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -30,6 +36,15 @@ func (p *TokensListQuery) encode(opts []RequestOption) (url.Values, []RequestOpt
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	if p.Include != nil {
+		v.Set("include", *p.Include)
+	}
+	if p.Metadata != nil {
+		v.Set("metadata", *p.Metadata)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -61,15 +76,44 @@ func (s *TokensService) ListAutoPaging(ctx context.Context, query *TokensListQue
 	})
 }
 
+// TokensCreateQuery are the optional query parameters of TokensService.Create.
+type TokensCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *TokensCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a personal access token
 //
 // POST /pats
-func (s *TokensService) Create(ctx context.Context, body CreatePATDto, opts ...RequestOption) (any, error) {
+func (s *TokensService) Create(ctx context.Context, body CreatePATDto, query *TokensCreateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/pats", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/pats", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// Audit audit your tokens
+//
+// GET /pats/audit
+func (s *TokensService) Audit(ctx context.Context, opts ...RequestOption) (*TokenAudit, error) {
+	var out TokenAudit
+	if err := s.c.do(ctx, "GET", "/pats/audit", nil, nil, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // TokensScopesQuery are the optional query parameters of TokensService.Scopes.
@@ -78,6 +122,10 @@ type TokensScopesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *TokensScopesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -90,6 +138,12 @@ func (p *TokensScopesQuery) encode(opts []RequestOption) (url.Values, []RequestO
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -121,34 +175,88 @@ func (s *TokensService) ScopesAutoPaging(ctx context.Context, query *TokensScope
 	})
 }
 
-// Rename rename a token
+// TokensRenameQuery are the optional query parameters of TokensService.Rename.
+type TokensRenameQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *TokensRenameQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Rename rename or re-tag a token
 //
 // PATCH /pats/{id}
-func (s *TokensService) Rename(ctx context.Context, id string, body TokensRenameParams, opts ...RequestOption) (any, error) {
+func (s *TokensService) Rename(ctx context.Context, id string, body TokensRenameParams, query *TokensRenameQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PATCH", "/pats/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/pats/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Revoke delete the personal access token
+// TokensRevokeQuery are the optional query parameters of TokensService.Revoke.
+type TokensRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *TokensRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke a token
 //
 // DELETE /pats/{id}
-func (s *TokensService) Revoke(ctx context.Context, id string, opts ...RequestOption) (*TokensRevokeResponse, error) {
+func (s *TokensService) Revoke(ctx context.Context, id string, query *TokensRevokeQuery, opts ...RequestOption) (*TokensRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out TokensRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/pats/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/pats/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// TokensRotateQuery are the optional query parameters of TokensService.Rotate.
+type TokensRotateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *TokensRotateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Rotate rotate the personal access token
 //
 // POST /pats/{id}/rotate
-func (s *TokensService) Rotate(ctx context.Context, id string, body TokensRotateParams, opts ...RequestOption) (any, error) {
+func (s *TokensService) Rotate(ctx context.Context, id string, body TokensRotateParams, query *TokensRotateQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/pats/"+pathEscape(id)+"/rotate", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/pats/"+pathEscape(id)+"/rotate", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil

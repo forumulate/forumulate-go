@@ -19,6 +19,10 @@ type LibraryDomainListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *LibraryDomainListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -31,6 +35,12 @@ func (p *LibraryDomainListQuery) encode(opts []RequestOption) (url.Values, []Req
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -62,56 +72,146 @@ func (s *LibraryDomainService) ListAutoPaging(ctx context.Context, orgID string,
 	})
 }
 
+// LibraryDomainAddQuery are the optional query parameters of LibraryDomainService.Add.
+type LibraryDomainAddQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainAddQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Add publish a content library’s hosted output at a custom domain
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/domains
-func (s *LibraryDomainService) Add(ctx context.Context, orgID string, libraryID string, body LibraryDomainAddParams, opts ...RequestOption) (any, error) {
+func (s *LibraryDomainService) Add(ctx context.Context, orgID string, libraryID string, body DomainAddBody, query *LibraryDomainAddQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// LibraryDomainAllocateSubdomainQuery are the optional query parameters of LibraryDomainService.AllocateSubdomain.
+type LibraryDomainAllocateSubdomainQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainAllocateSubdomainQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // AllocateSubdomain give a content library’s hosted output a first-party subdomain
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/domains/subdomain
-func (s *LibraryDomainService) AllocateSubdomain(ctx context.Context, orgID string, libraryID string, body LibraryDomainAllocateSubdomainParams, opts ...RequestOption) (any, error) {
+func (s *LibraryDomainService) AllocateSubdomain(ctx context.Context, orgID string, libraryID string, body LibraryDomainAllocateSubdomainParams, query *LibraryDomainAllocateSubdomainQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/subdomain", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/subdomain", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// LibraryDomainPreviewQuery are the optional query parameters of LibraryDomainService.Preview.
+type LibraryDomainPreviewQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainPreviewQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Preview dry-run a custom domain for a content library
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/domains/preview
-func (s *LibraryDomainService) Preview(ctx context.Context, orgID string, libraryID string, body LibraryDomainPreviewParams, opts ...RequestOption) (*DomainPreview, error) {
+func (s *LibraryDomainService) Preview(ctx context.Context, orgID string, libraryID string, body LibraryDomainPreviewParams, query *LibraryDomainPreviewQuery, opts ...RequestOption) (*DomainPreview, error) {
+	v, opts := query.encode(opts)
 	var out DomainPreview
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/preview", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/preview", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// LibraryDomainVerifyQuery are the optional query parameters of LibraryDomainService.Verify.
+type LibraryDomainVerifyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainVerifyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Verify verify a content library’s custom domain
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/domains/{domainId}/verify
-func (s *LibraryDomainService) Verify(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainVerifyParams, opts ...RequestOption) (any, error) {
+func (s *LibraryDomainService) Verify(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainVerifyParams, query *LibraryDomainVerifyQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/verify", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/verify", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// LibraryDomainActivateQuery are the optional query parameters of LibraryDomainService.Activate.
+type LibraryDomainActivateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainActivateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Activate take a content library’s verified domain live
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/domains/{domainId}/activate
-func (s *LibraryDomainService) Activate(ctx context.Context, orgID string, libraryID string, domainID string, opts ...RequestOption) (*DomainResponseDto, error) {
+func (s *LibraryDomainService) Activate(ctx context.Context, orgID string, libraryID string, domainID string, query *LibraryDomainActivateQuery, opts ...RequestOption) (*DomainResponseDto, error) {
+	v, opts := query.encode(opts)
 	var out DomainResponseDto
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/activate", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/activate", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -128,45 +228,117 @@ func (s *LibraryDomainService) Setup(ctx context.Context, orgID string, libraryI
 	return &out, nil
 }
 
+// LibraryDomainRemoveQuery are the optional query parameters of LibraryDomainService.Remove.
+type LibraryDomainRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Remove remove a content library’s custom domain
 //
 // DELETE /orgs/{orgId}/content/libraries/{libraryId}/domains/{domainId}
-func (s *LibraryDomainService) Remove(ctx context.Context, orgID string, libraryID string, domainID string, opts ...RequestOption) (*LibraryDomainRemoveResponse, error) {
+func (s *LibraryDomainService) Remove(ctx context.Context, orgID string, libraryID string, domainID string, query *LibraryDomainRemoveQuery, opts ...RequestOption) (*LibraryDomainRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryDomainRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// LibraryDomainSetWwwQuery are the optional query parameters of LibraryDomainService.SetWww.
+type LibraryDomainSetWwwQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainSetWwwQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetWww also redirect www.
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/domains/{domainId}/www
-func (s *LibraryDomainService) SetWww(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainSetWwwParams, opts ...RequestOption) (any, error) {
+func (s *LibraryDomainService) SetWww(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainSetWwwParams, query *LibraryDomainSetWwwQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/www", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/www", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// LibraryDomainSetIPAllowListQuery are the optional query parameters of LibraryDomainService.SetIPAllowList.
+type LibraryDomainSetIPAllowListQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainSetIPAllowListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetIPAllowList restrict who may read a content library’s domain
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/domains/{domainId}/ip-allow-list
-func (s *LibraryDomainService) SetIPAllowList(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainSetIPAllowListParams, opts ...RequestOption) (*LibraryDomainSetIPAllowListResponse, error) {
+func (s *LibraryDomainService) SetIPAllowList(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainSetIPAllowListParams, query *LibraryDomainSetIPAllowListQuery, opts ...RequestOption) (*LibraryDomainSetIPAllowListResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryDomainSetIPAllowListResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/ip-allow-list", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/ip-allow-list", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// LibraryDomainSetRedirectQuery are the optional query parameters of LibraryDomainService.SetRedirect.
+type LibraryDomainSetRedirectQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibraryDomainSetRedirectQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetRedirect retire a content library’s domain with a 301 to a new home
 //
 // PUT /orgs/{orgId}/content/libraries/{libraryId}/domains/{domainId}/redirect
-func (s *LibraryDomainService) SetRedirect(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainSetRedirectParams, opts ...RequestOption) (*LibraryDomainSetRedirectResponse, error) {
+func (s *LibraryDomainService) SetRedirect(ctx context.Context, orgID string, libraryID string, domainID string, body LibraryDomainSetRedirectParams, query *LibraryDomainSetRedirectQuery, opts ...RequestOption) (*LibraryDomainSetRedirectResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibraryDomainSetRedirectResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/redirect", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/domains/"+pathEscape(domainID)+"/redirect", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

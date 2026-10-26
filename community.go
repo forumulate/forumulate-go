@@ -24,7 +24,8 @@ type CommunityAnalyticsSummaryQuery struct {
 	Days *int64
 	// Top contributors returned.
 	Contributors *int64
-	SpaceID      *string
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
+	SpaceID *string
 }
 
 func (p *CommunityAnalyticsSummaryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -64,6 +65,10 @@ type CommunityReactionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityReactionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -79,6 +84,12 @@ func (p *CommunityReactionsQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -110,12 +121,30 @@ func (s *CommunityService) ReactionsAutoPaging(ctx context.Context, orgID string
 	})
 }
 
+// CommunitySetReactionsQuery are the optional query parameters of CommunityService.SetReactions.
+type CommunitySetReactionsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunitySetReactionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetReactions create a reaction in an organization
 //
 // POST /orgs/{orgId}/community/reactions
-func (s *CommunityService) SetReactions(ctx context.Context, orgID string, body CommunitySetReactionsParams, opts ...RequestOption) (*CommunitySetReactionsResponse, error) {
+func (s *CommunityService) SetReactions(ctx context.Context, orgID string, body CommunitySetReactionsParams, query *CommunitySetReactionsQuery, opts ...RequestOption) (*CommunitySetReactionsResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunitySetReactionsResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reactions", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reactions", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -127,6 +156,10 @@ type CommunityListCustomReactionsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityListCustomReactionsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -139,6 +172,12 @@ func (p *CommunityListCustomReactionsQuery) encode(opts []RequestOption) (url.Va
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -170,23 +209,59 @@ func (s *CommunityService) ListCustomReactionsAutoPaging(ctx context.Context, or
 	})
 }
 
-// UploadCustomReaction create the custom in an organization
+// CommunityUploadCustomReactionQuery are the optional query parameters of CommunityService.UploadCustomReaction.
+type CommunityUploadCustomReactionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityUploadCustomReactionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UploadCustomReaction upload the custom reaction
 //
 // POST /orgs/{orgId}/community/reactions/custom
-func (s *CommunityService) UploadCustomReaction(ctx context.Context, orgID string, body CommunityUploadCustomReactionParams, opts ...RequestOption) (*CommunityUploadCustomReactionResponse, error) {
+func (s *CommunityService) UploadCustomReaction(ctx context.Context, orgID string, body CommunityUploadCustomReactionParams, query *CommunityUploadCustomReactionQuery, opts ...RequestOption) (*CommunityUploadCustomReactionResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityUploadCustomReactionResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reactions/custom", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reactions/custom", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CommunityDeleteCustomReactionQuery are the optional query parameters of CommunityService.DeleteCustomReaction.
+type CommunityDeleteCustomReactionQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityDeleteCustomReactionQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteCustomReaction delete the custom
 //
 // DELETE /orgs/{orgId}/community/reactions/custom/{slug}
-func (s *CommunityService) DeleteCustomReaction(ctx context.Context, orgID string, slug string, opts ...RequestOption) (*CommunityDeleteCustomReactionResponse, error) {
+func (s *CommunityService) DeleteCustomReaction(ctx context.Context, orgID string, slug string, query *CommunityDeleteCustomReactionQuery, opts ...RequestOption) (*CommunityDeleteCustomReactionResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityDeleteCustomReactionResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reactions/custom/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reactions/custom/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -201,6 +276,10 @@ type CommunityTagFeedQuery struct {
 	Cursor *string
 	// Rows per page — the spelling used everywhere else in this API.
 	Limit *int64
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityTagFeedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -219,6 +298,12 @@ func (p *CommunityTagFeedQuery) encode(opts []RequestOption) (url.Values, []Requ
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -284,6 +369,10 @@ type CommunityBookmarksQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityBookmarksQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -296,6 +385,12 @@ func (p *CommunityBookmarksQuery) encode(opts []RequestOption) (url.Values, []Re
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -338,6 +433,10 @@ type CommunityBadgeQueryGrantsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityBadgeQueryGrantsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -350,6 +449,12 @@ func (p *CommunityBadgeQueryGrantsListQuery) encode(opts []RequestOption) (url.V
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -381,56 +486,146 @@ func (s *CommunityBadgeQueryGrantsService) ListAutoPaging(ctx context.Context, o
 	})
 }
 
+// CommunityBadgeQueryGrantsCreateQuery are the optional query parameters of CommunityBadgeQueryGrantsService.Create.
+type CommunityBadgeQueryGrantsCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityBadgeQueryGrantsCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a badge query grant in an organization
 //
 // POST /orgs/{orgId}/admin/badge-query-grants
-func (s *CommunityBadgeQueryGrantsService) Create(ctx context.Context, orgID string, body CommunityBadgeQueryGrantsCreateParams, opts ...RequestOption) (*CommunityBadgeQueryGrantsCreateResponse, error) {
+func (s *CommunityBadgeQueryGrantsService) Create(ctx context.Context, orgID string, body CommunityBadgeQueryGrantsCreateParams, query *CommunityBadgeQueryGrantsCreateQuery, opts ...RequestOption) (*CommunityBadgeQueryGrantsCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityBadgeQueryGrantsCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityBadgeQueryGrantsUpdateQuery are the optional query parameters of CommunityBadgeQueryGrantsService.Update.
+type CommunityBadgeQueryGrantsUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityBadgeQueryGrantsUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the badge query grant
 //
 // PATCH /orgs/{orgId}/admin/badge-query-grants/{ruleId}
-func (s *CommunityBadgeQueryGrantsService) Update(ctx context.Context, orgID string, ruleID string, body CommunityBadgeQueryGrantsUpdateParams, opts ...RequestOption) (*CommunityBadgeQueryGrantsUpdateResponse, error) {
+func (s *CommunityBadgeQueryGrantsService) Update(ctx context.Context, orgID string, ruleID string, body CommunityBadgeQueryGrantsUpdateParams, query *CommunityBadgeQueryGrantsUpdateQuery, opts ...RequestOption) (*CommunityBadgeQueryGrantsUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityBadgeQueryGrantsUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/"+pathEscape(ruleID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/"+pathEscape(ruleID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityBadgeQueryGrantsRemoveQuery are the optional query parameters of CommunityBadgeQueryGrantsService.Remove.
+type CommunityBadgeQueryGrantsRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityBadgeQueryGrantsRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the badge query grant
 //
 // DELETE /orgs/{orgId}/admin/badge-query-grants/{ruleId}
-func (s *CommunityBadgeQueryGrantsService) Remove(ctx context.Context, orgID string, ruleID string, opts ...RequestOption) (*CommunityBadgeQueryGrantsRemoveResponse, error) {
+func (s *CommunityBadgeQueryGrantsService) Remove(ctx context.Context, orgID string, ruleID string, query *CommunityBadgeQueryGrantsRemoveQuery, opts ...RequestOption) (*CommunityBadgeQueryGrantsRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityBadgeQueryGrantsRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/"+pathEscape(ruleID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/"+pathEscape(ruleID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityBadgeQueryGrantsRunOneQuery are the optional query parameters of CommunityBadgeQueryGrantsService.RunOne.
+type CommunityBadgeQueryGrantsRunOneQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityBadgeQueryGrantsRunOneQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RunOne run the badge query grant
 //
 // POST /orgs/{orgId}/admin/badge-query-grants/{ruleId}/run
-func (s *CommunityBadgeQueryGrantsService) RunOne(ctx context.Context, orgID string, ruleID string, opts ...RequestOption) (*CommunityBadgeQueryGrantsRunOneResponse, error) {
+func (s *CommunityBadgeQueryGrantsService) RunOne(ctx context.Context, orgID string, ruleID string, query *CommunityBadgeQueryGrantsRunOneQuery, opts ...RequestOption) (*CommunityBadgeQueryGrantsRunOneResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityBadgeQueryGrantsRunOneResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/"+pathEscape(ruleID)+"/run", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/"+pathEscape(ruleID)+"/run", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CommunityBadgeQueryGrantsRunAllQuery are the optional query parameters of CommunityBadgeQueryGrantsService.RunAll.
+type CommunityBadgeQueryGrantsRunAllQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityBadgeQueryGrantsRunAllQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RunAll run the badge query grant (create)
 //
 // POST /orgs/{orgId}/admin/badge-query-grants/run
-func (s *CommunityBadgeQueryGrantsService) RunAll(ctx context.Context, orgID string, opts ...RequestOption) (*CommunityBadgeQueryGrantsRunAllResponse, error) {
+func (s *CommunityBadgeQueryGrantsService) RunAll(ctx context.Context, orgID string, query *CommunityBadgeQueryGrantsRunAllQuery, opts ...RequestOption) (*CommunityBadgeQueryGrantsRunAllResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityBadgeQueryGrantsRunAllResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/run", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/admin/badge-query-grants/run", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -443,11 +638,16 @@ type CommunityCannedRepliesService struct {
 
 // CommunityCannedRepliesListQuery are the optional query parameters of CommunityCannedRepliesService.List.
 type CommunityCannedRepliesListQuery struct {
+	// The space uuid (uuid only — a slug is not resolved in a query parameter).
 	SpaceID *string
 	// Rows per page.
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityCannedRepliesListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -463,6 +663,12 @@ func (p *CommunityCannedRepliesListQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -494,45 +700,117 @@ func (s *CommunityCannedRepliesService) ListAutoPaging(ctx context.Context, orgI
 	})
 }
 
+// CommunityCannedRepliesCreateQuery are the optional query parameters of CommunityCannedRepliesService.Create.
+type CommunityCannedRepliesCreateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityCannedRepliesCreateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Create create a canned reply in an organization
 //
 // POST /orgs/{orgId}/community/canned-replies
-func (s *CommunityCannedRepliesService) Create(ctx context.Context, orgID string, body CommunityCannedRepliesCreateParams, opts ...RequestOption) (*CommunityCannedRepliesCreateResponse, error) {
+func (s *CommunityCannedRepliesService) Create(ctx context.Context, orgID string, body CommunityCannedRepliesCreateParams, query *CommunityCannedRepliesCreateQuery, opts ...RequestOption) (*CommunityCannedRepliesCreateResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityCannedRepliesCreateResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/canned-replies", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/canned-replies", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityCannedRepliesUpdateQuery are the optional query parameters of CommunityCannedRepliesService.Update.
+type CommunityCannedRepliesUpdateQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityCannedRepliesUpdateQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Update update the canned reply
 //
 // PATCH /orgs/{orgId}/community/canned-replies/{id}
-func (s *CommunityCannedRepliesService) Update(ctx context.Context, orgID string, id string, body CommunityCannedRepliesUpdateParams, opts ...RequestOption) (*CommunityCannedRepliesUpdateResponse, error) {
+func (s *CommunityCannedRepliesService) Update(ctx context.Context, orgID string, id string, body CommunityCannedRepliesUpdateParams, query *CommunityCannedRepliesUpdateQuery, opts ...RequestOption) (*CommunityCannedRepliesUpdateResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityCannedRepliesUpdateResponse
-	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/community/canned-replies/"+pathEscape(id), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/community/canned-replies/"+pathEscape(id), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityCannedRepliesRemoveQuery are the optional query parameters of CommunityCannedRepliesService.Remove.
+type CommunityCannedRepliesRemoveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityCannedRepliesRemoveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Remove delete the canned reply
 //
 // DELETE /orgs/{orgId}/community/canned-replies/{id}
-func (s *CommunityCannedRepliesService) Remove(ctx context.Context, orgID string, id string, opts ...RequestOption) (*CommunityCannedRepliesRemoveResponse, error) {
+func (s *CommunityCannedRepliesService) Remove(ctx context.Context, orgID string, id string, query *CommunityCannedRepliesRemoveQuery, opts ...RequestOption) (*CommunityCannedRepliesRemoveResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityCannedRepliesRemoveResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/canned-replies/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/canned-replies/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Use create the use in an organization
+// CommunityCannedRepliesUseQuery are the optional query parameters of CommunityCannedRepliesService.Use.
+type CommunityCannedRepliesUseQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityCannedRepliesUseQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Use use the canned reply
 //
 // POST /orgs/{orgId}/community/canned-replies/{id}/use
-func (s *CommunityCannedRepliesService) Use(ctx context.Context, orgID string, id string, opts ...RequestOption) (*CommunityCannedRepliesUseResponse, error) {
+func (s *CommunityCannedRepliesService) Use(ctx context.Context, orgID string, id string, query *CommunityCannedRepliesUseQuery, opts ...RequestOption) (*CommunityCannedRepliesUseResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityCannedRepliesUseResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/canned-replies/"+pathEscape(id)+"/use", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/canned-replies/"+pathEscape(id)+"/use", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -549,6 +827,10 @@ type CommunityExtrasListSavedQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityExtrasListSavedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -561,6 +843,12 @@ func (p *CommunityExtrasListSavedQuery) encode(opts []RequestOption) (url.Values
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -592,34 +880,88 @@ func (s *CommunityExtrasService) ListSavedAutoPaging(ctx context.Context, orgID 
 	})
 }
 
+// CommunityExtrasSaveQuery are the optional query parameters of CommunityExtrasService.Save.
+type CommunityExtrasSaveQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasSaveQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Save create a saved search in an organization
 //
 // POST /orgs/{orgId}/community/saved-searches
-func (s *CommunityExtrasService) Save(ctx context.Context, orgID string, body CommunityExtrasSaveParams, opts ...RequestOption) (*CommunityExtrasSaveResponse, error) {
+func (s *CommunityExtrasService) Save(ctx context.Context, orgID string, body CommunityExtrasSaveParams, query *CommunityExtrasSaveQuery, opts ...RequestOption) (*CommunityExtrasSaveResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasSaveResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/saved-searches", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/saved-searches", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetSavedNotify create the notify in an organization
+// CommunityExtrasSetSavedNotifyQuery are the optional query parameters of CommunityExtrasService.SetSavedNotify.
+type CommunityExtrasSetSavedNotifyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasSetSavedNotifyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetSavedNotify set the saved notify
 //
 // POST /orgs/{orgId}/community/saved-searches/{id}/notify
-func (s *CommunityExtrasService) SetSavedNotify(ctx context.Context, orgID string, id string, body CommunityExtrasSetSavedNotifyParams, opts ...RequestOption) (*CommunityExtrasSetSavedNotifyResponse, error) {
+func (s *CommunityExtrasService) SetSavedNotify(ctx context.Context, orgID string, id string, body CommunityExtrasSetSavedNotifyParams, query *CommunityExtrasSetSavedNotifyQuery, opts ...RequestOption) (*CommunityExtrasSetSavedNotifyResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasSetSavedNotifyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/saved-searches/"+pathEscape(id)+"/notify", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/saved-searches/"+pathEscape(id)+"/notify", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityExtrasRemoveSavedQuery are the optional query parameters of CommunityExtrasService.RemoveSaved.
+type CommunityExtrasRemoveSavedQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasRemoveSavedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // RemoveSaved delete the saved search
 //
 // DELETE /orgs/{orgId}/community/saved-searches/{id}
-func (s *CommunityExtrasService) RemoveSaved(ctx context.Context, orgID string, id string, opts ...RequestOption) (*CommunityExtrasRemoveSavedResponse, error) {
+func (s *CommunityExtrasService) RemoveSaved(ctx context.Context, orgID string, id string, query *CommunityExtrasRemoveSavedQuery, opts ...RequestOption) (*CommunityExtrasRemoveSavedResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasRemoveSavedResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/saved-searches/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/saved-searches/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -633,6 +975,10 @@ type CommunityExtrasCakedayQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityExtrasCakedayQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -648,6 +994,12 @@ func (p *CommunityExtrasCakedayQuery) encode(opts []RequestOption) (url.Values, 
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -685,6 +1037,10 @@ type CommunityExtrasListNotesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityExtrasListNotesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -697,6 +1053,12 @@ func (p *CommunityExtrasListNotesQuery) encode(opts []RequestOption) (url.Values
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -728,23 +1090,59 @@ func (s *CommunityExtrasService) ListNotesAutoPaging(ctx context.Context, orgID 
 	})
 }
 
+// CommunityExtrasAddNoteQuery are the optional query parameters of CommunityExtrasService.AddNote.
+type CommunityExtrasAddNoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasAddNoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // AddNote create a note in an organization
 //
 // POST /orgs/{orgId}/community/members/{userId}/notes
-func (s *CommunityExtrasService) AddNote(ctx context.Context, orgID string, userID string, body CommunityExtrasAddNoteParams, opts ...RequestOption) (*CommunityExtrasAddNoteResponse, error) {
+func (s *CommunityExtrasService) AddNote(ctx context.Context, orgID string, userID string, body CommunityExtrasAddNoteParams, query *CommunityExtrasAddNoteQuery, opts ...RequestOption) (*CommunityExtrasAddNoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasAddNoteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(userID)+"/notes", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(userID)+"/notes", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CommunityExtrasRemoveNoteQuery are the optional query parameters of CommunityExtrasService.RemoveNote.
+type CommunityExtrasRemoveNoteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasRemoveNoteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveNote delete the note (community)
 //
 // DELETE /orgs/{orgId}/community/notes/{id}
-func (s *CommunityExtrasService) RemoveNote(ctx context.Context, orgID string, id string, opts ...RequestOption) (*CommunityExtrasRemoveNoteResponse, error) {
+func (s *CommunityExtrasService) RemoveNote(ctx context.Context, orgID string, id string, query *CommunityExtrasRemoveNoteQuery, opts ...RequestOption) (*CommunityExtrasRemoveNoteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasRemoveNoteResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/notes/"+pathEscape(id), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/notes/"+pathEscape(id), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -761,45 +1159,117 @@ func (s *CommunityExtrasService) AckStatus(ctx context.Context, orgID string, to
 	return &out, nil
 }
 
-// Acknowledge create the acknowledge in an organization
+// CommunityExtrasAcknowledgeQuery are the optional query parameters of CommunityExtrasService.Acknowledge.
+type CommunityExtrasAcknowledgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasAcknowledgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Acknowledge acknowledge the topic
 //
 // POST /orgs/{orgId}/community/topics/{topicId}/acknowledge
-func (s *CommunityExtrasService) Acknowledge(ctx context.Context, orgID string, topicID string, opts ...RequestOption) (*CommunityExtrasAcknowledgeResponse, error) {
+func (s *CommunityExtrasService) Acknowledge(ctx context.Context, orgID string, topicID string, query *CommunityExtrasAcknowledgeQuery, opts ...RequestOption) (*CommunityExtrasAcknowledgeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasAcknowledgeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/acknowledge", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/acknowledge", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetPolicy create the policy in an organization
+// CommunityExtrasSetPolicyQuery are the optional query parameters of CommunityExtrasService.SetPolicy.
+type CommunityExtrasSetPolicyQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasSetPolicyQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetPolicy set the policy of the topic
 //
 // POST /orgs/{orgId}/community/topics/{topicId}/policy
-func (s *CommunityExtrasService) SetPolicy(ctx context.Context, orgID string, topicID string, body CommunityExtrasSetPolicyParams, opts ...RequestOption) (*CommunityExtrasSetPolicyResponse, error) {
+func (s *CommunityExtrasService) SetPolicy(ctx context.Context, orgID string, topicID string, body CommunityExtrasSetPolicyParams, query *CommunityExtrasSetPolicyQuery, opts ...RequestOption) (*CommunityExtrasSetPolicyResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasSetPolicyResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/policy", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/policy", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityExtrasAssignQuery are the optional query parameters of CommunityExtrasService.Assign.
+type CommunityExtrasAssignQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasAssignQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Assign assign the topic
 //
 // POST /orgs/{orgId}/community/topics/{topicId}/assign
-func (s *CommunityExtrasService) Assign(ctx context.Context, orgID string, topicID string, body CommunityExtrasAssignParams, opts ...RequestOption) (*CommunityExtrasAssignResponse, error) {
+func (s *CommunityExtrasService) Assign(ctx context.Context, orgID string, topicID string, body CommunityExtrasAssignParams, query *CommunityExtrasAssignQuery, opts ...RequestOption) (*CommunityExtrasAssignResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasAssignResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/assign", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/assign", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// SetEvent create the event in an organization
+// CommunityExtrasSetEventQuery are the optional query parameters of CommunityExtrasService.SetEvent.
+type CommunityExtrasSetEventQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasSetEventQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetEvent set the event of the topic
 //
 // POST /orgs/{orgId}/community/topics/{topicId}/event
-func (s *CommunityExtrasService) SetEvent(ctx context.Context, orgID string, topicID string, body CommunityExtrasSetEventParams, opts ...RequestOption) (*CommunityExtrasSetEventResponse, error) {
+func (s *CommunityExtrasService) SetEvent(ctx context.Context, orgID string, topicID string, body CommunityExtrasSetEventParams, query *CommunityExtrasSetEventQuery, opts ...RequestOption) (*CommunityExtrasSetEventResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasSetEventResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/event", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/event", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -811,6 +1281,10 @@ type CommunityExtrasEventsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityExtrasEventsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -823,6 +1297,12 @@ func (p *CommunityExtrasEventsQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -865,12 +1345,30 @@ func (s *CommunityExtrasService) RsvpState(ctx context.Context, orgID string, to
 	return &out, nil
 }
 
-// Rsvp create the rsvp in an organization
+// CommunityExtrasRsvpQuery are the optional query parameters of CommunityExtrasService.Rsvp.
+type CommunityExtrasRsvpQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityExtrasRsvpQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Rsvp rSVP to the topic
 //
 // POST /orgs/{orgId}/community/topics/{topicId}/rsvp
-func (s *CommunityExtrasService) Rsvp(ctx context.Context, orgID string, topicID string, body CommunityExtrasRsvpParams, opts ...RequestOption) (*CommunityExtrasRsvpResponse, error) {
+func (s *CommunityExtrasService) Rsvp(ctx context.Context, orgID string, topicID string, body CommunityExtrasRsvpParams, query *CommunityExtrasRsvpQuery, opts ...RequestOption) (*CommunityExtrasRsvpResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityExtrasRsvpResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/rsvp", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/topics/"+pathEscape(topicID)+"/rsvp", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -920,23 +1418,59 @@ type CommunityRelationshipsService struct {
 	c *Client
 }
 
-// SetStatus create the status in an organization
+// CommunityRelationshipsSetStatusQuery are the optional query parameters of CommunityRelationshipsService.SetStatus.
+type CommunityRelationshipsSetStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityRelationshipsSetStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetStatus set the status
 //
 // POST /orgs/{orgId}/community/status
-func (s *CommunityRelationshipsService) SetStatus(ctx context.Context, orgID string, body CommunityRelationshipsSetStatusParams, opts ...RequestOption) (*CommunityRelationshipsSetStatusResponse, error) {
+func (s *CommunityRelationshipsService) SetStatus(ctx context.Context, orgID string, body CommunityRelationshipsSetStatusParams, query *CommunityRelationshipsSetStatusQuery, opts ...RequestOption) (*CommunityRelationshipsSetStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityRelationshipsSetStatusResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/status", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/status", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CommunityRelationshipsClearStatusQuery are the optional query parameters of CommunityRelationshipsService.ClearStatus.
+type CommunityRelationshipsClearStatusQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityRelationshipsClearStatusQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // ClearStatus delete the status in an organization
 //
 // DELETE /orgs/{orgId}/community/status
-func (s *CommunityRelationshipsService) ClearStatus(ctx context.Context, orgID string, opts ...RequestOption) (*CommunityRelationshipsClearStatusResponse, error) {
+func (s *CommunityRelationshipsService) ClearStatus(ctx context.Context, orgID string, query *CommunityRelationshipsClearStatusQuery, opts ...RequestOption) (*CommunityRelationshipsClearStatusResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityRelationshipsClearStatusResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/status", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/status", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -948,6 +1482,10 @@ type CommunityRelationshipsListQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityRelationshipsListQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -960,6 +1498,12 @@ func (p *CommunityRelationshipsListQuery) encode(opts []RequestOption) (url.Valu
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -991,45 +1535,117 @@ func (s *CommunityRelationshipsService) ListAutoPaging(ctx context.Context, orgI
 	})
 }
 
+// CommunityRelationshipsMuteQuery are the optional query parameters of CommunityRelationshipsService.Mute.
+type CommunityRelationshipsMuteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityRelationshipsMuteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Mute mute the member
 //
 // POST /orgs/{orgId}/community/members/{targetUserId}/mute
-func (s *CommunityRelationshipsService) Mute(ctx context.Context, orgID string, targetUserID string, body CommunityRelationshipsMuteParams, opts ...RequestOption) (*CommunityRelationshipsMuteResponse, error) {
+func (s *CommunityRelationshipsService) Mute(ctx context.Context, orgID string, targetUserID string, body CommunityRelationshipsMuteParams, query *CommunityRelationshipsMuteQuery, opts ...RequestOption) (*CommunityRelationshipsMuteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityRelationshipsMuteResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/mute", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/mute", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Unmute mute the member (delete)
+// CommunityRelationshipsUnmuteQuery are the optional query parameters of CommunityRelationshipsService.Unmute.
+type CommunityRelationshipsUnmuteQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityRelationshipsUnmuteQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Unmute unmute the member
 //
 // DELETE /orgs/{orgId}/community/members/{targetUserId}/mute
-func (s *CommunityRelationshipsService) Unmute(ctx context.Context, orgID string, targetUserID string, opts ...RequestOption) (*CommunityRelationshipsUnmuteResponse, error) {
+func (s *CommunityRelationshipsService) Unmute(ctx context.Context, orgID string, targetUserID string, query *CommunityRelationshipsUnmuteQuery, opts ...RequestOption) (*CommunityRelationshipsUnmuteResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityRelationshipsUnmuteResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/mute", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/mute", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityRelationshipsFollowQuery are the optional query parameters of CommunityRelationshipsService.Follow.
+type CommunityRelationshipsFollowQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityRelationshipsFollowQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // Follow follow the member
 //
 // POST /orgs/{orgId}/community/members/{targetUserId}/follow
-func (s *CommunityRelationshipsService) Follow(ctx context.Context, orgID string, targetUserID string, opts ...RequestOption) (*CommunityRelationshipsFollowResponse, error) {
+func (s *CommunityRelationshipsService) Follow(ctx context.Context, orgID string, targetUserID string, query *CommunityRelationshipsFollowQuery, opts ...RequestOption) (*CommunityRelationshipsFollowResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityRelationshipsFollowResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/follow", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/follow", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Unfollow follow the member (delete)
+// CommunityRelationshipsUnfollowQuery are the optional query parameters of CommunityRelationshipsService.Unfollow.
+type CommunityRelationshipsUnfollowQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityRelationshipsUnfollowQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Unfollow unfollow the member
 //
 // DELETE /orgs/{orgId}/community/members/{targetUserId}/follow
-func (s *CommunityRelationshipsService) Unfollow(ctx context.Context, orgID string, targetUserID string, opts ...RequestOption) (*CommunityRelationshipsUnfollowResponse, error) {
+func (s *CommunityRelationshipsService) Unfollow(ctx context.Context, orgID string, targetUserID string, query *CommunityRelationshipsUnfollowQuery, opts ...RequestOption) (*CommunityRelationshipsUnfollowResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityRelationshipsUnfollowResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/follow", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/members/"+pathEscape(targetUserID)+"/follow", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1073,67 +1689,175 @@ func (s *CommunityReputationService) Catalog(ctx context.Context, orgID string, 
 	return &out, nil
 }
 
+// CommunityReputationCreateBadgeQuery are the optional query parameters of CommunityReputationService.CreateBadge.
+type CommunityReputationCreateBadgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationCreateBadgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateBadge create a badge in an organization
 //
 // POST /orgs/{orgId}/community/reputation/badges
-func (s *CommunityReputationService) CreateBadge(ctx context.Context, orgID string, body CommunityReputationCreateBadgeParams, opts ...RequestOption) (*CommunityReputationCreateBadgeResponse, error) {
+func (s *CommunityReputationService) CreateBadge(ctx context.Context, orgID string, body CommunityReputationCreateBadgeParams, query *CommunityReputationCreateBadgeQuery, opts ...RequestOption) (*CommunityReputationCreateBadgeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationCreateBadgeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/badges", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/badges", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// UpdateBadge create the badge
+// CommunityReputationUpdateBadgeQuery are the optional query parameters of CommunityReputationService.UpdateBadge.
+type CommunityReputationUpdateBadgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationUpdateBadgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// UpdateBadge update the badge
 //
 // POST /orgs/{orgId}/community/reputation/badges/{badgeId}
-func (s *CommunityReputationService) UpdateBadge(ctx context.Context, orgID string, badgeID string, body CommunityReputationUpdateBadgeParams, opts ...RequestOption) (*CommunityReputationUpdateBadgeResponse, error) {
+func (s *CommunityReputationService) UpdateBadge(ctx context.Context, orgID string, badgeID string, body CommunityReputationUpdateBadgeParams, query *CommunityReputationUpdateBadgeQuery, opts ...RequestOption) (*CommunityReputationUpdateBadgeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationUpdateBadgeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/badges/"+pathEscape(badgeID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/badges/"+pathEscape(badgeID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityReputationDeleteBadgeQuery are the optional query parameters of CommunityReputationService.DeleteBadge.
+type CommunityReputationDeleteBadgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationDeleteBadgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // DeleteBadge delete the badge
 //
 // DELETE /orgs/{orgId}/community/reputation/badges/{badgeId}
-func (s *CommunityReputationService) DeleteBadge(ctx context.Context, orgID string, badgeID string, opts ...RequestOption) (*CommunityReputationDeleteBadgeResponse, error) {
+func (s *CommunityReputationService) DeleteBadge(ctx context.Context, orgID string, badgeID string, query *CommunityReputationDeleteBadgeQuery, opts ...RequestOption) (*CommunityReputationDeleteBadgeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationDeleteBadgeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reputation/badges/"+pathEscape(badgeID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reputation/badges/"+pathEscape(badgeID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// GrantBadge create a badge in an organization (for a user)
+// CommunityReputationGrantBadgeQuery are the optional query parameters of CommunityReputationService.GrantBadge.
+type CommunityReputationGrantBadgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationGrantBadgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// GrantBadge grant the badge
 //
 // POST /orgs/{orgId}/community/reputation/{userId}/badges
-func (s *CommunityReputationService) GrantBadge(ctx context.Context, orgID string, userID string, body CommunityReputationGrantBadgeParams, opts ...RequestOption) (*CommunityReputationGrantBadgeResponse, error) {
+func (s *CommunityReputationService) GrantBadge(ctx context.Context, orgID string, userID string, body CommunityReputationGrantBadgeParams, query *CommunityReputationGrantBadgeQuery, opts ...RequestOption) (*CommunityReputationGrantBadgeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationGrantBadgeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/badges", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/badges", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// RevokeBadge delete the badge (for a user and a named one)
+// CommunityReputationRevokeBadgeQuery are the optional query parameters of CommunityReputationService.RevokeBadge.
+type CommunityReputationRevokeBadgeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationRevokeBadgeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// RevokeBadge revoke the badge
 //
 // DELETE /orgs/{orgId}/community/reputation/{userId}/badges/{slug}
-func (s *CommunityReputationService) RevokeBadge(ctx context.Context, orgID string, userID string, slug string, opts ...RequestOption) (*CommunityReputationRevokeBadgeResponse, error) {
+func (s *CommunityReputationService) RevokeBadge(ctx context.Context, orgID string, userID string, slug string, query *CommunityReputationRevokeBadgeQuery, opts ...RequestOption) (*CommunityReputationRevokeBadgeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationRevokeBadgeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/badges/"+pathEscape(slug), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/badges/"+pathEscape(slug), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Recompute create the recompute in an organization
+// CommunityReputationRecomputeQuery are the optional query parameters of CommunityReputationService.Recompute.
+type CommunityReputationRecomputeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationRecomputeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Recompute recompute the reputation
 //
 // POST /orgs/{orgId}/community/reputation/recompute
-func (s *CommunityReputationService) Recompute(ctx context.Context, orgID string, opts ...RequestOption) (*CommunityReputationRecomputeResponse, error) {
+func (s *CommunityReputationService) Recompute(ctx context.Context, orgID string, query *CommunityReputationRecomputeQuery, opts ...RequestOption) (*CommunityReputationRecomputeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationRecomputeResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/recompute", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/recompute", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1150,23 +1874,59 @@ func (s *CommunityReputationService) Me(ctx context.Context, orgID string, opts 
 	return &out, nil
 }
 
+// CommunityReputationSetExternalQuery are the optional query parameters of CommunityReputationService.SetExternal.
+type CommunityReputationSetExternalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationSetExternalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetExternal replace the external in an organization
 //
 // PUT /orgs/{orgId}/community/reputation/{userId}/external
-func (s *CommunityReputationService) SetExternal(ctx context.Context, orgID string, userID string, body CommunityReputationSetExternalParams, opts ...RequestOption) (*CommunityReputationSetExternalResponse, error) {
+func (s *CommunityReputationService) SetExternal(ctx context.Context, orgID string, userID string, body CommunityReputationSetExternalParams, query *CommunityReputationSetExternalQuery, opts ...RequestOption) (*CommunityReputationSetExternalResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationSetExternalResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/external", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/external", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CommunityReputationRemoveExternalQuery are the optional query parameters of CommunityReputationService.RemoveExternal.
+type CommunityReputationRemoveExternalQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationRemoveExternalQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // RemoveExternal delete the external
 //
 // DELETE /orgs/{orgId}/community/reputation/{userId}/external/{source}
-func (s *CommunityReputationService) RemoveExternal(ctx context.Context, orgID string, userID string, source string, opts ...RequestOption) (*CommunityReputationRemoveExternalResponse, error) {
+func (s *CommunityReputationService) RemoveExternal(ctx context.Context, orgID string, userID string, source string, query *CommunityReputationRemoveExternalQuery, opts ...RequestOption) (*CommunityReputationRemoveExternalResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationRemoveExternalResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/external/"+pathEscape(source), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/external/"+pathEscape(source), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1212,34 +1972,88 @@ func (s *CommunityReputationService) GetFeatured(ctx context.Context, orgID stri
 	return &out, nil
 }
 
+// CommunityReputationSetFeaturedQuery are the optional query parameters of CommunityReputationService.SetFeatured.
+type CommunityReputationSetFeaturedQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationSetFeaturedQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetFeatured replace the featured in an organization
 //
 // PUT /orgs/{orgId}/community/reputation/me/featured
-func (s *CommunityReputationService) SetFeatured(ctx context.Context, orgID string, body CommunityReputationSetFeaturedParams, opts ...RequestOption) (*CommunityReputationSetFeaturedResponse, error) {
+func (s *CommunityReputationService) SetFeatured(ctx context.Context, orgID string, body CommunityReputationSetFeaturedParams, query *CommunityReputationSetFeaturedQuery, opts ...RequestOption) (*CommunityReputationSetFeaturedResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationSetFeaturedResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/me/featured", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/me/featured", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// CommunityReputationSetFeaturedTopicQuery are the optional query parameters of CommunityReputationService.SetFeaturedTopic.
+type CommunityReputationSetFeaturedTopicQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationSetFeaturedTopicQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
 }
 
 // SetFeaturedTopic replace the featured topic in an organization
 //
 // PUT /orgs/{orgId}/community/reputation/me/featured-topic
-func (s *CommunityReputationService) SetFeaturedTopic(ctx context.Context, orgID string, body CommunityReputationSetFeaturedTopicParams, opts ...RequestOption) (*CommunityReputationSetFeaturedTopicResponse, error) {
+func (s *CommunityReputationService) SetFeaturedTopic(ctx context.Context, orgID string, body CommunityReputationSetFeaturedTopicParams, query *CommunityReputationSetFeaturedTopicQuery, opts ...RequestOption) (*CommunityReputationSetFeaturedTopicResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationSetFeaturedTopicResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/me/featured-topic", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/me/featured-topic", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CommunityReputationSetBackgroundsQuery are the optional query parameters of CommunityReputationService.SetBackgrounds.
+type CommunityReputationSetBackgroundsQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationSetBackgroundsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // SetBackgrounds replace backgrounds in an organization
 //
 // PUT /orgs/{orgId}/community/reputation/me/backgrounds
-func (s *CommunityReputationService) SetBackgrounds(ctx context.Context, orgID string, body CommunityReputationSetBackgroundsParams, opts ...RequestOption) (*CommunityReputationSetBackgroundsResponse, error) {
+func (s *CommunityReputationService) SetBackgrounds(ctx context.Context, orgID string, body CommunityReputationSetBackgroundsParams, query *CommunityReputationSetBackgroundsQuery, opts ...RequestOption) (*CommunityReputationSetBackgroundsResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationSetBackgroundsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/me/backgrounds", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/community/reputation/me/backgrounds", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -1251,6 +2065,10 @@ type CommunityReputationLeaderboardQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityReputationLeaderboardQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1263,6 +2081,12 @@ func (p *CommunityReputationLeaderboardQuery) encode(opts []RequestOption) (url.
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1297,7 +2121,8 @@ func (s *CommunityReputationService) LeaderboardAutoPaging(ctx context.Context, 
 // CommunityReputationPointsLeaderboardQuery are the optional query parameters of CommunityReputationService.PointsLeaderboard.
 type CommunityReputationPointsLeaderboardQuery struct {
 	// Members on the board.
-	Limit *int64
+	Limit  *int64
+	Period *string
 }
 
 func (p *CommunityReputationPointsLeaderboardQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1307,6 +2132,9 @@ func (p *CommunityReputationPointsLeaderboardQuery) encode(opts []RequestOption)
 	}
 	if p.Limit != nil {
 		v.Set("limit", strconv.FormatInt(*p.Limit, 10))
+	}
+	if p.Period != nil {
+		v.Set("period", *p.Period)
 	}
 	return v, opts
 }
@@ -1336,6 +2164,10 @@ type CommunityReputationDirectoryQuery struct {
 	Limit *int64
 	Order *string
 	Sort  *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CommunityReputationDirectoryQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -1366,6 +2198,12 @@ func (p *CommunityReputationDirectoryQuery) encode(opts []RequestOption) (url.Va
 	}
 	if p.Sort != nil {
 		v.Set("sort", *p.Sort)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -1408,12 +2246,30 @@ func (s *CommunityReputationService) ForUser(ctx context.Context, orgID string, 
 	return &out, nil
 }
 
-// SetLevel create the level in an organization
+// CommunityReputationSetLevelQuery are the optional query parameters of CommunityReputationService.SetLevel.
+type CommunityReputationSetLevelQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CommunityReputationSetLevelQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// SetLevel set the level of the reputation
 //
 // POST /orgs/{orgId}/community/reputation/{userId}/level
-func (s *CommunityReputationService) SetLevel(ctx context.Context, orgID string, userID string, body CommunityReputationSetLevelParams, opts ...RequestOption) (*CommunityReputationSetLevelResponse, error) {
+func (s *CommunityReputationService) SetLevel(ctx context.Context, orgID string, userID string, body CommunityReputationSetLevelParams, query *CommunityReputationSetLevelQuery, opts ...RequestOption) (*CommunityReputationSetLevelResponse, error) {
+	v, opts := query.encode(opts)
 	var out CommunityReputationSetLevelResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/level", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/community/reputation/"+pathEscape(userID)+"/level", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

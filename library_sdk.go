@@ -5,6 +5,7 @@ package forumulate
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // LibrarySDKService holds the operations under client.LibrarySDK.
@@ -23,12 +24,30 @@ func (s *LibrarySDKService) Status(ctx context.Context, orgID string, libraryID 
 	return &out, nil
 }
 
+// LibrarySDKPublishQuery are the optional query parameters of LibrarySDKService.Publish.
+type LibrarySDKPublishQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *LibrarySDKPublishQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // Publish publish the library client to a connected registry
 //
 // POST /orgs/{orgId}/content/libraries/{libraryId}/sdk/{language}/publish
-func (s *LibrarySDKService) Publish(ctx context.Context, orgID string, libraryID string, language string, body LibrarySDKPublishParams, opts ...RequestOption) (*LibrarySDKPublishResponse, error) {
+func (s *LibrarySDKService) Publish(ctx context.Context, orgID string, libraryID string, language string, body LibrarySDKPublishParams, query *LibrarySDKPublishQuery, opts ...RequestOption) (*LibrarySDKPublishResponse, error) {
+	v, opts := query.encode(opts)
 	var out LibrarySDKPublishResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/sdk/"+pathEscape(language)+"/publish", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/content/libraries/"+pathEscape(libraryID)+"/sdk/"+pathEscape(language)+"/publish", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil

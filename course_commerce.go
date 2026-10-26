@@ -24,12 +24,64 @@ func (s *CourseCommerceService) Terms(ctx context.Context, orgID string, spaceID
 	return &out, nil
 }
 
+// CourseCommerceSetTermsQuery are the optional query parameters of CourseCommerceService.SetTerms.
+type CourseCommerceSetTermsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+	// `true` (or `1`): the stored object becomes EXACTLY this body — every key you leave out is removed — and the answer carries `diff` naming what changed, removals included.
+	Prune *string
+}
+
+func (p *CourseCommerceSetTermsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	if p.Prune != nil {
+		v.Set("prune", *p.Prune)
+	}
+	return v, opts
+}
+
 // SetTerms replace the commerce in a space
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/authoring/commerce
-func (s *CourseCommerceService) SetTerms(ctx context.Context, orgID string, spaceID string, body CourseCommerceSetTermsParams, opts ...RequestOption) (*CourseCommerceSetTermsResponse, error) {
-	var out CourseCommerceSetTermsResponse
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/commerce", nil, body, &out, opts); err != nil {
+func (s *CourseCommerceService) SetTerms(ctx context.Context, orgID string, spaceID string, body CourseCommerceSetTermsParams, query *CourseCommerceSetTermsQuery, opts ...RequestOption) (*CourseCommercePatchTermsResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseCommercePatchTermsResponse
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/commerce", v, body, &out, opts); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CourseCommercePatchTermsQuery are the optional query parameters of CourseCommerceService.PatchTerms.
+type CourseCommercePatchTermsQuery struct {
+	// `true` (or `1`): read, merge and validate exactly as the write would, store NOTHING, and answer the would-be result with `dryRun: true` and `diff` — every key it would `add`, `remove` or `change` (`{p
+	DryRun *string
+}
+
+func (p *CourseCommercePatchTermsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", *p.DryRun)
+	}
+	return v, opts
+}
+
+// PatchTerms update the commerce in a space
+//
+// PATCH /orgs/{orgId}/spaces/{spaceId}/course/authoring/commerce
+func (s *CourseCommerceService) PatchTerms(ctx context.Context, orgID string, spaceID string, body any, query *CourseCommercePatchTermsQuery, opts ...RequestOption) (*CourseCommercePatchTermsResponse, error) {
+	v, opts := query.encode(opts)
+	var out CourseCommercePatchTermsResponse
+	if err := s.c.do(ctx, "PATCH", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/authoring/commerce", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -41,6 +93,10 @@ type CourseCommerceCouponsQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CourseCommerceCouponsQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -53,6 +109,12 @@ func (p *CourseCommerceCouponsQuery) encode(opts []RequestOption) (url.Values, [
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -84,34 +146,88 @@ func (s *CourseCommerceService) CouponsAutoPaging(ctx context.Context, orgID str
 	})
 }
 
+// CourseCommerceCreateCouponQuery are the optional query parameters of CourseCommerceService.CreateCoupon.
+type CourseCommerceCreateCouponQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseCommerceCreateCouponQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // CreateCoupon create a coupon in a space
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/coupons
-func (s *CourseCommerceService) CreateCoupon(ctx context.Context, orgID string, spaceID string, body CourseCommerceCreateCouponParams, opts ...RequestOption) (*CourseCommerceCreateCouponResponse, error) {
+func (s *CourseCommerceService) CreateCoupon(ctx context.Context, orgID string, spaceID string, body CourseCommerceCreateCouponParams, query *CourseCommerceCreateCouponQuery, opts ...RequestOption) (*CourseCommerceCreateCouponResponse, error) {
+	v, opts := query.encode(opts)
 	var out CourseCommerceCreateCouponResponse
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/coupons", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/coupons", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
+// CourseCommercePatchCouponQuery are the optional query parameters of CourseCommerceService.PatchCoupon.
+type CourseCommercePatchCouponQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseCommercePatchCouponQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // PatchCoupon replace the coupon
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/coupons/{couponId}
-func (s *CourseCommerceService) PatchCoupon(ctx context.Context, orgID string, spaceID string, couponID string, body CourseCommercePatchCouponParams, opts ...RequestOption) (any, error) {
+func (s *CourseCommerceService) PatchCoupon(ctx context.Context, orgID string, spaceID string, couponID string, body CourseCommercePatchCouponParams, query *CourseCommercePatchCouponQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/coupons/"+pathEscape(couponID), nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/coupons/"+pathEscape(couponID), v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+// CourseCommerceDeleteCouponQuery are the optional query parameters of CourseCommerceService.DeleteCoupon.
+type CourseCommerceDeleteCouponQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseCommerceDeleteCouponQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
 // DeleteCoupon delete the coupon
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/course/coupons/{couponId}
-func (s *CourseCommerceService) DeleteCoupon(ctx context.Context, orgID string, spaceID string, couponID string, opts ...RequestOption) (*CourseCommerceDeleteCouponResponse, error) {
+func (s *CourseCommerceService) DeleteCoupon(ctx context.Context, orgID string, spaceID string, couponID string, query *CourseCommerceDeleteCouponQuery, opts ...RequestOption) (*CourseCommerceDeleteCouponResponse, error) {
+	v, opts := query.encode(opts)
 	var out CourseCommerceDeleteCouponResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/coupons/"+pathEscape(couponID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/coupons/"+pathEscape(couponID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
@@ -123,6 +239,10 @@ type CourseCommercePurchasesQuery struct {
 	Limit *int64
 	// Where to continue from: pass back the `page.nextCursor` of the previous answer.
 	Cursor *string
+	// From `2027-01-01`: the document bodies to keep in each row, comma-separated.
+	Include []string
+	// From `2027-01-01`: the only keys to return in each row, comma-separated (`id` always comes back; naming a body field brings it back).
+	Fields []string
 }
 
 func (p *CourseCommercePurchasesQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
@@ -135,6 +255,12 @@ func (p *CourseCommercePurchasesQuery) encode(opts []RequestOption) (url.Values,
 	}
 	if p.Cursor != nil {
 		v.Set("cursor", *p.Cursor)
+	}
+	for _, x := range p.Include {
+		v.Add("include", x)
+	}
+	for _, x := range p.Fields {
+		v.Add("fields", x)
 	}
 	return v, opts
 }
@@ -166,34 +292,88 @@ func (s *CourseCommerceService) PurchasesAutoPaging(ctx context.Context, orgID s
 	})
 }
 
-// Grant replace the grant in a space
+// CourseCommerceGrantQuery are the optional query parameters of CourseCommerceService.Grant.
+type CourseCommerceGrantQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseCommerceGrantQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Grant grant the purchase
 //
 // PUT /orgs/{orgId}/spaces/{spaceId}/course/purchases/grant
-func (s *CourseCommerceService) Grant(ctx context.Context, orgID string, spaceID string, body CourseCommerceGrantParams, opts ...RequestOption) (any, error) {
+func (s *CourseCommerceService) Grant(ctx context.Context, orgID string, spaceID string, body CourseCommerceGrantParams, query *CourseCommerceGrantQuery, opts ...RequestOption) (any, error) {
+	v, opts := query.encode(opts)
 	var out any
-	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchases/grant", nil, body, &out, opts); err != nil {
+	if err := s.c.do(ctx, "PUT", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchases/grant", v, body, &out, opts); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Revoke delete the purchase
+// CourseCommerceRevokeQuery are the optional query parameters of CourseCommerceService.Revoke.
+type CourseCommerceRevokeQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseCommerceRevokeQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Revoke revoke the purchase
 //
 // DELETE /orgs/{orgId}/spaces/{spaceId}/course/purchases/{purchaseId}
-func (s *CourseCommerceService) Revoke(ctx context.Context, orgID string, spaceID string, purchaseID string, opts ...RequestOption) (*CourseCommerceRevokeResponse, error) {
+func (s *CourseCommerceService) Revoke(ctx context.Context, orgID string, spaceID string, purchaseID string, query *CourseCommerceRevokeQuery, opts ...RequestOption) (*CourseCommerceRevokeResponse, error) {
+	v, opts := query.encode(opts)
 	var out CourseCommerceRevokeResponse
-	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchases/"+pathEscape(purchaseID), nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "DELETE", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchases/"+pathEscape(purchaseID), v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// Refund create the refund in a space (course purchases)
+// CourseCommerceRefundQuery are the optional query parameters of CourseCommerceService.Refund.
+type CourseCommerceRefundQuery struct {
+	// `true`: authenticate, authorize and validate this request (body, query and path), then answer `200 {dryRun: true, ok: true, operation, checks}` WITHOUT carrying it out — nothing is written, queued, ma
+	DryRun *bool
+}
+
+func (p *CourseCommerceRefundQuery) encode(opts []RequestOption) (url.Values, []RequestOption) {
+	v := url.Values{}
+	if p == nil {
+		return v, opts
+	}
+	if p.DryRun != nil {
+		v.Set("dryRun", strconv.FormatBool(*p.DryRun))
+	}
+	return v, opts
+}
+
+// Refund refund the purchase (purchases)
 //
 // POST /orgs/{orgId}/spaces/{spaceId}/course/purchases/{purchaseId}/refund
-func (s *CourseCommerceService) Refund(ctx context.Context, orgID string, spaceID string, purchaseID string, opts ...RequestOption) (*CoursePurchaseView, error) {
+func (s *CourseCommerceService) Refund(ctx context.Context, orgID string, spaceID string, purchaseID string, query *CourseCommerceRefundQuery, opts ...RequestOption) (*CoursePurchaseView, error) {
+	v, opts := query.encode(opts)
 	var out CoursePurchaseView
-	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchases/"+pathEscape(purchaseID)+"/refund", nil, nil, &out, opts); err != nil {
+	if err := s.c.do(ctx, "POST", "/orgs/"+pathEscape(orgID)+"/spaces/"+pathEscape(spaceID)+"/course/purchases/"+pathEscape(purchaseID)+"/refund", v, nil, &out, opts); err != nil {
 		return nil, err
 	}
 	return &out, nil
